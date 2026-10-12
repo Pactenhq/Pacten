@@ -1,0 +1,5 @@
+// Shared Pacten brand logo (supplied vector).
+export function PactenLogo({ className = "h-8 w-auto" }: { className?: string }) {
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src="/assets/logo-pacten.svg" alt="Pacten" className={className} />;
+}
