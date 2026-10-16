@@ -188,6 +188,26 @@ export const api = {
       method: "DELETE",
       auth: true,
     }),
+
+  // Direct opportunities (M2): brand → creator/professional
+  sendOpportunity: (d: {
+    recipientId: string;
+    title: string;
+    description?: string;
+    budget?: string;
+  }) => apiFetch<any>(`/opportunities`, { method: "POST", body: d, auth: true }),
+
+  sentOpportunities: () => apiFetch<any[]>(`/opportunities/sent`, { auth: true }),
+
+  receivedOpportunities: () =>
+    apiFetch<any[]>(`/opportunities/received`, { auth: true }),
+
+  respondOpportunity: (id: string, action: "accept" | "decline") =>
+    apiFetch<any>(`/opportunities/${id}/respond`, {
+      method: "PATCH",
+      body: { action },
+      auth: true,
+    }),
 };
 
 export function dashboardPathForRole(role: string): string {

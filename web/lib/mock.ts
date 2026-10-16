@@ -635,6 +635,7 @@ function withDashboardHome(
 export const brandNav: DashboardNavItem[] = withDashboardHome("/dashboard/brand", [
   dashboardNavBase[0],
   { label: "Applications", href: "/dashboard/applications/received", icon: "file" },
+  { label: "Opportunities", href: "/dashboard/opportunities", icon: "chat" },
   dashboardNavBase[2],
   dashboardNavBase[3],
   { label: "Employer", href: "#", icon: "briefcase" },
@@ -646,11 +647,19 @@ export const brandNav: DashboardNavItem[] = withDashboardHome("/dashboard/brand"
 /** Creator / Professional sidebar (no "Employer" entry in the design). */
 export const creatorNav: DashboardNavItem[] = withDashboardHome(
   "/dashboard/creator",
-  dashboardNavBase
+  [
+    ...dashboardNavBase.slice(0, 2),
+    { label: "Opportunities", href: "/dashboard/opportunities", icon: "chat" },
+    ...dashboardNavBase.slice(2),
+  ],
 );
 export const professionalNav: DashboardNavItem[] = withDashboardHome(
   "/dashboard/professional",
-  dashboardNavBase
+  [
+    ...dashboardNavBase.slice(0, 2),
+    { label: "Opportunities", href: "/dashboard/opportunities", icon: "chat" },
+    ...dashboardNavBase.slice(2),
+  ],
 );
 /** Referral view lives under the brand dashboard nav with Referral active. */
 export const referralNav: DashboardNavItem[] = brandNav;

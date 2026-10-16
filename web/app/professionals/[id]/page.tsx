@@ -8,6 +8,9 @@ import Link from "next/link";
 import { Navbar } from "@/components/ui/Navbar";
 import { Footer } from "@/components/ui/Footer";
 import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { SendOpportunityModal } from "@/components/opportunities/SendOpportunityModal";
+import { useAuth } from "@/components/auth/AuthProvider";
 import { api } from "@/lib/api";
 
 function Pill({ children }: { children: React.ReactNode }) {
@@ -21,9 +24,12 @@ function Pill({ children }: { children: React.ReactNode }) {
 export default function ProfessionalDetailPage() {
   const params = useParams();
   const id = params.id as string;
+  const { user } = useAuth();
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [sent, setSent] = useState(false);
 
   useEffect(() => {
     api
@@ -114,11 +120,36 @@ export default function ProfessionalDetailPage() {
                     Not currently open to new projects.
                   </p>
                 )}
+                {user?.role === "brand" && profile.userId && (
+                  <div className="mt-4">
+                    {sent ? (
+                      <p className="rounded-lg bg-green-50 px-4 py-3 text-[14px] font-medium text-green-700">
+                        Opportunity sent! They can accept or decline it from
+                        their dashboard.
+                      </p>
+                    ) : (
+                      <Button onClick={() => setModalOpen(true)} className="w-full">
+                        Send direct opportunity
+                      </Button>
+                    )}
+                  </div>
+                )}
               </Card>
             </div>
           </div>
         )}
       </main>
+      {modalOpen && (
+        <SendOpportunityModal
+          recipientName={profile.displayName}
+          recipientId={profile.userId}
+          onClose={() => setModalOpen(false)}
+          onSent={() => {
+            setModalOpen(false);
+            setSent(true);
+          }}
+        />
+      )}
       <Footer />
     </>
   );
