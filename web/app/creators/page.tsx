@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Navbar } from "@/components/ui/Navbar";
 import { Footer } from "@/components/ui/Footer";
 import { Drawer } from "@/components/ui/Drawer";
@@ -45,11 +45,17 @@ export default function CreatorsPage() {
   const allCreators = useMarketplaceCreators();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("All");
-  const [category, setCategory] = useState("All");
+  const [filters, setFilters] = useState<CreatorFilters>({
+    category: "All",
+    followers: null,
+    price: null,
+    verifiedOnly: false,
+    availableNow: false,
+  });
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 9;
 
-  const filtered = allCreators.filter((c: any) => {
+  const filtered = allCreators.filter((c) => {
     const q = searchQuery.trim().toLowerCase();
     if (q) {
       const hay = [c.name, ...(c.niches ?? []), ...(c.platforms ?? [])]
@@ -62,10 +68,23 @@ export default function CreatorsPage() {
       const plats = (c.platforms ?? []).map((p: string) => p.toLowerCase());
       if (!plats.some((p: string) => p.includes(activeTab.toLowerCase()))) return false;
     }
-    if (category !== "All") {
+    if (filters.category !== "All") {
       const niches = (c.niches ?? []).map((n: string) => n.toLowerCase());
-      if (!niches.includes(category.toLowerCase())) return false;
+      if (!niches.includes(filters.category.toLowerCase())) return false;
     }
+    // Range/boolean filters only exclude items that actually carry data;
+    // items without the field pass through so the panel never empties the
+    // list just because a profile hasn't filled that field in yet.
+    if (filters.followers && c.followersCount != null) {
+      const [lo, hi] = filters.followers;
+      if (c.followersCount < lo || c.followersCount > hi) return false;
+    }
+    if (filters.price && c.rateValue != null) {
+      const [lo, hi] = filters.price;
+      if (c.rateValue < lo || c.rateValue > hi) return false;
+    }
+    if (filters.verifiedOnly && c.isVerified === false) return false;
+    if (filters.availableNow && c.availableNow === false) return false;
     return true;
   });
 
@@ -81,7 +100,7 @@ export default function CreatorsPage() {
     setPage(1);
   };
   const handleFilter = (f: CreatorFilters) => {
-    setCategory(f.category);
+    setFilters(f);
     setPage(1);
   };
 

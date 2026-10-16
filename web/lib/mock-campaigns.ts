@@ -44,6 +44,10 @@ export interface MyCampaignRow {
   status: string;
   deadline: string;
   submitted: string;
+  /** Real campaign id when the row came from the API (mock rows omit it). */
+  id?: string;
+  /** Raw API status ("open" | "closed" | ...) when from the API. */
+  rawStatus?: string;
 }
 
 /** Five identical rows. had a "Deciilned" typo — corrected. */

@@ -31,8 +31,8 @@ export class ProfilesService {
   async updateMyProfile(userId: string, role: UserRole, data: any) {
     const allowedFields: Record<string, string[]> = {
       [UserRole.BRAND]: ['companyName', 'website', 'industry', 'description', 'logoUrl', 'location'],
-      [UserRole.CREATOR]: ['displayName', 'bio', 'avatarUrl', 'niches', 'platforms', 'location', 'availableNow'],
-      [UserRole.PROFESSIONAL]: ['displayName', 'title', 'bio', 'avatarUrl', 'skills', 'platforms', 'hourlyRate', 'location', 'availableNow'],
+      [UserRole.CREATOR]: ['displayName', 'bio', 'avatarUrl', 'niches', 'platforms', 'followers', 'location', 'availableNow', 'rate'],
+      [UserRole.PROFESSIONAL]: ['displayName', 'title', 'bio', 'avatarUrl', 'skills', 'platforms', 'hourlyRate', 'location', 'availableNow', 'openToProjects', 'yearsExperience'],
     };
 
     const fields = allowedFields[role];

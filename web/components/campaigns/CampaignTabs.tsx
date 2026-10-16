@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { cn } from "@/lib/cn";
 import { Card } from "@/components/ui/Card";
 import { myCampaignPills, myCampaignRows } from "@/lib/mock-campaigns";
@@ -54,7 +53,7 @@ export function CampaignTabs() {
   const [pill, setPill] = useState("All");
   const [rows, setRows] = useState(myCampaignRows);
   const [openMenu, setOpenMenu] = useState<number | null>(null);
-  const router = useRouter();
+  const [closingId, setClosingId] = useState<string | null>(null);
 
   useEffect(() => {
     api
@@ -77,6 +76,7 @@ export function CampaignTabs() {
               deadline: c.deadline ?? "—",
               submitted: new Date(c.createdAt).toLocaleDateString(),
               id: c.id,
+              rawStatus: c.status,
             }))
           );
         }
@@ -85,6 +85,23 @@ export function CampaignTabs() {
         // API unavailable or not logged in — keep mock data
       });
   }, []);
+
+  const closeCampaign = async (id: string) => {
+    setClosingId(id);
+    try {
+      await api.updateCampaign(id, { status: "closed" });
+      setRows((rs) =>
+        rs.map((r: any) =>
+          r.id === id ? { ...r, status: "Declined", rawStatus: "closed" } : r
+        )
+      );
+    } catch {
+      // keep the row unchanged on failure
+    } finally {
+      setClosingId(null);
+      setOpenMenu(null);
+    }
+  };
 
   const allowed = pillToStatus[pill] ?? [];
   const filtered = allowed.length
@@ -149,6 +166,7 @@ export function CampaignTabs() {
               <div className="relative justify-self-end">
                 <button
                   aria-label="Campaign options"
+                  aria-haspopup="menu"
                   aria-expanded={openMenu === i}
                   onClick={() => setOpenMenu(openMenu === i ? null : i)}
                   className="cursor-pointer rounded-lg p-2 text-ink-400 hover:bg-ink-50 hover:text-ink-700"
@@ -160,41 +178,25 @@ export function CampaignTabs() {
                   </svg>
                 </button>
                 {openMenu === i && (
-                  <>
-                    <button
-                      aria-label="Close menu"
-                      onClick={() => setOpenMenu(null)}
-                      className="fixed inset-0 z-10 cursor-default"
-                    />
-                    <ul className="absolute right-0 z-20 mt-1 w-44 rounded-xl border border-ink-100 bg-white py-2 shadow-lg">
-                      <li>
-                        <button
-                          onClick={() => {
-                            setOpenMenu(null);
-                            router.push(
-                              `/dashboard/campaigns/${(c as any).id ?? "summer-glow"}`
-                            );
-                          }}
-                          className="block w-full cursor-pointer px-4 py-2 text-left text-[14px] text-ink-700 hover:bg-ink-50"
-                        >
-                          View details
-                        </button>
-                      </li>
-                      <li>
-                        <button
-                          onClick={() => {
-                            setOpenMenu(null);
-                            router.push(
-                              `/dashboard/campaigns/${(c as any).id ?? "summer-glow"}/manage`
-                            );
-                          }}
-                          className="block w-full cursor-pointer px-4 py-2 text-left text-[14px] text-ink-700 hover:bg-ink-50"
-                        >
-                          Manage campaign
-                        </button>
-                      </li>
-                    </ul>
-                  </>
+                  <div
+                    role="menu"
+                    className="absolute right-0 z-20 mt-1 w-44 overflow-hidden rounded-xl border border-ink-100 bg-white shadow-lg"
+                  >
+                    {c.rawStatus && c.rawStatus !== "closed" && c.id ? (
+                      <button
+                        role="menuitem"
+                        disabled={closingId === c.id}
+                        onClick={() => c.id && closeCampaign(c.id)}
+                        className="block w-full px-4 py-2.5 text-left text-[14px] font-medium text-ink-700 hover:bg-ink-50 disabled:opacity-50"
+                      >
+                        {closingId === c.id ? "Closing…" : "Close campaign"}
+                      </button>
+                    ) : (
+                      <span className="block px-4 py-2.5 text-[13px] text-ink-400">
+                        No actions available
+                      </span>
+                    )}
+                  </div>
                 )}
               </div>
               <div className="col-span-2 flex flex-wrap gap-x-6 gap-y-1 text-[13px] md:hidden">

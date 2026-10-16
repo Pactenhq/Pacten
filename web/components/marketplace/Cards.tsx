@@ -84,7 +84,7 @@ export function CreatorCard({ creator }: { creator: CreatorCardData }) {
         </div>
         <div className="mt-3 flex items-center justify-between gap-2 sm:mt-4">
           <Link
-            href="/profile/creator"
+            href={`/creators/${creator.id}`}
             className="inline-flex h-9 items-center gap-1.5 rounded-full bg-brand px-3 text-xs font-semibold text-white hover:bg-brand-dark sm:h-10 sm:gap-2 sm:px-5 sm:text-sm"
           >
             View Profile
@@ -152,7 +152,7 @@ export function ProfessionalCard({
         </div>
         <div className="mt-4 flex items-center justify-between gap-2">
           <Link
-            href="/profile/professional"
+            href={`/professionals/${professional.id}`}
             className="inline-flex h-10 items-center gap-2 rounded-full bg-brand px-5 text-sm font-semibold text-white hover:bg-brand-dark"
           >
             View Profile

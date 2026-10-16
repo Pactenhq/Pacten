@@ -103,8 +103,13 @@ export const api = {
 
   creators: (params = "") => apiFetch<any[]>(`/profiles/creators${params}`),
 
+  creatorProfile: (id: string) => apiFetch<any>(`/profiles/creators/${id}`),
+
   professionals: (params = "") =>
     apiFetch<any[]>(`/profiles/professionals${params}`),
+
+  professionalProfile: (id: string) =>
+    apiFetch<any>(`/profiles/professionals/${id}`),
 
   forgotPassword: (email: string) =>
     apiFetch<{ message: string; resetToken?: string }>("/auth/forgot-password", {
@@ -181,42 +186,6 @@ export const api = {
   withdrawApplication: (appId: string) =>
     apiFetch<any>(`/campaigns/applications/${appId}`, {
       method: "DELETE",
-      auth: true,
-    }),
-
-  // Messaging
-  conversations: () =>
-    apiFetch<any[]>("/conversations", { auth: true }),
-
-  createConversation: (d: Record<string, unknown>) =>
-    apiFetch<any>("/conversations", { method: "POST", body: d, auth: true }),
-
-  conversationMessages: (id: string) =>
-    apiFetch<any[]>(`/conversations/${id}/messages`, { auth: true }),
-
-  sendMessage: (id: string, content: string) =>
-    apiFetch<any>(`/conversations/${id}/messages`, {
-      method: "POST",
-      body: { content },
-      auth: true,
-    }),
-
-  // Deals
-  deals: () => apiFetch<any[]>("/deals", { auth: true }),
-
-  dealDetail: (id: string) =>
-    apiFetch<any>(`/deals/${id}`, { auth: true }),
-
-  createDeal: (d: Record<string, unknown>) =>
-    apiFetch<any>("/deals", { method: "POST", body: d, auth: true }),
-
-  updateDeal: (id: string, d: Record<string, unknown>) =>
-    apiFetch<any>(`/deals/${id}`, { method: "PATCH", body: d, auth: true }),
-
-  updateDealStatus: (id: string, status: string) =>
-    apiFetch<any>(`/deals/${id}/status`, {
-      method: "PATCH",
-      body: { status },
       auth: true,
     }),
 };

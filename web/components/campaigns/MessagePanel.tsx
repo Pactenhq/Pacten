@@ -1,7 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
-import Link from "next/link";
+import { useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import type { CampaignMessage } from "@/lib/mock-campaigns";
@@ -29,23 +28,15 @@ export function MessagePanel({
 }) {
   const [messages, setMessages] = useState(initialMessages);
   const [draft, setDraft] = useState("");
-  const [attachment, setAttachment] = useState<string | null>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
 
   const send = () => {
     const body = draft.trim();
-    if (!body && !attachment) return;
+    if (!body) return;
     setMessages((m) => [
       ...m,
-      {
-        from: "You",
-        body: attachment ? `${body} (attachment: ${attachment})`.trim() : body,
-        time: "Now",
-        mine: true,
-      },
+      { from: "You", body, time: "Now", mine: true },
     ]);
     setDraft("");
-    setAttachment(null);
   };
 
   return (
@@ -74,12 +65,9 @@ export function MessagePanel({
               <p className="text-[13px] text-white/80">{creatorHandle}</p>
             </div>
           </div>
-          <Link
-            href="/profile/creator"
-            className="cursor-pointer rounded-lg border border-white/70 px-5 py-2.5 text-[14px] font-semibold text-white transition-colors hover:bg-white/10"
-          >
+          <button className="cursor-pointer rounded-lg border border-white/70 px-5 py-2.5 text-[14px] font-semibold text-white transition-colors hover:bg-white/10">
             View Profile
-          </Link>
+          </button>
         </div>
       )}
 
@@ -110,21 +98,6 @@ export function MessagePanel({
       </div>
 
       <div className="mt-5 rounded-xl border border-ink-200 p-4">
-        {attachment && (
-          <div className="mb-3 flex items-center justify-between gap-3 rounded-lg bg-ink-50 px-3 py-2">
-            <span className="truncate text-[13px] font-medium text-ink-700">
-              📎 {attachment}
-            </span>
-            <button
-              type="button"
-              onClick={() => setAttachment(null)}
-              aria-label="Remove attachment"
-              className="cursor-pointer rounded px-1.5 py-0.5 text-[13px] font-bold text-ink-400 hover:bg-white hover:text-ink-900"
-            >
-              ×
-            </button>
-          </div>
-        )}
         <textarea
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
@@ -133,21 +106,8 @@ export function MessagePanel({
           className="w-full resize-none bg-transparent text-[15px] text-ink-900 placeholder:text-ink-400 focus:outline-none"
         />
         <div className="mt-3 flex items-center justify-end gap-3">
-          <input
-            ref={fileRef}
-            type="file"
-            className="hidden"
-            aria-hidden
-            tabIndex={-1}
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) setAttachment(f.name);
-              e.target.value = "";
-            }}
-          />
           <button
             aria-label="Attach file"
-            onClick={() => fileRef.current?.click()}
             className="cursor-pointer rounded-lg p-2 text-ink-400 hover:bg-ink-50 hover:text-ink-700"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>

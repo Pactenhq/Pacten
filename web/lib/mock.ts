@@ -615,7 +615,6 @@ export const dashboardUser = {
 const dashboardNavBase: DashboardNavItem[] = [
   { label: "My Campaigns", href: "/campaigns", icon: "megaphone" },
   { label: "Applications", href: "/dashboard/applications", icon: "file" },
-  { label: "Messages", href: "/dashboard/messages", icon: "chat" },
   { label: "Analytics", href: "#", icon: "chart" },
   { label: "Referral", href: "/dashboard/referrals", icon: "gift" },
   { label: "Contract", href: "/dashboard/contracts", icon: "doc" },
@@ -638,11 +637,10 @@ export const brandNav: DashboardNavItem[] = withDashboardHome("/dashboard/brand"
   { label: "Applications", href: "/dashboard/applications/received", icon: "file" },
   dashboardNavBase[2],
   dashboardNavBase[3],
-  dashboardNavBase[4],
   { label: "Employer", href: "#", icon: "briefcase" },
+  dashboardNavBase[4],
   dashboardNavBase[5],
   dashboardNavBase[6],
-  dashboardNavBase[7],
 ]);
 
 /** Creator / Professional sidebar (no "Employer" entry in the design). */

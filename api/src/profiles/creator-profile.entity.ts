@@ -54,6 +54,9 @@ export class CreatorProfile {
   @Column({ default: true })
   availableNow: boolean;
 
+  @Column({ nullable: true })
+  rate: string;
+
   @CreateDateColumn()
   createdAt: Date;
 

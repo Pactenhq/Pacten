@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/cn";
-import { Button } from "@/components/ui/Button";
 
 // Filter panels rebuilt from the design marketplace frames
 // ("Marketplace Creator" 278:4057, "Marketplace professional" 401:55119,
@@ -64,11 +63,10 @@ function RangeSlider({
   max: string;
   onChange?: (range: [number, number]) => void;
 }) {
-  const [lo, setLo] = useState(8);
-  const [hi, setHi] = useState(68);
+  const [lo, setLo] = useState(0);
+  const [hi, setHi] = useState(100);
   const trackRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<"lo" | "hi" | null>(null);
-  const latestRef = useRef<[number, number]>([8, 68]);
 
   // Map slider percent (0-100) onto the labelled scale, e.g. "0".."100K".
   const scaleOf = (s: string) => {
@@ -88,15 +86,8 @@ function RangeSlider({
     if (!el) return;
     const rect = el.getBoundingClientRect();
     const pct = Math.min(100, Math.max(0, ((clientX - rect.left) / rect.width) * 100));
-    if (dragRef.current === "lo") {
-      const v = Math.min(pct, hi - 4);
-      latestRef.current = [v, latestRef.current[1]];
-      setLo(v);
-    } else if (dragRef.current === "hi") {
-      const v = Math.max(pct, lo + 4);
-      latestRef.current = [latestRef.current[0], v];
-      setHi(v);
-    }
+    if (dragRef.current === "lo") setLo((prev) => Math.min(pct, hi - 4));
+    else if (dragRef.current === "hi") setHi((prev) => Math.max(pct, lo + 4));
   };
 
   useEffect(() => {
@@ -106,7 +97,7 @@ function RangeSlider({
     const up = () => {
       if (dragRef.current) {
         dragRef.current = null;
-        commit(latestRef.current[0], latestRef.current[1]);
+        commit(lo, hi);
       }
     };
     window.addEventListener("pointermove", move);
@@ -144,13 +135,11 @@ function RangeSlider({
             onKeyDown={(e) => {
               if (e.key === "ArrowLeft") {
                 const v = Math.max(0, lo - 2);
-                latestRef.current = [v, latestRef.current[1]];
                 setLo(v);
                 commit(v, hi);
               }
               if (e.key === "ArrowRight") {
                 const v = Math.min(hi - 4, lo + 2);
-                latestRef.current = [v, latestRef.current[1]];
                 setLo(v);
                 commit(v, hi);
               }
@@ -170,13 +159,11 @@ function RangeSlider({
             onKeyDown={(e) => {
               if (e.key === "ArrowLeft") {
                 const v = Math.max(lo + 4, hi - 2);
-                latestRef.current = [latestRef.current[0], v];
                 setHi(v);
                 commit(lo, v);
               }
               if (e.key === "ArrowRight") {
                 const v = Math.min(100, hi + 2);
-                latestRef.current = [latestRef.current[0], v];
                 setHi(v);
                 commit(lo, v);
               }
@@ -315,17 +302,55 @@ export interface CampaignFilters {
 }
 
 export interface CreatorFilters {
+  /** Niche pill; "All" = no category filter. */
   category: string;
+  /** Follower-count range from the Followers slider; null = no filter. */
+  followers: [number, number] | null;
+  /** Campaign-rate range from the Price slider; null = no filter. */
+  price: [number, number] | null;
+  verifiedOnly: boolean;
+  availableNow: boolean;
 }
+
+export interface ProfessionalFilters {
+  /** Category pill; "All" = no category filter. */
+  category: string;
+  /** Hourly-rate range from the Hourly Rate slider; null = no filter. */
+  hourlyRate: [number, number] | null;
+  verifiedOnly: boolean;
+  availableNow: boolean;
+  openToProjects: boolean;
+  /** Selected experience levels ("Entry" | "Mid" | "Expert"); empty = no filter. */
+  experience: string[];
+}
+
+const DEFAULT_CREATOR_FILTERS: CreatorFilters = {
+  category: "All",
+  followers: null,
+  price: null,
+  verifiedOnly: false,
+  availableNow: false,
+};
+
+const DEFAULT_PROFESSIONAL_FILTERS: ProfessionalFilters = {
+  category: "All",
+  hourlyRate: null,
+  verifiedOnly: false,
+  availableNow: false,
+  openToProjects: false,
+  experience: [],
+};
 
 export function FilterPanel({
   kind,
   onFilterChange,
   onCreatorFilterChange,
+  onProfessionalFilterChange,
 }: {
   kind: FilterKind;
   onFilterChange?: (filters: CampaignFilters) => void;
   onCreatorFilterChange?: (filters: CreatorFilters) => void;
+  onProfessionalFilterChange?: (filters: ProfessionalFilters) => void;
 }) {
   const [resetKey, setResetKey] = useState(0);
   const filtersRef = useRef<CampaignFilters>({
@@ -335,10 +360,22 @@ export function FilterPanel({
     budget: null,
     verifiedOnly: false,
   });
+  const creatorRef = useRef<CreatorFilters>({ ...DEFAULT_CREATOR_FILTERS });
+  const professionalRef = useRef<ProfessionalFilters>({ ...DEFAULT_PROFESSIONAL_FILTERS });
 
   const emit = (patch: Partial<CampaignFilters>) => {
     filtersRef.current = { ...filtersRef.current, ...patch };
     onFilterChange?.(filtersRef.current);
+  };
+
+  const emitCreator = (patch: Partial<CreatorFilters>) => {
+    creatorRef.current = { ...creatorRef.current, ...patch };
+    onCreatorFilterChange?.(creatorRef.current);
+  };
+
+  const emitProfessional = (patch: Partial<ProfessionalFilters>) => {
+    professionalRef.current = { ...professionalRef.current, ...patch };
+    onProfessionalFilterChange?.(professionalRef.current);
   };
 
   const clearAll = () => {
@@ -349,7 +386,11 @@ export function FilterPanel({
       budget: null,
       verifiedOnly: false,
     };
+    creatorRef.current = { ...DEFAULT_CREATOR_FILTERS };
+    professionalRef.current = { ...DEFAULT_PROFESSIONAL_FILTERS };
     onFilterChange?.(filtersRef.current);
+    onCreatorFilterChange?.(creatorRef.current);
+    onProfessionalFilterChange?.(professionalRef.current);
     setResetKey((k) => k + 1);
   };
 
@@ -371,12 +412,28 @@ export function FilterPanel({
         <div className="space-y-6" key={resetKey}>
           <CategoryPills
             options={["All", "Fashion", "Beauty", "Fitness", "Gaming", "Travel", "Food", "Business", "Lifestyle"]}
-            onChange={(category) => onCreatorFilterChange?.({ category })}
+            onChange={(category) => emitCreator({ category })}
           />
-          <RangeSlider label="Followers" min="0" max="10M" />
-          <RangeSlider label="Price" min="0" max="100K" />
-          <ToggleRow label="Verified" />
-          <ToggleRow label="Available Now" />
+          <RangeSlider
+            label="Followers"
+            min="0"
+            max="10M"
+            onChange={(followers) => emitCreator({ followers })}
+          />
+          <RangeSlider
+            label="Price"
+            min="0"
+            max="100K"
+            onChange={(price) => emitCreator({ price })}
+          />
+          <ToggleRow
+            label="Verified"
+            onChange={(verifiedOnly) => emitCreator({ verifiedOnly })}
+          />
+          <ToggleRow
+            label="Available Now"
+            onChange={(availableNow) => emitCreator({ availableNow })}
+          />
           <CheckGroup label="Audience Gender" options={["Male", "Female", "Other"]} />
           <SelectRow label="Country" />
           <SelectRow label="City" />
@@ -387,18 +444,39 @@ export function FilterPanel({
           <SelectRow label="Years Experience" />
           <SelectRow label="Audience Country" />
           <SelectRow label="Response Time" />
-          <Button className="w-full">Apply All</Button>
         </div>
       )}
 
       {kind === "professionals" && (
-        <div className="space-y-6">
-          <CategoryPills options={["All", "Editors", "Copywriters", "Designers"]} cols={2} />
-          <RangeSlider label="Hourly Rate" min="0" max="100K" />
-          <ToggleRow label="Verified" />
-          <ToggleRow label="Available Now" />
-          <ToggleRow label="Open to new projects" />
-          <CheckGroup label="Experience Level" options={["Entry", "Mid", "Expert"]} />
+        <div className="space-y-6" key={resetKey}>
+          <CategoryPills
+            options={["All", "Editors", "Copywriters", "Designers"]}
+            cols={2}
+            onChange={(category) => emitProfessional({ category })}
+          />
+          <RangeSlider
+            label="Hourly Rate"
+            min="0"
+            max="100K"
+            onChange={(hourlyRate) => emitProfessional({ hourlyRate })}
+          />
+          <ToggleRow
+            label="Verified"
+            onChange={(verifiedOnly) => emitProfessional({ verifiedOnly })}
+          />
+          <ToggleRow
+            label="Available Now"
+            onChange={(availableNow) => emitProfessional({ availableNow })}
+          />
+          <ToggleRow
+            label="Open to new projects"
+            onChange={(openToProjects) => emitProfessional({ openToProjects })}
+          />
+          <CheckGroup
+            label="Experience Level"
+            options={["Entry", "Mid", "Expert"]}
+            onChange={(experience) => emitProfessional({ experience })}
+          />
           <SelectRow label="Country" />
           <SelectRow label="Language" />
           <SelectRow label="Skills" />

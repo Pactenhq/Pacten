@@ -60,6 +60,9 @@ export class ProfessionalProfile {
   @Column({ default: true })
   availableNow: boolean;
 
+  @Column({ default: true })
+  openToProjects: boolean;
+
   @CreateDateColumn()
   createdAt: Date;
 
