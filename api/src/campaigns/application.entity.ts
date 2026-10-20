@@ -16,6 +16,9 @@ export enum ApplicationStatus {
   ACCEPTED = 'accepted',
   REJECTED = 'rejected',
   WITHDRAWN = 'withdrawn',
+  // PRD application machine: ACCEPTED -> CONVERTED_TO_DEAL (set when a
+  // deal is created from this application).
+  CONVERTED_TO_DEAL = 'converted_to_deal',
 }
 
 @Entity('applications')

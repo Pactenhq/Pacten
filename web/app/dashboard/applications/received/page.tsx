@@ -172,6 +172,11 @@ export default function BrandApplicationsPage() {
                           </Button>
                         </div>
                       )}
+                      {a.status === "accepted" && (
+                        <Link href={`/dashboard/deals/new?applicationId=${a.id}`}>
+                          <Button size="sm">Create Deal</Button>
+                        </Link>
+                      )}
                     </div>
                   </div>
                 </li>

@@ -6,6 +6,8 @@ import { UsersModule } from './users/users.module';
 import { ProfilesModule } from './profiles/profiles.module';
 import { CampaignsModule } from './campaigns/campaigns.module';
 import { OpportunitiesModule } from './opportunities/opportunities.module';
+import { MessagingModule } from './messaging/messaging.module';
+import { DealsModule } from './deals/deals.module';
 
 @Module({
   imports: [
@@ -40,6 +42,8 @@ import { OpportunitiesModule } from './opportunities/opportunities.module';
     ProfilesModule,
     CampaignsModule,
     OpportunitiesModule,
+    MessagingModule,
+    DealsModule,
   ],
 })
 export class AppModule {}

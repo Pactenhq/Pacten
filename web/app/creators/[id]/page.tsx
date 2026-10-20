@@ -3,7 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Navbar } from "@/components/ui/Navbar";
 import { Footer } from "@/components/ui/Footer";
@@ -23,6 +23,7 @@ function Pill({ children }: { children: React.ReactNode }) {
 
 export default function CreatorDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const id = params.id as string;
   const { user } = useAuth();
   const [profile, setProfile] = useState<any>(null);
@@ -38,6 +39,22 @@ export default function CreatorDetailPage() {
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
   }, [id]);
+
+  const startConversation = async () => {
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+    try {
+      const conv = await api.createConversation({
+        otherUserId: profile.userId,
+        subject: `Chat with ${profile.displayName}`,
+      });
+      router.push(`/dashboard/messages?conversation=${conv.id}`);
+    } catch {
+      router.push("/dashboard/messages");
+    }
+  };
 
   return (
     <>
@@ -136,6 +153,18 @@ export default function CreatorDetailPage() {
                     )}
                   </div>
                 )}
+                <div className="mt-4 flex flex-col gap-3">
+                  <Button onClick={startConversation} className="w-full" variant="outline">
+                    Message
+                  </Button>
+                  {(!user || user.role === "brand") && profile.userId && (
+                    <Link href={`/dashboard/deals/new?creatorId=${profile.userId}`} className="w-full">
+                      <Button variant="outline" className="w-full">
+                        Create Deal
+                      </Button>
+                    </Link>
+                  )}
+                </div>
               </Card>
             </div>
           </div>

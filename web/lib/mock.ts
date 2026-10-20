@@ -615,6 +615,7 @@ export const dashboardUser = {
 const dashboardNavBase: DashboardNavItem[] = [
   { label: "My Campaigns", href: "/campaigns", icon: "megaphone" },
   { label: "Applications", href: "/dashboard/applications", icon: "file" },
+  { label: "Messages", href: "/dashboard/messages", icon: "chat" },
   { label: "Analytics", href: "#", icon: "chart" },
   { label: "Referral", href: "/dashboard/referrals", icon: "gift" },
   { label: "Contract", href: "/dashboard/contracts", icon: "doc" },
@@ -635,13 +636,14 @@ function withDashboardHome(
 export const brandNav: DashboardNavItem[] = withDashboardHome("/dashboard/brand", [
   dashboardNavBase[0],
   { label: "Applications", href: "/dashboard/applications/received", icon: "file" },
-  { label: "Opportunities", href: "/dashboard/opportunities", icon: "chat" },
+  { label: "Opportunities", href: "/dashboard/opportunities", icon: "briefcase" },
   dashboardNavBase[2],
   dashboardNavBase[3],
-  { label: "Employer", href: "#", icon: "briefcase" },
   dashboardNavBase[4],
+  { label: "Employer", href: "#", icon: "briefcase" },
   dashboardNavBase[5],
   dashboardNavBase[6],
+  dashboardNavBase[7],
 ]);
 
 /** Creator / Professional sidebar (no "Employer" entry in the design). */
@@ -649,7 +651,7 @@ export const creatorNav: DashboardNavItem[] = withDashboardHome(
   "/dashboard/creator",
   [
     ...dashboardNavBase.slice(0, 2),
-    { label: "Opportunities", href: "/dashboard/opportunities", icon: "chat" },
+    { label: "Opportunities", href: "/dashboard/opportunities", icon: "briefcase" },
     ...dashboardNavBase.slice(2),
   ],
 );
@@ -657,7 +659,7 @@ export const professionalNav: DashboardNavItem[] = withDashboardHome(
   "/dashboard/professional",
   [
     ...dashboardNavBase.slice(0, 2),
-    { label: "Opportunities", href: "/dashboard/opportunities", icon: "chat" },
+    { label: "Opportunities", href: "/dashboard/opportunities", icon: "briefcase" },
     ...dashboardNavBase.slice(2),
   ],
 );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { WelcomeHeader } from "@/components/dashboard/widgets";
 import { Button } from "@/components/ui/Button";
@@ -138,6 +139,21 @@ export default function OpportunitiesPage() {
                       >
                         {acting === o.id ? "…" : "Accept"}
                       </Button>
+                    </div>
+                  )}
+                  {isBrand && o.status === "accepted" && (
+                    <div className="flex gap-2">
+                      {o.dealId ? (
+                        <Link href={`/dashboard/deals/${o.dealId}`}>
+                          <Button variant="outline">View Deal</Button>
+                        </Link>
+                      ) : (
+                        <Link
+                          href={`/dashboard/deals/new?creatorId=${o.recipientId}&opportunityId=${o.id}`}
+                        >
+                          <Button>Create Deal</Button>
+                        </Link>
+                      )}
                     </div>
                   )}
                 </div>

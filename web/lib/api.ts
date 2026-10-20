@@ -208,6 +208,42 @@ export const api = {
       body: { action },
       auth: true,
     }),
+
+  // Messaging (M3)
+  conversations: () =>
+    apiFetch<any[]>("/conversations", { auth: true }),
+
+  createConversation: (d: Record<string, unknown>) =>
+    apiFetch<any>("/conversations", { method: "POST", body: d, auth: true }),
+
+  conversationMessages: (id: string) =>
+    apiFetch<any[]>(`/conversations/${id}/messages`, { auth: true }),
+
+  sendMessage: (id: string, content: string) =>
+    apiFetch<any>(`/conversations/${id}/messages`, {
+      method: "POST",
+      body: { content },
+      auth: true,
+    }),
+
+  // Deals (M3)
+  deals: () => apiFetch<any[]>("/deals", { auth: true }),
+
+  dealDetail: (id: string) =>
+    apiFetch<any>(`/deals/${id}`, { auth: true }),
+
+  createDeal: (d: Record<string, unknown>) =>
+    apiFetch<any>("/deals", { method: "POST", body: d, auth: true }),
+
+  updateDeal: (id: string, d: Record<string, unknown>) =>
+    apiFetch<any>(`/deals/${id}`, { method: "PATCH", body: d, auth: true }),
+
+  updateDealStatus: (id: string, status: string) =>
+    apiFetch<any>(`/deals/${id}/status`, {
+      method: "PATCH",
+      body: { status },
+      auth: true,
+    }),
 };
 
 export function dashboardPathForRole(role: string): string {
