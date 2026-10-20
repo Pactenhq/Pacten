@@ -2,8 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import {
   AvailabilityCalendar,
@@ -19,40 +18,109 @@ import {
   VisibilityBoost,
   WelcomeHeader,
 } from "@/components/dashboard/widgets";
-import { Card } from "@/components/ui/Card";
 import {
   creatorNav,
-  creatorStatCards,
   dashboardUser,
   trustScoreBreakdown,
   trustScoreEmptyBreakdown,
+  type DashboardCampaign,
 } from "@/lib/mock";
+import { api } from "@/lib/api";
 
 // + "Creator dashboard empty"
-// (418:69025); mobile refs 366:26121 / 418:69686. The empty state is the
-// same layout with zeroed values, reached here via ?empty=1.
+// (418:69025); mobile refs 366:26121 / 418:69686.
+// Stat cards, Recent Requests aur campaign rows AB REAL API DATA se
+// aate hain (pehle sab mock tha): earnings = completed deals ke budgets,
+// active campaigns = active deals, requests = received opportunities.
+// "Profile Views" ka koi data source MVP me nahi (analytics Phase 2) —
+// us ki jagah real Pending Requests count hai. Profile completeness
+// asal profile fields se gintee hai. TrustScore / Availability /
+// Services abhi design blocks hain (backend source MVP scope me nahi).
 
-const activeCampaign = {
-  title: "New Product Launch",
-  handle: "Brand",
-  budget: "0£",
-  status: "Active" as const,
-  deadline: "Nov 2, 2026",
-  submitted: "Sep 2, 2026",
-};
+function moneyOf(v: any): number {
+  if (v == null) return 0;
+  const m = String(v).replace(/,/g, "").match(/[\d.]+/);
+  return m ? parseFloat(m[0]) || 0 : 0;
+}
 
-const completedCampaign = {
-  title: "New Product Launch",
-  handle: "Brand",
-  budget: "0£",
-  status: "Completed" as const,
-  deadline: "Nov 2, 2025",
-  submitted: "Sep 2, 2025",
-};
+function fmtDate(d: any): string {
+  if (!d) return "—";
+  const dt = new Date(d);
+  return isNaN(dt.getTime()) ? "—" : dt.toLocaleDateString();
+}
 
-function CreatorDashboardContent() {
-  const params = useSearchParams();
-  const empty = params.get("empty") === "1";
+function personName(u: any): string {
+  if (!u) return "Brand";
+  const n = [u.firstName, u.lastName].filter(Boolean).join(" ");
+  return n || u.email || "Brand";
+}
+
+function dealCard(d: any, status: "Active" | "Completed"): DashboardCampaign {
+  return {
+    title: d.title ?? "Deal",
+    handle: d.brand?.email ? `@${String(d.brand.email).split("@")[0]}` : "@brand",
+    budget: d.agreedBudget ?? d.budget ?? "—",
+    status,
+    deadline: "—",
+    submitted: fmtDate(d.createdAt),
+  };
+}
+
+export default function CreatorDashboardPage() {
+  const [earnings, setEarnings] = useState(0);
+  const [activeDeals, setActiveDeals] = useState<any[]>([]);
+  const [completedDeals, setCompletedDeals] = useState<any[]>([]);
+  const [opportunities, setOpportunities] = useState<any[]>([]);
+  const [completeness, setCompleteness] = useState(0);
+
+  useEffect(() => {
+    api
+      .deals()
+      .then((data: any[]) => {
+        if (!Array.isArray(data)) return;
+        setActiveDeals(data.filter((d) => d.status === "active"));
+        const done = data.filter((d) => d.status === "completed");
+        setCompletedDeals(done);
+        setEarnings(done.reduce((sum, d) => sum + moneyOf(d.agreedBudget ?? d.budget), 0));
+      })
+      .catch(() => {});
+    api
+      .receivedOpportunities()
+      .then((data: any[]) => {
+        if (Array.isArray(data)) setOpportunities(data);
+      })
+      .catch(() => {});
+    api
+      .myProfile()
+      .then((p: any) => {
+        if (!p) return;
+        const checks = [
+          !!p.displayName,
+          !!p.bio,
+          !!p.avatarUrl,
+          !!p.location,
+          p.rate != null,
+          Array.isArray(p.niches) && p.niches.length > 0,
+          Array.isArray(p.platforms) && p.platforms.length > 0,
+        ];
+        setCompleteness(
+          Math.round((checks.filter(Boolean).length / checks.length) * 100)
+        );
+      })
+      .catch(() => {});
+  }, []);
+
+  const recentRequests = [...opportunities]
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 4);
+  const pendingCount = opportunities.filter((o) => o.status === "pending").length;
+
+  const statCards = [
+    { value: String(earnings), label: "Total Earnings", delta: "", icon: "moneybag" },
+    { value: String(activeDeals.length), label: "Active Campaigns", delta: "", icon: "megaphone" },
+    { value: String(opportunities.length), label: "Campaign Requests", delta: "", icon: "chat" },
+    { value: String(pendingCount), label: "Pending Requests", delta: "", icon: "eye" },
+  ];
 
   return (
     <DashboardShell
@@ -66,11 +134,11 @@ function CreatorDashboardContent() {
           subtitle="Manage your campaigns and creator relationships."
         />
 
-        <ProfileCompleteness pct={empty ? 0 : 65} />
+        <ProfileCompleteness pct={completeness} />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {creatorStatCards.map((s) => (
-            <StatCard key={s.label} {...s} sub="vs. last month" />
+          {statCards.map((s) => (
+            <StatCard key={s.label} {...s} />
           ))}
         </div>
 
@@ -79,22 +147,28 @@ function CreatorDashboardContent() {
             Recent Requests
           </h2>
           <div className="mt-4 flex flex-col gap-4">
-            {empty ? (
+            {recentRequests.length > 0 ? (
+              recentRequests.map((o) => (
+                <RequestRowCard
+                  key={o.id}
+                  name={personName(o.brand)}
+                  location={o.brand?.email ?? ""}
+                  budget={o.budget != null ? String(o.budget) : "—"}
+                  status={
+                    o.status === "pending"
+                      ? "Pending"
+                      : o.status === "accepted"
+                        ? "Accepted"
+                        : "Declined"
+                  }
+                  date={fmtDate(o.createdAt)}
+                />
+              ))
+            ) : (
               <EmptyState
                 title="No requests yet."
                 body="Collaboration requests from brands will appear here when you receive them."
               />
-            ) : (
-              [0, 1].map((i) => (
-                <RequestRowCard
-                  key={i}
-                  name="Brand"
-                  location="London"
-                  budget="0£"
-                  status="Active"
-                  date="Nov 2, 2026"
-                />
-              ))
             )}
           </div>
         </section>
@@ -115,17 +189,17 @@ function CreatorDashboardContent() {
           title="Active Campaigns"
           className="border-0 bg-transparent p-0 shadow-none"
         >
-          {empty ? (
+          {activeDeals.length > 0 ? (
+            <div className="flex flex-col gap-4">
+              {activeDeals.map((d) => (
+                <CampaignCard key={d.id} campaign={dealCard(d, "Active")} />
+              ))}
+            </div>
+          ) : (
             <EmptyState
               title="No campaigns yet."
               body="Collaboration requests from brands will appear here when you receive them."
             />
-          ) : (
-            <div className="flex flex-col gap-4">
-              {[0, 1, 2].map((i) => (
-                <CampaignCard key={i} campaign={activeCampaign} />
-              ))}
-            </div>
           )}
         </SectionCard>
 
@@ -133,42 +207,32 @@ function CreatorDashboardContent() {
           title="Review Your Brand Partners"
           className="border-0 bg-transparent p-0 shadow-none"
         >
-          {empty ? (
+          {completedDeals.length > 0 ? (
+            <div className="flex flex-col gap-4">
+              {completedDeals.map((d) => (
+                <CampaignCard key={d.id} campaign={dealCard(d, "Completed")} />
+              ))}
+            </div>
+          ) : (
             <EmptyState
               title="No brand partners to review yet."
               body="Complete a campaign with a brand to leave a review and share your experience."
             />
-          ) : (
-            <div className="flex flex-col gap-4">
-              {[0, 1, 2].map((i) => (
-                <CampaignCard key={i} campaign={completedCampaign} />
-              ))}
-            </div>
           )}
         </SectionCard>
 
         <AvailabilityCalendar />
 
         <TrustScore
-          score={empty ? 0 : 123}
+          score={completedDeals.length > 0 ? 123 : 0}
           tier="Strong"
-          breakdown={empty ? trustScoreEmptyBreakdown : trustScoreBreakdown}
+          breakdown={
+            completedDeals.length > 0 ? trustScoreBreakdown : trustScoreEmptyBreakdown
+          }
         />
 
         <VisibilityBoost />
       </div>
     </DashboardShell>
-  );
-}
-
-export default function CreatorDashboardPage() {
-  return (
-    <Suspense
-      fallback={
-        <Card className="p-10 text-center text-ink-500">Loading dashboard…</Card>
-      }
-    >
-      <CreatorDashboardContent />
-    </Suspense>
   );
 }

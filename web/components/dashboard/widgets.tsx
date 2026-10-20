@@ -248,9 +248,11 @@ export function StatCard({
         )}
       </p>
       {sub && <p className="mt-0.5 text-[13px] text-ink-400">{sub}</p>}
-      <p className="mt-2">
-        <DeltaPill delta={delta} />
-      </p>
+      {delta ? (
+        <p className="mt-2">
+          <DeltaPill delta={delta} />
+        </p>
+      ) : null}
     </Card>
   );
 }
