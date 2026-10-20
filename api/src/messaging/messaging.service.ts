@@ -105,6 +105,13 @@ export class MessagingService {
       order: { createdAt: 'ASC' },
     });
 
+    // Frontend har message ko isMine se pehchanta hai (apna = right,
+    // doosre ka = left). Ye field pehle missing tha — is liye saare
+    // messages "them" ban kar left par render ho rahe thay.
+    for (const m of messages) {
+      (m as any).isMine = m.senderId === userId;
+    }
+
     // Mark messages as read
     await this.messagesRepo.update(
       { conversationId, isRead: false },
