@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
 import type { ConversationPreview } from "@/lib/mock-messages";
+import { fmtTime } from "./ConversationPanel";
 
 // Conversation list column, rebuilt from the design "Messages dashboard"
 // (360:19583) / "inbox" (411:59061): search field, "All" filter
@@ -72,7 +73,7 @@ export function ConversationList({
                 <span className="block truncate text-sm text-ink-500">{c.preview}</span>
               </span>
               <span className="flex shrink-0 flex-col items-end gap-1.5">
-                <span className="text-[13px] text-ink-500">{c.time}</span>
+                <span className="text-[13px] text-ink-500">{fmtTime(c.time)}</span>
                 {c.unreadCount > 0 && (
                   <span className="flex h-[22px] min-w-[22px] items-center justify-center rounded-full bg-brand px-1.5 text-[11px] font-bold text-white">
                     {c.unreadCount}

@@ -10,23 +10,30 @@ import { ConversationList } from "@/components/messaging/ConversationList";
 import { ConversationPanel } from "@/components/messaging/ConversationPanel";
 import { conversations as mockConversations, janeSmithThread } from "@/lib/mock-messages";
 import { api } from "@/lib/api";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { mapConversation, mapMessages } from "../page";
 
 // Desktop: two-column (list + panel) — matches Figma "Messages
 // dashboard" (361:20232). Mobile: panel with Back link — matches Figma
 // "mob inbox" (411:59486).
 // Loads the real conversation + messages from the API; falls back to
 // mock data when the API is unreachable or the id is a mock id.
+// Real conversation me messages na hon to thread KHAALI dikhta hai —
+// pehle wahan mock Jane Smith thread aa jata tha.
 export default function ConversationPage() {
   const { id } = useParams() as { id: string };
-  const [conversations, setConversations] = useState<any[]>(mockConversations);
+  const { user } = useAuth();
+  const myId = (user as any)?.id as string | undefined;
+  const [conversations, setConversations] = useState<any[]>([]);
   const [active, setActive] = useState<any | null>(null);
-  const [messages, setMessages] = useState<any[]>(janeSmithThread);
+  const [messages, setMessages] = useState<any[]>([]);
 
   useEffect(() => {
     let cancelled = false;
     const isMockId = !id || id.length <= 20;
     if (isMockId) {
       const conv = mockConversations.find((c) => c.id === id) ?? mockConversations[0];
+      setConversations(mockConversations);
       setActive(conv);
       setMessages(janeSmithThread);
       return;
@@ -36,50 +43,18 @@ export default function ConversationPage() {
       api.conversationMessages(id).catch(() => []),
     ]).then(([convs, msgs]) => {
       if (cancelled) return;
-      if (Array.isArray(convs) && convs.length > 0) {
-        setConversations(
-          convs.map((c: any) => {
-            const other = c.participant2 ?? c.participant1 ?? {};
-            return {
-              id: c.id,
-              name: other?.name ?? other?.email ?? "User",
-              handle: other?.email ? `@${String(other.email).split("@")[0]}` : "",
-              avatar: other?.avatar ?? "",
-              preview: c.lastMessage?.content ?? "",
-              time: c.lastMessage?.createdAt ?? c.updatedAt ?? "",
-              unreadCount: c.unreadCount ?? 0,
-            };
-          })
-        );
-      }
-      const conv = (Array.isArray(convs) ? convs : []).find((c: any) => c.id === id);
-      if (conv) {
-        const other = conv.participant2 ?? conv.participant1 ?? {};
-        setActive({
-          id: conv.id,
-          name: other?.name ?? other?.email ?? "User",
-          handle: other?.email ? `@${String(other.email).split("@")[0]}` : "",
-        });
-      } else {
-        setActive(mockConversations[0]);
-      }
-      if (Array.isArray(msgs) && msgs.length > 0) {
-        setMessages(
-          msgs.map((m: any) => ({
-            id: m.id,
-            from: m.isMine ? "me" : "them",
-            body: m.content,
-            time: m.createdAt ?? "",
-          }))
-        );
-      } else {
-        setMessages(janeSmithThread);
-      }
+      const mapped = (Array.isArray(convs) ? convs : []).map((c: any) =>
+        mapConversation(c, myId)
+      );
+      setConversations(mapped);
+      const mine = mapped.find((c: any) => c.id === id);
+      setActive(mine ?? null);
+      setMessages(mapMessages(msgs));
     });
     return () => {
       cancelled = true;
     };
-  }, [id]);
+  }, [id, myId]);
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
@@ -90,7 +65,7 @@ export default function ConversationPage() {
             <ConversationList conversations={conversations} basePath="/dashboard/messages" />
           </div>
           <ConversationPanel
-            conversation={active ?? mockConversations[0]}
+            conversation={active ?? { id, name: "Conversation", handle: "" }}
             initialMessages={messages}
             conversationId={id}
             backHref="/dashboard/messages"

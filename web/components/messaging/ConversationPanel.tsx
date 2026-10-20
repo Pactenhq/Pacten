@@ -19,6 +19,19 @@ import { useAuth } from "@/components/auth/AuthProvider";
 // connect na ho sake to 5s polling fallback ke taur par chalti hai.
 // Mock conversations stay client-side.
 
+// ISO timestamp ko design-style time ("10:24 AM") me badlo;
+// jo strings pehle se display format me hain ("now", "10:24 AM")
+// wo waisay hi rehne do.
+export function fmtTime(t: string): string {
+  if (!t) return "";
+  if (/^\d{4}-\d{2}-\d{2}T/.test(t)) {
+    const d = new Date(t);
+    if (!isNaN(d.getTime()))
+      return d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  }
+  return t;
+}
+
 export function ConversationPanel({
   conversation,
   initialMessages,
@@ -129,15 +142,22 @@ export function ConversationPanel({
       api
         .sendMessage(convId, body)
         .then((m: any) => {
-          setMessages((prev) => [
-            ...prev,
-            {
-              id: m?.id ?? `m-${Date.now()}`,
-              from: "me",
-              body: m?.content ?? body,
-              time: m?.createdAt ?? "now",
-            },
-          ]);
+          setMessages((prev) => {
+            // WebSocket broadcast REST response se pehle aa sakta hai —
+            // agar socket ne message pehle hi add kar diya hai to
+            // dobara add na karo (duplicate bubble bug).
+            if (m?.id && prev.some((x) => String(x.id) === String(m.id)))
+              return prev;
+            return [
+              ...prev,
+              {
+                id: m?.id ?? `m-${Date.now()}`,
+                from: "me",
+                body: m?.content ?? body,
+                time: m?.createdAt ?? "now",
+              },
+            ];
+          });
         })
         .catch(() => {
           // API unavailable — keep client-side only
@@ -215,14 +235,14 @@ export function ConversationPanel({
               <div className="rounded-2xl rounded-tl-md bg-[#ebf3ff] px-4 py-3 text-[15px] text-ink-900">
                 {m.body}
               </div>
-              <span className="text-xs text-ink-500">{m.time}</span>
+              <span className="text-xs text-ink-500">{fmtTime(m.time)}</span>
             </div>
           ) : (
             <div key={m.id} className="flex max-w-[75%] flex-col items-end gap-1 self-end">
               <div className="rounded-2xl rounded-tr-md bg-[#d3d8f0] px-4 py-3 text-[15px] text-ink-900">
                 {m.body}
               </div>
-              <span className="text-xs text-ink-500">{m.time}</span>
+              <span className="text-xs text-ink-500">{fmtTime(m.time)}</span>
             </div>
           )
         )}
