@@ -11,7 +11,7 @@ import { ConversationPanel } from "@/components/messaging/ConversationPanel";
 import { conversations as mockConversations, janeSmithThread } from "@/lib/mock-messages";
 import { api } from "@/lib/api";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { mapConversation, mapMessages } from "../page";
+import { mapConversation, mapMessages } from "@/lib/conversation-map";
 
 // Desktop: two-column (list + panel) — matches Figma "Messages
 // dashboard" (361:20232). Mobile: panel with Back link — matches Figma

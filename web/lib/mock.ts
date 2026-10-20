@@ -637,6 +637,7 @@ export const brandNav: DashboardNavItem[] = withDashboardHome("/dashboard/brand"
   dashboardNavBase[0],
   { label: "Applications", href: "/dashboard/applications/received", icon: "file" },
   { label: "Opportunities", href: "/dashboard/opportunities", icon: "briefcase" },
+  { label: "Deals", href: "/dashboard/deals", icon: "briefcase" },
   dashboardNavBase[2],
   dashboardNavBase[3],
   dashboardNavBase[4],
@@ -652,6 +653,7 @@ export const creatorNav: DashboardNavItem[] = withDashboardHome(
   [
     ...dashboardNavBase.slice(0, 2),
     { label: "Opportunities", href: "/dashboard/opportunities", icon: "briefcase" },
+    { label: "Deals", href: "/dashboard/deals", icon: "briefcase" },
     ...dashboardNavBase.slice(2),
   ],
 );
@@ -660,6 +662,7 @@ export const professionalNav: DashboardNavItem[] = withDashboardHome(
   [
     ...dashboardNavBase.slice(0, 2),
     { label: "Opportunities", href: "/dashboard/opportunities", icon: "briefcase" },
+    { label: "Deals", href: "/dashboard/deals", icon: "briefcase" },
     ...dashboardNavBase.slice(2),
   ],
 );

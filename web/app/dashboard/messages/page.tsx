@@ -11,45 +11,7 @@ import { conversations as mockConversations, janeSmithThread } from "@/lib/mock-
 import { brandNav, dashboardUser } from "@/lib/mock";
 import { api } from "@/lib/api";
 import { useAuth } from "@/components/auth/AuthProvider";
-
-// Doosra participant = jo main NAHI hun. Pehle code hamesha
-// participant2 utha leta tha — jo user khud participant2 ho
-// (doosre ne conversation shuru ki ho) use apna hi email
-// partner ke taur par nazar aata tha.
-export function otherParticipant(c: any, myId?: string) {
-  const parts = [c?.participant1, c?.participant2].filter(Boolean);
-  return (
-    parts.find((p: any) => !myId || String(p.id) !== String(myId)) ??
-    c?.participant2 ??
-    c?.participant1 ??
-    {}
-  );
-}
-
-export function mapConversation(c: any, myId?: string) {
-  const other = otherParticipant(c, myId);
-  const fullName = [other.firstName, other.lastName].filter(Boolean).join(" ");
-  return {
-    id: c.id,
-    name: fullName || other.email || "User",
-    handle: other.email ? `@${String(other.email).split("@")[0]}` : "",
-    avatar: other.avatar ?? "",
-    preview: c.lastMessage?.content ?? "",
-    lastMessage: c.lastMessage?.content ?? "",
-    time: c.lastMessage?.createdAt ?? c.updatedAt ?? "",
-    unread: c.unreadCount ?? 0,
-    unreadCount: c.unreadCount ?? 0,
-  };
-}
-
-export function mapMessages(msgs: any) {
-  return (Array.isArray(msgs) ? msgs : []).map((m: any) => ({
-    id: m.id,
-    from: m.isMine ? "me" : "them",
-    body: m.content,
-    time: m.createdAt ?? "",
-  }));
-}
+import { mapConversation, mapMessages } from "@/lib/conversation-map";
 
 // desktop + "mob Messages dashboard"
 // (361:20232) mobile: dashboard shell with sidebar, "Messages" hero
