@@ -1,6 +1,7 @@
 import {
   Injectable,
   NotFoundException,
+  ForbiddenException,
   OnModuleInit,
   Logger,
 } from '@nestjs/common';
@@ -203,7 +204,7 @@ export class SubscriptionsService implements OnModuleInit {
       planName: `Pacten ${plan.name} (${plan.role})`,
       amountCents: plan.priceCentsMonthly,
       currency: plan.currency,
-      successUrl: `${frontendUrl}/pricing/success?plan=${plan.id}`,
+      successUrl: `${frontendUrl}/pricing/success?session_id={CHECKOUT_SESSION_ID}&plan=${plan.id}`,
       cancelUrl: `${frontendUrl}/pricing?cancelled=1`,
       metadata: { userId, planId: plan.id },
     });
@@ -227,6 +228,61 @@ export class SubscriptionsService implements OnModuleInit {
     }
 
     return { checkoutUrl: session.url, sessionId: session.id };
+  }
+
+  /**
+   * LIVE return-path sync for subscription checkouts (the pricing success
+   * page calls this after Stripe redirects back with ?session_id=...).
+   * Mirrors the deal-payment sync: the checkout.session.completed webhook
+   * points at the deployed backend, so on a local run it never arrives —
+   * this endpoint settles the subscription from the return URL instead.
+   * Idempotent: activate() upserts the user's subscription row and the
+   * referral earning is deduped by sourceId (the session id) inside
+   * ReferralsService. The webhook remains the other settlement path —
+   * whichever lands first wins, the second is a no-op.
+   */
+  async syncCheckout(
+    userId: string,
+    sessionId: string,
+  ): Promise<{
+    subscription: Subscription | null;
+    plan: SubscriptionPlan | null;
+  }> {
+    const current = await this.mySubscription(userId);
+    if (this.stripe.isDemo() || !sessionId) return current;
+
+    let session: Awaited<
+      ReturnType<StripeService['retrieveCheckoutSession']>
+    >;
+    try {
+      session = await this.stripe.retrieveCheckoutSession(sessionId);
+    } catch {
+      // Session lookup is best-effort on the return path; the webhook
+      // can still settle the subscription later.
+      return current;
+    }
+
+    const paid =
+      session.paymentStatus === 'paid' || session.status === 'complete';
+    if (!paid) return current;
+
+    if (session.metadata?.userId !== userId) {
+      throw new ForbiddenException(
+        'This checkout session belongs to another user',
+      );
+    }
+    const planId = session.metadata?.planId;
+    if (!planId) return current;
+    const plan = await this.plansRepo.findOne({ where: { id: planId } });
+    if (!plan) return current;
+
+    await this.activate(userId, plan.id, session.subscriptionId);
+    await this.referrals.handleSubscriptionPayment(
+      userId,
+      plan.priceCentsMonthly,
+      sessionId,
+    );
+    return this.mySubscription(userId);
   }
 
   async activate(

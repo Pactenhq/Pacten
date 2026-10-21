@@ -115,6 +115,29 @@ export default function DealDetailPage() {
       .finally(() => setLoading(false));
     refreshM4();
     refreshDisputes();
+
+    // Live-mode return from Stripe Checkout (?payment=success|cancelled):
+    // settle the pending payment via the sync endpoint, refresh, then
+    // strip the query param so a reload doesn't repeat the sync.
+    const returnState = new URLSearchParams(window.location.search).get(
+      "payment"
+    );
+    if (returnState === "success" || returnState === "cancelled") {
+      (async () => {
+        if (returnState === "success") {
+          try {
+            const payments = await api.myPayments();
+            const pending = (Array.isArray(payments) ? payments : []).find(
+              (p: any) => p.dealId === id && p.status === "pending"
+            );
+            if (pending) await api.syncPayment(pending.id);
+          } catch {}
+          await refreshM4();
+        }
+        router.replace(`/dashboard/deals/${id}`);
+      })();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const updateStatus = async (status: string) => {
@@ -151,6 +174,12 @@ export default function DealDetailPage() {
     m4action(async () => {
       const key = `upfront-${id}-${Date.now()}`;
       const res = await api.createUpfrontPayment(id, undefined, key);
+      if (res?.checkoutUrl) {
+        // Live mode: hand off to Stripe's hosted checkout. Settlement
+        // happens on the return path (see the ?payment=success effect).
+        window.location.href = res.checkoutUrl;
+        return;
+      }
       if (res?.demoMode && res?.payment?.id) {
         await api.demoConfirmPayment(res.payment.id);
       }

@@ -298,6 +298,13 @@ export const api = {
       auth: true,
     }),
 
+  // Live mode: settle a deal payment after returning from Stripe Checkout.
+  syncPayment: (paymentId: string) =>
+    apiFetch<any>(`/payments/${paymentId}/sync`, {
+      method: "POST",
+      auth: true,
+    }),
+
   myPayments: () => apiFetch<any[]>("/payments/my", { auth: true }),
 
   paymentDetail: (id: string) =>
@@ -327,6 +334,14 @@ export const api = {
     apiFetch<any>("/subscriptions/checkout", {
       method: "POST",
       body: { planId },
+      auth: true,
+    }),
+
+  // Live mode: settle a subscription after returning from Stripe Checkout.
+  syncSubscription: (sessionId: string) =>
+    apiFetch<any>("/subscriptions/sync", {
+      method: "POST",
+      body: { sessionId },
       auth: true,
     }),
 

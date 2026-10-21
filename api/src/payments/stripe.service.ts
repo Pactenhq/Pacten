@@ -115,6 +115,90 @@ export class StripeService {
   }
 
   /**
+   * One-time (mode: 'payment') Checkout Session — used for deal upfront
+   * payments, mirroring the subscription flow's redirect architecture.
+   * createCheckoutSession above stays subscription-only.
+   */
+  async createPaymentCheckoutSession(params: {
+    itemName: string;
+    amountCents: number;
+    currency: string;
+    successUrl: string;
+    cancelUrl: string;
+    metadata?: Record<string, string>;
+    idempotencyKey?: string;
+  }): Promise<{ id: string; url: string }> {
+    if (this.demoMode) {
+      const id = `cs_demo_${randomUUID().replace(/-/g, '').slice(0, 16)}`;
+      return { id, url: `demo-checkout://${id}` };
+    }
+    const session = await this.stripe.checkout.sessions.create(
+      {
+        mode: 'payment',
+        line_items: [
+          {
+            price_data: {
+              currency: params.currency,
+              product_data: { name: params.itemName },
+              unit_amount: params.amountCents,
+            },
+            quantity: 1,
+          },
+        ],
+        success_url: params.successUrl,
+        cancel_url: params.cancelUrl,
+        metadata: params.metadata || {},
+      },
+      params.idempotencyKey
+        ? { idempotencyKey: params.idempotencyKey }
+        : undefined,
+    );
+    return { id: session.id, url: session.url };
+  }
+
+  /**
+   * Fetch a Checkout Session's current state (used by the deal page's
+   * return-path sync after the payer comes back from Stripe).
+   */
+  async retrieveCheckoutSession(sessionId: string): Promise<{
+    id: string;
+    status: string | null;
+    paymentStatus: string | null;
+    paymentIntentId: string | null;
+    url: string | null;
+    metadata: Record<string, string>;
+    subscriptionId: string | null;
+  }> {
+    if (this.demoMode) {
+      return {
+        id: sessionId,
+        status: 'open',
+        paymentStatus: 'unpaid',
+        paymentIntentId: null,
+        url: null,
+        metadata: {},
+        subscriptionId: null,
+      };
+    }
+    const session = await this.stripe.checkout.sessions.retrieve(sessionId);
+    return {
+      id: session.id,
+      status: session.status,
+      paymentStatus: session.payment_status,
+      paymentIntentId:
+        typeof session.payment_intent === 'string'
+          ? session.payment_intent
+          : (session.payment_intent?.id ?? null),
+      url: session.url,
+      metadata: (session.metadata || {}) as Record<string, string>,
+      subscriptionId:
+        typeof session.subscription === 'string'
+          ? session.subscription
+          : (session.subscription?.id ?? null),
+    };
+  }
+
+  /**
    * Verify + parse a webhook payload. In demo mode the signature is not
    * verified (there is no webhook secret yet) — the JSON is parsed directly.
    */

@@ -36,6 +36,11 @@ export class Payment {
   @Column({ nullable: true })
   stripePaymentIntentId: string;
 
+  // Live mode: the Stripe Checkout Session that collects this payment.
+  // Null in demo mode (PaymentIntent simulation) and for legacy rows.
+  @Column({ nullable: true })
+  stripeCheckoutSessionId: string;
+
   @Column({
     type: 'enum',
     enum: PaymentStatus,

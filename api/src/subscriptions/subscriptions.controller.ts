@@ -7,13 +7,18 @@ import {
   UseGuards,
   Request,
 } from '@nestjs/common';
-import { IsUUID } from 'class-validator';
+import { IsUUID, IsString } from 'class-validator';
 import { SubscriptionsService } from './subscriptions.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 class CheckoutDto {
   @IsUUID()
   planId: string;
+}
+
+class SyncDto {
+  @IsString()
+  sessionId: string;
 }
 
 @Controller('subscriptions')
@@ -46,5 +51,14 @@ export class SubscriptionsController {
   @UseGuards(JwtAuthGuard)
   cancel(@Request() req: any) {
     return this.subscriptionsService.cancel(req.user.id);
+  }
+
+  // Live-mode return path: settle a subscription checkout from the
+  // Stripe session id carried back to /pricing/success (the webhook
+  // targets the deployed backend and never reaches a local run).
+  @Post('sync')
+  @UseGuards(JwtAuthGuard)
+  sync(@Request() req: any, @Body() dto: SyncDto) {
+    return this.subscriptionsService.syncCheckout(req.user.id, dto.sessionId);
   }
 }

@@ -41,6 +41,14 @@ export class PaymentsController {
     return this.paymentsService.confirmDemoPayment(id, req.user.id);
   }
 
+  // Live-mode return path: the deal page calls this after Stripe
+  // redirects back from Checkout so the payment settles immediately
+  // (the webhook covers the case where the payer never returns).
+  @Post(':id/sync')
+  sync(@Request() req: any, @Param('id') id: string) {
+    return this.paymentsService.syncPayment(id, req.user.id);
+  }
+
   @Get('my')
   myPayments(@Request() req: any) {
     return this.paymentsService.myPayments(req.user.id);

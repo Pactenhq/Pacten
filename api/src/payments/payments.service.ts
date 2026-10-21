@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
 import { Payment, PaymentStatus } from './payment.entity';
 import { PaymentEvent } from './payment-event.entity';
 import { CommissionRule } from './commission-rule.entity';
@@ -68,6 +69,7 @@ export class PaymentsService implements OnModuleInit {
     private stripe: StripeService,
     private emails: EmailsService,
     private referrals: ReferralsService,
+    private config: ConfigService,
   ) {}
 
   async onModuleInit() {
@@ -132,23 +134,59 @@ export class PaymentsService implements OnModuleInit {
   /**
    * Brand funds the deal upfront. Idempotent via the Idempotency-Key header:
    * retries with the same key return the original payment.
+   *
+   * DEMO mode: bare PaymentIntent + demo-confirm (unchanged behaviour).
+   * LIVE mode: mirrors the subscription architecture — the Payment row is
+   * created PENDING first, then a one-time Stripe Checkout Session carries
+   * the payer to Stripe's hosted page; settlement happens on the return
+   * path (POST /payments/:id/sync) and/or the checkout.session.completed /
+   * payment_intent.succeeded webhooks.
    */
   async createUpfrontPayment(
     dealId: string,
     userId: string,
     dto: CreateUpfrontPaymentDto,
     idempotencyKey?: string,
-  ): Promise<{ payment: Payment; clientSecret: string; demoMode: boolean }> {
+  ): Promise<{
+    payment: Payment;
+    clientSecret?: string;
+    checkoutUrl?: string;
+    demoMode: boolean;
+  }> {
     if (idempotencyKey) {
       const existing = await this.paymentsRepo.findOne({
         where: { idempotencyKey },
       });
       if (existing) {
-        return {
+        const result: {
+          payment: Payment;
+          clientSecret?: string;
+          checkoutUrl?: string;
+          demoMode: boolean;
+        } = {
           payment: existing,
           clientSecret: 'already-created',
           demoMode: this.stripe.isDemo(),
         };
+        // Live retry of a still-open checkout: hand back the session URL
+        // so the payer can resume where they left off.
+        if (
+          !result.demoMode &&
+          existing.status === PaymentStatus.PENDING &&
+          existing.stripeCheckoutSessionId
+        ) {
+          try {
+            const session = await this.stripe.retrieveCheckoutSession(
+              existing.stripeCheckoutSessionId,
+            );
+            if (session.status === 'open' && session.url) {
+              result.checkoutUrl = session.url;
+            }
+          } catch {
+            // Session lookup is best-effort on the retry path.
+          }
+        }
+        return result;
       }
     }
 
@@ -175,26 +213,97 @@ export class PaymentsService implements OnModuleInit {
     }
 
     const currency = dto.currency || 'usd';
-    const pi = await this.stripe.createPaymentIntent({
-      amountCents,
-      currency,
-      metadata: { dealId, payerId: userId },
-      idempotencyKey,
-    });
 
+    if (this.stripe.isDemo()) {
+      const pi = await this.stripe.createPaymentIntent({
+        amountCents,
+        currency,
+        metadata: { dealId, payerId: userId },
+        idempotencyKey,
+      });
+
+      const payment = await this.paymentsRepo.save(
+        this.paymentsRepo.create({
+          dealId,
+          payerId: userId,
+          amountCents,
+          currency,
+          stripePaymentIntentId: pi.id,
+          status: PaymentStatus.PENDING,
+          idempotencyKey: idempotencyKey || null,
+        }),
+      );
+
+      return { payment, clientSecret: pi.clientSecret, demoMode: true };
+    }
+
+    // LIVE: payment row first (PENDING), then the Checkout Session.
     const payment = await this.paymentsRepo.save(
       this.paymentsRepo.create({
         dealId,
         payerId: userId,
         amountCents,
         currency,
-        stripePaymentIntentId: pi.id,
         status: PaymentStatus.PENDING,
         idempotencyKey: idempotencyKey || null,
       }),
     );
 
-    return { payment, clientSecret: pi.clientSecret, demoMode: this.stripe.isDemo() };
+    const frontendUrl =
+      this.config.get<string>('FRONTEND_URL') || 'http://localhost:3000';
+    try {
+      const session = await this.stripe.createPaymentCheckoutSession({
+        itemName: `Pacten deal payment — ${deal.title || 'Deal'}`,
+        amountCents,
+        currency,
+        metadata: { dealId, paymentId: payment.id },
+        successUrl: `${frontendUrl}/dashboard/deals/${dealId}?payment=success`,
+        cancelUrl: `${frontendUrl}/dashboard/deals/${dealId}?payment=cancelled`,
+        idempotencyKey: `checkout_${payment.id}`,
+      });
+      payment.stripeCheckoutSessionId = session.id;
+      await this.paymentsRepo.save(payment);
+      return { payment, checkoutUrl: session.url, demoMode: false };
+    } catch (err) {
+      payment.status = PaymentStatus.FAILED;
+      payment.failureReason = 'Could not start Stripe checkout';
+      await this.paymentsRepo.save(payment);
+      throw err;
+    }
+  }
+
+  /**
+   * LIVE return-path sync for deal payments (the deal page calls this
+   * after Stripe redirects back with ?payment=success). Payer-only.
+   * Idempotent: an already-settled payment is returned untouched, and
+   * processPaymentSuccess is status-guarded against double processing.
+   * The webhooks remain the other settlement path — whichever lands
+   * first wins, the second is a no-op.
+   */
+  async syncPayment(paymentId: string, userId: string): Promise<Payment> {
+    const payment = await this.paymentsRepo.findOne({
+      where: { id: paymentId },
+    });
+    if (!payment) throw new NotFoundException('Payment not found');
+    if (payment.payerId !== userId) {
+      throw new ForbiddenException('Only the payer can sync this payment');
+    }
+    if (payment.status !== PaymentStatus.PENDING) return payment;
+    if (this.stripe.isDemo() || !payment.stripeCheckoutSessionId) {
+      return payment;
+    }
+
+    const session = await this.stripe.retrieveCheckoutSession(
+      payment.stripeCheckoutSessionId,
+    );
+    if (session.paymentStatus !== 'paid') return payment;
+
+    if (session.paymentIntentId && !payment.stripePaymentIntentId) {
+      payment.stripePaymentIntentId = session.paymentIntentId;
+    }
+    // Deterministic per-session event id: PaymentEvent dedupe + the
+    // status guard in processPaymentSuccess make repeat syncs no-ops.
+    return this.processPaymentSuccess(payment, `evt_sync_${session.id}`);
   }
 
   /**
@@ -225,6 +334,9 @@ export class PaymentsService implements OnModuleInit {
     payment: Payment,
     stripeEventId?: string,
   ): Promise<Payment> {
+    // Idempotency guard: settlement can arrive via return-path sync AND
+    // webhook for the same payment — only the first call may process.
+    if (payment.status === PaymentStatus.SUCCEEDED) return payment;
     payment.status = PaymentStatus.SUCCEEDED;
     const saved = await this.paymentsRepo.save(payment);
 
@@ -391,6 +503,33 @@ export class PaymentsService implements OnModuleInit {
       }
       case 'checkout.session.completed': {
         const session = event.data;
+        // Deal upfront payment (one-time session carrying paymentId):
+        // settle that payment, mirroring the return-path sync.
+        if (session?.metadata?.paymentId) {
+          const payment = await this.paymentsRepo.findOne({
+            where: { id: session.metadata.paymentId },
+          });
+          if (payment && payment.status !== PaymentStatus.SUCCEEDED) {
+            if (session.payment_intent && !payment.stripePaymentIntentId) {
+              payment.stripePaymentIntentId = session.payment_intent;
+            }
+            if (
+              !session.payment_status ||
+              session.payment_status === 'paid'
+            ) {
+              await this.processPaymentSuccess(payment, event.id);
+            } else {
+              await this.paymentsRepo.save(payment);
+            }
+          }
+          await this.recordEvent(
+            event.id,
+            event.type,
+            payment?.id || null,
+            event.data,
+          );
+          break;
+        }
         if (
           session?.mode === 'subscription' &&
           session?.metadata?.userId &&
