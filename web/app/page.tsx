@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/ui/Navbar";
 import { Footer } from "@/components/ui/Footer";
 import { Button } from "@/components/ui/Button";
@@ -173,12 +174,20 @@ function StarPersonIcon({ className }: { className?: string }) {
 /* ------------------------------- hero ------------------------------ */
 
 const searchTabs = [
-  { icon: PersonIcon, title: "Creators", sub: "Find creators & collaborations", active: true },
-  { icon: BriefcaseIcon, title: "Professionals", sub: "Find experts & specialists", active: false },
-  { icon: BuildingIcon, title: "Campaigns", sub: "Discover campaigns & opportunities", active: false },
+  { icon: PersonIcon, title: "Creators", sub: "Find creators & collaborations", target: "/creators" },
+  { icon: BriefcaseIcon, title: "Professionals", sub: "Find experts & specialists", target: "/professionals" },
+  { icon: BuildingIcon, title: "Campaigns", sub: "Discover campaigns & opportunities", target: "/campaigns" },
 ];
 
 function Hero() {
+  const router = useRouter();
+  const [tab, setTab] = useState(0);
+  const [query, setQuery] = useState("");
+  const go = (value?: string) => {
+    const base = searchTabs[tab].target;
+    const q = (value ?? query).trim();
+    router.push(q ? `${base}?q=${encodeURIComponent(q)}` : base);
+  };
   return (
     <section className="relative mx-auto max-w-[1380px] overflow-hidden px-6 pt-12 text-center lg:px-12 lg:pt-16">
       {/* ambient background orbs */}
@@ -218,19 +227,20 @@ function Hero() {
       {/* search tab panel */}
       <div className="fade-up fade-up-5 mx-auto mt-10 w-full max-w-[1248px] rounded-2xl border border-ink-200 bg-white p-4 text-left shadow-card sm:p-5">
         <div className="grid gap-3 sm:grid-cols-3">
-          {searchTabs.map((t) => (
+          {searchTabs.map((t, i) => (
             <button
               key={t.title}
+              onClick={() => setTab(i)}
               className={cn(
                 "flex items-center gap-4 rounded-xl border p-4 text-left transition-colors",
-                t.active
+                i === tab
                   ? "border-brand bg-white"
                   : "border-ink-200 bg-white hover:border-ink-300"
               )}
             >
-              <t.icon className={t.active ? "text-brand" : "text-ink-900"} />
+              <t.icon className={i === tab ? "text-brand" : "text-ink-900"} />
               <span>
-                <span className={cn("block text-[17px] font-bold", t.active ? "text-brand" : "text-ink-900")}>
+                <span className={cn("block text-[17px] font-bold", i === tab ? "text-brand" : "text-ink-900")}>
                   {t.title}
                 </span>
                 <span className="block text-sm text-ink-500">{t.sub}</span>
@@ -241,9 +251,14 @@ function Hero() {
         <div className="relative mt-4">
           <input
             placeholder="Search creators, niches or platforms..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") go();
+            }}
             className="h-[56px] w-full rounded-xl border border-ink-200 bg-white px-5 pr-[140px] text-[15px] text-ink-900 placeholder:text-ink-400 focus:border-brand focus:outline-none"
           />
-          <Button size="lg" className="bottom-2 right-2 top-2 h-auto gap-2 px-6" style={{ position: "absolute" }}>
+          <Button size="lg" onClick={() => go()} className="bottom-2 right-2 top-2 h-auto gap-2 px-6" style={{ position: "absolute" }}>
             Search
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden>
               <path d="M8.25 14.25a6 6 0 1 0 0-12 6 6 0 0 0 0 12ZM16.5 16.5l-3.9-3.9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
@@ -254,6 +269,7 @@ function Hero() {
           {homeSearchChips.map((chip, i) => (
             <button
               key={chip}
+              onClick={() => go(chip)}
               className={cn(
                 "inline-flex h-9 items-center rounded-full px-4 text-sm font-medium transition-colors",
                 i === 0

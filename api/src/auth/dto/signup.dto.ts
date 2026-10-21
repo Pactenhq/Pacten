@@ -27,4 +27,8 @@ export class SignupDto {
   @IsOptional()
   @IsString()
   displayName?: string;
+
+  @IsOptional()
+  @IsString()
+  referralCode?: string;
 }

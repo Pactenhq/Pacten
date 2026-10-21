@@ -117,12 +117,18 @@ export function useSignupForm(role: Role) {
     }
     setLoading(true);
     try {
+      // Referral attribution (M5): ?ref=CODE on the signup URL.
+      const ref =
+        typeof window !== "undefined"
+          ? new URLSearchParams(window.location.search).get("ref") || undefined
+          : undefined;
       const { verified } = await signup({
         email: values.email.trim(),
         password: values.password,
         role,
         firstName: values.firstName.trim(),
         lastName: values.lastName.trim(),
+        ...(ref ? { referralCode: ref } : {}),
       });
       if (verified) router.push("/login?verified=1");
       else setCheckEmail(true);

@@ -5,9 +5,16 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ProfilesModule } from './profiles/profiles.module';
 import { CampaignsModule } from './campaigns/campaigns.module';
-import { OpportunitiesModule } from './opportunities/opportunities.module';
 import { MessagingModule } from './messaging/messaging.module';
 import { DealsModule } from './deals/deals.module';
+import { ContractsModule } from './contracts/contracts.module';
+import { PaymentsModule } from './payments/payments.module';
+import { SubscriptionsModule } from './subscriptions/subscriptions.module';
+import { ReferralsModule } from './referrals/referrals.module';
+import { DisputesModule } from './disputes/disputes.module';
+import { AdminModule } from './admin/admin.module';
+import { EmailsModule } from './emails/emails.module';
+import { OpportunitiesModule } from './opportunities/opportunities.module';
 
 @Module({
   imports: [
@@ -41,9 +48,16 @@ import { DealsModule } from './deals/deals.module';
     UsersModule,
     ProfilesModule,
     CampaignsModule,
-    OpportunitiesModule,
     MessagingModule,
     DealsModule,
+    ContractsModule,
+    PaymentsModule,
+    SubscriptionsModule,
+    ReferralsModule,
+    DisputesModule,
+    AdminModule,
+    EmailsModule,
+    OpportunitiesModule,
   ],
 })
 export class AppModule {}

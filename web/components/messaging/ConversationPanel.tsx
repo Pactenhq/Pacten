@@ -45,6 +45,7 @@ export function ConversationPanel({
 }) {
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [draft, setDraft] = useState("");
+  const [sendError, setSendError] = useState("");
   const [socketOk, setSocketOk] = useState(false);
   const convId = conversationId ?? (conversation as any)?.id;
   const isReal = !!convId && convId.length > 20;
@@ -138,6 +139,7 @@ export function ConversationPanel({
     const body = draft.trim();
     if (!body) return;
     setDraft("");
+    setSendError("");
     if (isReal && convId) {
       api
         .sendMessage(convId, body)
@@ -159,7 +161,13 @@ export function ConversationPanel({
             ];
           });
         })
-        .catch(() => {
+        .catch((err: any) => {
+          // Free-plan message cap: surface the limit, don't fake the send.
+          if (String(err?.message || "").includes("Free plan limit")) {
+            setSendError(err.message);
+            setDraft(body);
+            return;
+          }
           // API unavailable — keep client-side only
           setMessages((prev) => [
             ...prev,
@@ -248,6 +256,11 @@ export function ConversationPanel({
         )}
       </div>
 
+      {sendError && (
+        <p className="mx-4 mb-2 rounded-xl bg-red-50 px-4 py-2.5 text-[13px] font-medium text-red-700">
+          {sendError}
+        </p>
+      )}
       {/* Composer — bordered box with textarea, paperclip, Send Message */}
       <div className="p-4">
         <div className="rounded-2xl border border-ink-100 bg-white p-4">

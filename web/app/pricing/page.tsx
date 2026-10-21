@@ -31,26 +31,36 @@ function SparkleIcon() {
   );
 }
 
-function PlanTabs() {
-  const tabs = ["For Business", "For Creator", "For Professional"];
-  const [active, setActive] = useState(tabs[0]);
+const PLAN_TABS = [
+  { label: "For Business", role: "brand" },
+  { label: "For Creator", role: "creator" },
+  { label: "For Professional", role: "professional" },
+] as const;
+
+function PlanTabs({
+  active,
+  onChange,
+}: {
+  active: string;
+  onChange: (role: "brand" | "creator" | "professional") => void;
+}) {
   return (
     <div className="mt-8 flex max-w-full justify-center overflow-x-auto px-1">
       <div className="inline-flex shrink-0 rounded-full border border-ink-200 bg-white p-1">
-      {tabs.map((t) => (
+      {PLAN_TABS.map((t) => (
         <button
-          key={t}
+          key={t.role}
           type="button"
-          onClick={() => setActive(t)}
-          aria-pressed={active === t}
+          onClick={() => onChange(t.role)}
+          aria-pressed={active === t.role}
           className={cn(
             "h-11 shrink-0 rounded-full px-4 text-[13px] font-semibold transition-colors sm:px-6 sm:text-[15px]",
-            active === t
+            active === t.role
               ? "bg-brand text-white"
               : "text-ink-500 hover:text-ink-900"
           )}
         >
-          {t}
+          {t.label}
         </button>
       ))}
       </div>
@@ -355,6 +365,7 @@ function PricingFaq() {
 }
 
 export default function PricingPage() {
+  const [role, setRole] = useState<"brand" | "creator" | "professional">("brand");
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
@@ -369,9 +380,9 @@ export default function PricingPage() {
             upgrade as they grow. Pacten only succeeds when our community
             succeeds.
           </p>
-          <PlanTabs />
+          <PlanTabs active={role} onChange={setRole} />
           <div className="mt-12 text-left">
-            <PricingCards />
+            <PricingCards role={role} />
           </div>
         </section>
         <ComparisonTable />

@@ -1,19 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { dashboardUser, brandNav } from "@/lib/mock";
-import { subscriptionPlan } from "@/lib/mock-billing";
+import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
 
 //  "Back to Subscription"
 // outlined button, "Why are you cancelling?" card with right-aligned
 // checkboxes, two light-blue summary cards (plan + features) on the right,
 // and a full-width "Want to keep your plan?" card below with a blue
-// "Change Plan" button. All copy verbatim.
+// "Change Plan" button. The plan summary shows the user's REAL current
+// subscription (name, price, benefits) from the subscriptions API.
 const cancelReasons = [
   "Too expensive",
   "I don't use it enough",
@@ -23,9 +24,41 @@ const cancelReasons = [
   "Other",
 ];
 
+type Plan = {
+  name: string;
+  tier: string;
+  role: string;
+  priceCentsMonthly: number;
+  benefits: string[];
+};
+
+const COMMISSION_TAG: Record<string, string> = {
+  free: "15% commission",
+  pro: "10% commission",
+  elite: "5% commission",
+};
+
+const fmtPrice = (cents: number) =>
+  cents === 0
+    ? "$0/mo"
+    : `$${(cents / 100).toFixed(cents % 100 === 0 ? 0 : 2)}/mo`;
+
 export default function CancelSubscriptionPage() {
   const [selected, setSelected] = useState<string[]>([]);
-  const plan = subscriptionPlan;
+  const [plan, setPlan] = useState<Plan | null>(null);
+  const [periodEnd, setPeriodEnd] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api
+      .mySubscription()
+      .then((data) => {
+        setPlan(data?.plan ?? null);
+        setPeriodEnd(data?.subscription?.currentPeriodEnd ?? null);
+      })
+      .catch(() => setPlan(null))
+      .finally(() => setLoading(false));
+  }, []);
 
   const toggle = (reason: string) =>
     setSelected((prev) =>
@@ -33,6 +66,12 @@ export default function CancelSubscriptionPage() {
         ? prev.filter((r) => r !== reason)
         : [...prev, reason]
     );
+
+  const tag = plan
+    ? plan.role === "brand"
+      ? "0% commission"
+      : (COMMISSION_TAG[plan.tier] ?? "")
+    : "";
 
   return (
     <DashboardShell
@@ -134,59 +173,84 @@ export default function CancelSubscriptionPage() {
           </div>
 
           <div className="flex flex-col gap-6">
-            <div className="rounded-2xl bg-brand-50/60 p-6">
-              <div className="flex items-center gap-3">
-                <span
-                  aria-hidden
-                  className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand text-white"
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-                    <rect x="3" y="8" width="18" height="4" stroke="currentColor" strokeWidth="1.8" />
-                    <path d="M5 12v8h14v-8M12 8v12M12 8s-4.5 0-5.5-2C5.7 4.5 7 3 8.5 3.5 10 4 12 8 12 8Zm0 0s4.5 0 5.5-2c.8-1.5-.5-3-2-2.5C14 4 12 8 12 8Z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </span>
-                <span className="inline-flex h-7 items-center rounded-full bg-white px-3 text-xs font-semibold text-brand">
-                  {plan.tag}
-                </span>
+            {loading ? (
+              <div className="rounded-2xl bg-brand-50/60 p-6">
+                <p className="text-[15px] text-ink-500">Loading your plan...</p>
               </div>
-              <p className="mt-4 text-3xl font-extrabold text-ink-900">
-                {plan.name}
-              </p>
-              <p className="mt-1 text-lg font-bold text-brand">{plan.price}</p>
-              <p className="mt-2 text-sm leading-relaxed text-ink-500">
-                {plan.blurb}
-              </p>
-            </div>
-
-            <div className="rounded-2xl bg-brand-50/60 p-6">
-              <ul className="space-y-3">
-                {plan.features.map((f) => (
-                  <li
-                    key={f}
-                    className="flex items-start gap-3 text-[15px] text-ink-700"
-                  >
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 20 20"
-                      fill="none"
+            ) : plan ? (
+              <>
+                <div className="rounded-2xl bg-brand-50/60 p-6">
+                  <div className="flex items-center gap-3">
+                    <span
                       aria-hidden
-                      className="mt-0.5 shrink-0 text-brand"
+                      className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand text-white"
                     >
-                      <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="1.6" />
-                      <path
-                        d="m6.5 10.2 2.4 2.4 4.6-5.2"
-                        stroke="currentColor"
-                        strokeWidth="1.6"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                    {f}
-                  </li>
-                ))}
-              </ul>
-            </div>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+                        <rect x="3" y="8" width="18" height="4" stroke="currentColor" strokeWidth="1.8" />
+                        <path d="M5 12v8h14v-8M12 8v12M12 8s-4.5 0-5.5-2C5.7 4.5 7 3 8.5 3.5 10 4 12 8 12 8Zm0 0s4.5 0 5.5-2c.8-1.5-.5-3-2-2.5C14 4 12 8 12 8Z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </span>
+                    {tag && (
+                      <span className="inline-flex h-7 items-center rounded-full bg-white px-3 text-xs font-semibold text-brand">
+                        {tag}
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-4 text-3xl font-extrabold text-ink-900">
+                    {plan.name}
+                  </p>
+                  <p className="mt-1 text-lg font-bold text-brand">
+                    {fmtPrice(plan.priceCentsMonthly)}
+                  </p>
+                  <p className="mt-2 text-sm leading-relaxed text-ink-500">
+                    Your current plan, billed monthly.
+                    {periodEnd &&
+                      ` Current period ends ${new Date(periodEnd).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}.`}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl bg-brand-50/60 p-6">
+                  <ul className="space-y-3">
+                    {(plan.benefits ?? []).map((f) => (
+                      <li
+                        key={f}
+                        className="flex items-start gap-3 text-[15px] text-ink-700"
+                      >
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 20 20"
+                          fill="none"
+                          aria-hidden
+                          className="mt-0.5 shrink-0 text-brand"
+                        >
+                          <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="1.6" />
+                          <path
+                            d="m6.5 10.2 2.4 2.4 4.6-5.2"
+                            stroke="currentColor"
+                            strokeWidth="1.6"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </>
+            ) : (
+              <div className="rounded-2xl bg-brand-50/60 p-6">
+                <p className="text-[15px] text-ink-700">
+                  You don&rsquo;t have an active subscription right now.
+                </p>
+                <div className="mt-4">
+                  <Link href="/pricing">
+                    <Button variant="outline">View Plans</Button>
+                  </Link>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Navbar } from "@/components/ui/Navbar";
 import { Footer } from "@/components/ui/Footer";
 import { Drawer } from "@/components/ui/Drawer";
@@ -54,6 +54,15 @@ export default function CreatorsPage() {
   });
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 9;
+
+  // Arriving from the home-page hero search (?q=...) — start filtered.
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get("q");
+    if (q) {
+      setSearchQuery(q);
+      setPage(1);
+    }
+  }, []);
 
   const filtered = allCreators.filter((c) => {
     const q = searchQuery.trim().toLowerCase();
@@ -115,6 +124,7 @@ export default function CreatorsPage() {
           subtitle="Browse verified TikTok, Instagram, YouTube, Twitch, LinkedIn and UGC creators."
           placeholder="Search creators, niches or platforms..."
           onSearch={handleSearch}
+          defaultQuery={searchQuery}
         />
         <PlatformTabs
           tabs={["All", "TikTok", "Instagram", "YouTube", "Twitch", "LinkedIn"]}

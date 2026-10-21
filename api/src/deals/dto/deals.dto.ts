@@ -26,11 +26,11 @@ export class CreateDealDto {
 
   @IsUUID()
   @IsOptional()
-  campaignId?: string;
+  opportunityId?: string;
 
   @IsUUID()
   @IsOptional()
-  opportunityId?: string;
+  campaignId?: string;
 
   @IsString()
   @IsOptional()

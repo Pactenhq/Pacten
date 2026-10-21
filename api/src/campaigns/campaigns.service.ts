@@ -14,6 +14,8 @@ import {
   UpdateCampaignDto,
   CreateApplicationDto,
 } from './dto/campaign.dto';
+import { EmailsService } from '../emails/emails.service';
+import { PlanLimitsService } from '../common/plan-limits/plan-limits.service';
 
 @Injectable()
 export class CampaignsService {
@@ -22,11 +24,15 @@ export class CampaignsService {
     private campaigns: Repository<Campaign>,
     @InjectRepository(Application)
     private applications: Repository<Application>,
+    private emails: EmailsService,
+    private planLimits: PlanLimitsService,
   ) {}
 
   // ---------- Campaigns ----------
 
   async create(brandId: string, dto: CreateCampaignDto): Promise<Campaign> {
+    // Free-plan cap: free brands can post a limited number of jobs.
+    await this.planLimits.assertCanCreateCampaign(brandId);
     const campaign = this.campaigns.create({
       ...dto,
       brandId,
@@ -110,6 +116,10 @@ export class CampaignsService {
       throw new ForbiddenException('Only creators and professionals can apply');
     }
 
+    // Free-plan cap: free creators/professionals can apply a limited
+    // number of times.
+    await this.planLimits.assertCanApply(applicant.id);
+
     const campaign = await this.findOne(campaignId);
     if (campaign.status !== CampaignStatus.OPEN) {
       throw new ConflictException('Campaign is not open for applications');
@@ -131,7 +141,18 @@ export class CampaignsService {
       campaignId,
       applicantId: applicant.id,
     });
-    return this.applications.save(application);
+    const saved = await this.applications.save(application);
+
+    // Transactional email (M5). Best-effort.
+    try {
+      await this.emails.sendApplicationReceived(
+        applicant.email,
+        campaign.title,
+      );
+    } catch {
+      // Email is best-effort.
+    }
+    return saved;
   }
 
   async findApplicationsForCampaign(

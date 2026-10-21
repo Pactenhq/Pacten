@@ -22,6 +22,8 @@ import {
   UpdateDealDto,
   UpdateDealStatusDto,
 } from './dto/deals.dto';
+import { PayoutsService } from '../payments/payouts.service';
+import { PlanLimitsService } from '../common/plan-limits/plan-limits.service';
 
 // Valid state transitions for the deal state machine
 const VALID_TRANSITIONS: Record<DealStatus, DealStatus[]> = {
@@ -32,10 +34,17 @@ const VALID_TRANSITIONS: Record<DealStatus, DealStatus[]> = {
   ],
   [DealStatus.AGREED]: [DealStatus.ACTIVE, DealStatus.CANCELLED],
   [DealStatus.ACTIVE]: [
+    DealStatus.SUBMITTED,
     DealStatus.COMPLETED,
     DealStatus.DISPUTED,
     DealStatus.CANCELLED,
   ],
+  [DealStatus.SUBMITTED]: [
+    DealStatus.APPROVED,
+    DealStatus.ACTIVE,
+    DealStatus.DISPUTED,
+  ],
+  [DealStatus.APPROVED]: [DealStatus.COMPLETED, DealStatus.DISPUTED],
   [DealStatus.COMPLETED]: [],
   [DealStatus.CANCELLED]: [],
   [DealStatus.DISPUTED]: [DealStatus.ACTIVE, DealStatus.CANCELLED],
@@ -52,6 +61,8 @@ export class DealsService {
     private applicationsRepo: Repository<Application>,
     @InjectRepository(Opportunity)
     private opportunitiesRepo: Repository<Opportunity>,
+    private payoutsService: PayoutsService,
+    private planLimits: PlanLimitsService,
   ) {}
 
   // Snapshot the deal's current terms + status as a new DealVersion.
@@ -138,6 +149,13 @@ export class DealsService {
         );
       }
     }
+
+    // Free-plan cap: free brands can hire a limited number of times.
+    // Every deal-creation path funnels through this service method.
+    // Checked after reference validation so an invalid conversion
+    // reports its 400/409 instead of a misleading quota error; the
+    // cap still gates every deal that is actually created.
+    await this.planLimits.assertCanCreateDeal(brandId);
 
     const deal = this.dealsRepo.create({
       ...dto,
@@ -231,7 +249,44 @@ export class DealsService {
     deal.status = dto.status;
     const saved = await this.dealsRepo.save(deal);
     await this.snapshot(saved, userId);
+
+    // M4: completing the deal releases the supported payout.
+    if (dto.status === DealStatus.COMPLETED) {
+      try {
+        await this.payoutsService.createForDeal(deal.id);
+      } catch {
+        // Payout creation is best-effort here; it can be retried.
+      }
+    }
+
     return saved;
+  }
+
+  /**
+   * M4: creator submits the finished work for brand approval.
+   */
+  async submitWork(dealId: string, userId: string): Promise<Deal> {
+    const deal = await this.findOne(dealId, userId);
+    if (deal.creatorId !== userId) {
+      throw new ForbiddenException('Only the creator can submit work');
+    }
+    return this.updateStatus(dealId, userId, {
+      status: DealStatus.SUBMITTED,
+    } as UpdateDealStatusDto);
+  }
+
+  /**
+   * M4: brand approves the submitted work. Payout is released when the
+   * deal is then marked completed.
+   */
+  async approveWork(dealId: string, userId: string): Promise<Deal> {
+    const deal = await this.findOne(dealId, userId);
+    if (deal.brandId !== userId) {
+      throw new ForbiddenException('Only the brand can approve work');
+    }
+    return this.updateStatus(dealId, userId, {
+      status: DealStatus.APPROVED,
+    } as UpdateDealStatusDto);
   }
 
   // DealVersion history — only the deal's two parties can read it.

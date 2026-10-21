@@ -33,6 +33,15 @@ export default function CampaignsPage() {
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 6;
 
+  // Arriving from the home-page hero search (?q=...) — start filtered.
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get("q");
+    if (q) {
+      setSearchQuery(q);
+      setPage(1);
+    }
+  }, []);
+
   useEffect(() => {
     api
       .campaigns()
@@ -137,6 +146,7 @@ export default function CampaignsPage() {
           subtitle="Discover brand campaigns, creative projects, and long-term collaborations."
           placeholder="Search by job title, skills, brand or keyword..."
           onSearch={handleSearch}
+          defaultQuery={searchQuery}
         />
         <div className="mt-10">
           <ResultCount

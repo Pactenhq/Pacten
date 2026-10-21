@@ -110,6 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       role: Role;
       firstName: string;
       lastName: string;
+      referralCode?: string;
     }) => {
       const data = await api.signup(d);
       // Dev-mode: the API returns the verification token directly

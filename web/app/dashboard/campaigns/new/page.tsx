@@ -36,9 +36,12 @@ export default function CampaignRequestPage() {
       });
       setSent(true);
     } catch (err: any) {
-      // If API unavailable (not logged in as brand), show local success
-      // to preserve the Figma-designed flow
-      if (err?.message?.includes("401") || err?.message?.includes("403")) {
+      // Free-plan cap: show the plan-limit message as-is.
+      if (err?.message?.includes("Free plan limit")) {
+        setError(err.message);
+      } else if (err?.message?.includes("401") || err?.message?.includes("403")) {
+        // If API unavailable (not logged in as brand), show local success
+        // to preserve the Figma-designed flow
         setError("Please log in as a brand to post campaigns.");
       } else {
         setSent(true);

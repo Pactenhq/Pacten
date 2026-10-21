@@ -1,9 +1,27 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import { pricingTiers, type PricingTier } from "@/lib/mock";
+import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
 
-function PlanIcon({ icon, light }: { icon: PricingTier["icon"]; light?: boolean }) {
+export type PlanRole = "brand" | "creator" | "professional";
+
+type Plan = {
+  id: string;
+  role: string;
+  code: string;
+  name: string;
+  tier: string;
+  priceCentsMonthly: number;
+  currency: string;
+  benefits: string[];
+};
+
+function PlanIcon({ highlighted, index }: { highlighted?: boolean; index: number }) {
+  const kinds = ["diamond", "briefcase", "gift"] as const;
+  const icon = kinds[index % kinds.length];
   const paths =
     icon === "diamond" ? (
       <path
@@ -28,7 +46,7 @@ function PlanIcon({ icon, light }: { icon: PricingTier["icon"]; light?: boolean 
       aria-hidden
       className={cn(
         "flex h-[52px] w-[52px] items-center justify-center rounded-2xl",
-        light ? "bg-white/15 text-white" : "bg-brand-50 text-brand"
+        highlighted ? "bg-white/15 text-white" : "bg-brand-50 text-brand"
       )}
     >
       <svg width="26" height="26" viewBox="0 0 16 16" fill="none">
@@ -65,98 +83,111 @@ function CheckItem({ children, light }: { children: React.ReactNode; light?: boo
   );
 }
 
-// Pricing plan cards, rebuilt from the design "pricing" page (390:41785).
-// Four plans: Free / Pro / Elite (dark highlighted) / Plus. Copy verbatim.
-export function PricingCards() {
+const fmtPrice = (p: Plan) =>
+  p.priceCentsMonthly === 0
+    ? "$0"
+    : `$${(p.priceCentsMonthly / 100).toFixed(p.priceCentsMonthly % 100 === 0 ? 0 : 2)}`;
+
+// Pricing plan cards — same design as before, now driven by the real
+// subscription plans API (M4). Prices/benefits are configurable server-side.
+export function PricingCards({ role }: { role: PlanRole }) {
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    api
+      .subscriptionPlans(role)
+      .then((data) => setPlans(Array.isArray(data) ? data : []))
+      .catch(() => setPlans([]))
+      .finally(() => setLoading(false));
+  }, [role]);
+
+  if (loading) {
+    return <p className="text-center text-[15px] text-ink-500">Loading plans...</p>;
+  }
+
+  if (plans.length === 0) {
+    return (
+      <p className="text-center text-[15px] text-ink-500">
+        Plans are unavailable right now. Please try again later.
+      </p>
+    );
+  }
+
   return (
-    <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-      {pricingTiers.map((tier) => (
-        <div
-          key={tier.name}
-          className={cn(
-            "relative flex flex-col rounded-2xl border p-6",
-            tier.highlighted
-              ? "border-brand-dark bg-brand-dark text-white shadow-lift"
-              : "border-ink-200 bg-white"
-          )}
-        >
-          {tier.badge && (
-            <span
-              className={cn(
-                "absolute -top-3.5 right-5 inline-flex h-7 items-center rounded-full px-3 text-xs font-semibold",
-                tier.highlighted
-                  ? "bg-white text-brand-dark"
-                  : "bg-brand-dark text-white"
-              )}
-            >
-              {tier.badge}
-            </span>
-          )}
-          <PlanIcon icon={tier.icon} light={tier.highlighted} />
-          <p
+    <div
+      className={cn(
+        "grid gap-5",
+        plans.length >= 3 ? "sm:grid-cols-2 xl:grid-cols-3" : "sm:grid-cols-2"
+      )}
+    >
+      {plans.map((plan, i) => {
+        const highlighted = plan.priceCentsMonthly > 0 && i === plans.length - 1;
+        return (
+          <div
+            key={plan.id}
             className={cn(
-              "mt-5 text-2xl font-extrabold",
-              tier.highlighted ? "text-white" : "text-ink-900"
+              "relative flex flex-col rounded-2xl border p-6",
+              highlighted
+                ? "border-brand-dark bg-brand-dark text-white shadow-lift"
+                : "border-ink-200 bg-white"
             )}
           >
-            {tier.name}
-          </p>
-          <p
-            className={cn(
-              "mt-1 text-lg font-bold",
-              tier.highlighted ? "text-white" : "text-brand"
+            {plan.priceCentsMonthly > 0 && (
+              <span
+                className={cn(
+                  "absolute -top-3.5 right-5 inline-flex h-7 items-center rounded-full px-3 text-xs font-semibold",
+                  highlighted ? "bg-white text-brand-dark" : "bg-brand-dark text-white"
+                )}
+              >
+                Most popular
+              </span>
             )}
-          >
-            {tier.price}
-          </p>
-          {tier.commission && (
-            <span
-              className={cn(
-                "mt-3 inline-flex h-7 w-fit items-center rounded-full px-3 text-xs font-semibold",
-                tier.highlighted
-                  ? "bg-white/15 text-white"
-                  : "bg-brand-50 text-brand"
-              )}
-            >
-              {tier.commission}
-            </span>
-          )}
-          <hr
-            className={cn(
-              "my-5 border-0 border-t",
-              tier.highlighted ? "border-white/20" : "border-ink-100"
-            )}
-          />
-          {tier.featurePrefix && (
+            <PlanIcon highlighted={highlighted} index={i} />
             <p
               className={cn(
-                "mb-3 text-[15px]",
-                tier.highlighted ? "text-white/80" : "text-ink-500"
+                "mt-5 text-2xl font-extrabold",
+                highlighted ? "text-white" : "text-ink-900"
               )}
             >
-              {tier.featurePrefix}
+              {plan.name}
             </p>
-          )}
-          <ul className="flex flex-col gap-3">
-            {tier.features.map((f) => (
-              <CheckItem key={f} light={tier.highlighted}>
-                {f}
-              </CheckItem>
-            ))}
-          </ul>
-          <Link href="/pricing/confirm" className="mt-6 block">
-            {tier.highlighted ? (
-              <Button className="w-full bg-white text-brand-dark hover:bg-brand-50">
-                {tier.cta}
-              </Button>
-            ) : (
-              <Button variant="outline" className="w-full">
-                {tier.cta}
-              </Button>
-            )}
-          </Link>
-        </div>
-      ))}
+            <p
+              className={cn(
+                "mt-1 text-lg font-bold",
+                highlighted ? "text-white" : "text-brand"
+              )}
+            >
+              {fmtPrice(plan)}{plan.priceCentsMonthly > 0 && <span className="text-sm font-semibold">/month</span>}
+            </p>
+            <hr
+              className={cn(
+                "my-5 border-0 border-t",
+                highlighted ? "border-white/20" : "border-ink-100"
+              )}
+            />
+            <ul className="flex flex-col gap-3">
+              {(plan.benefits ?? []).map((f) => (
+                <CheckItem key={f} light={highlighted}>
+                  {f}
+                </CheckItem>
+              ))}
+            </ul>
+            <Link href={`/pricing/confirm?plan=${plan.id}`} className="mt-6 block">
+              {highlighted ? (
+                <Button className="w-full bg-white text-brand-dark hover:bg-brand-50">
+                  {plan.priceCentsMonthly === 0 ? "Start Free" : "Choose Plan"}
+                </Button>
+              ) : (
+                <Button variant="outline" className="w-full">
+                  {plan.priceCentsMonthly === 0 ? "Start Free" : "Choose Plan"}
+                </Button>
+              )}
+            </Link>
+          </div>
+        );
+      })}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
 
@@ -35,6 +35,7 @@ export function MarketplaceHero({
   subtitle,
   placeholder,
   onSearch,
+  defaultQuery,
 }: {
   eyebrow: string;
   titleBlue: string;
@@ -42,8 +43,13 @@ export function MarketplaceHero({
   subtitle: string;
   placeholder: string;
   onSearch?: (query: string) => void;
+  defaultQuery?: string;
 }) {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(defaultQuery ?? "");
+  // Keep the box in sync when the page's term arrives from the URL (?q=...).
+  useEffect(() => {
+    if (defaultQuery) setQuery(defaultQuery);
+  }, [defaultQuery]);
   const submit = () => onSearch?.(query);
   return (
     <section className="mx-auto max-w-[1380px] px-6 pt-12 text-center lg:px-12 lg:pt-16">

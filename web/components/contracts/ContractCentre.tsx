@@ -1,31 +1,51 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/cn";
 import { Button } from "@/components/ui/Button";
+import { api } from "@/lib/api";
 import {
-  brandContractStats,
-  contractRows,
-  contractStats,
   contractTabs,
   contractTemplates,
   type ContractStat,
   type ContractStatus,
 } from "@/lib/mock-messages";
 
-// Contract Centre list pages, rebuilt from the design frames:
-// - Brand "Contract" (394:50351): "Contract Centre" heading, four summary
-//   cards (Total Sent / Signed / Declined / Awaiting Signature, each with its
-//   own icon), "Contract Status" heading, seven status pills + search on the
-//   same row, four contract rows (the design repeats the same row, one per
-//   status), "Upcoming Deadlines" with "+ New Contract", and "Contract
-//   Templates" with "+ New Template" (Edit / Delete actions).
-// - Creator "Contract creator" (394:52430): "Contract Centre" heading +
-//   subtitle, "My Contracts"/"Templates" tabs, the same four stat cards,
-//   the same Contract Status block, Upcoming Deadlines, and the same
-//   Contract Templates section.
-// "Submitted" is the corrected spelling.
+// Contract Centre list pages, rebuilt from the design frames (visual design
+// unchanged). M4: rows, stats, search and tabs are now driven by the real
+// contracts API instead of mock data. Backend statuses map to the design's
+// labels: sent -> "Awaiting Signature", accepted -> "Signed",
+// declined -> "Cancelled", draft -> "Draft".
+
+type ApiContract = {
+  id: string;
+  title: string;
+  status: "draft" | "sent" | "accepted" | "declined";
+  createdAt: string;
+  brandId: string;
+  creatorId: string;
+  dealId: string;
+};
+
+type Row = {
+  id: string;
+  title: string;
+  client: string;
+  submittedLabel: string;
+  submittedDate: string;
+  deadlineDate: string;
+  status: ContractStatus;
+};
+
+const STATUS_LABEL: Record<ApiContract["status"], ContractStatus> = {
+  draft: "Draft",
+  sent: "Awaiting Signature",
+  accepted: "Signed",
+  declined: "Cancelled",
+};
 
 type Tab = ContractStatus | "All";
 
@@ -52,9 +72,6 @@ function StatusBadge({ status }: { status: ContractStatus }) {
 }
 
 function StatIcon({ label }: { label: string }) {
-  // Distinct icons per stat card,  "Contract" frames:
-  // envelope (Total Sent), check-circle (Signed), x-circle (Declined),
-  // clock (Awaiting Signature) — each in a light-blue rounded square.
   const paths: Record<string, ReactNode> = {
     "Total Sent": (
       <>
@@ -108,18 +125,19 @@ function StatCards({ stats }: { stats: ContractStat[] }) {
           <p className="mt-4 text-[28px] font-extrabold text-ink-900">{s.value}</p>
           <p className="text-[15px] font-bold text-ink-900">{s.label}</p>
           <p className="text-sm text-ink-500">{s.description}</p>
-          <p className="mt-2 inline-flex items-center rounded-full bg-success-bg px-2.5 py-0.5 text-[13px] font-semibold text-success">
-            {s.delta}
-          </p>
         </div>
       ))}
     </div>
   );
 }
 
-function ContractRowCard({ row }: { row: (typeof contractRows)[number] }) {
+function ContractRowCard({ row }: { row: Row }) {
+  const router = useRouter();
   return (
-    <div className="flex flex-wrap items-center gap-x-8 gap-y-3 rounded-2xl border border-ink-100 bg-white px-6 py-5">
+    <button
+      onClick={() => router.push(`/dashboard/contracts/${row.id}`)}
+      className="flex w-full flex-wrap items-center gap-x-8 gap-y-3 rounded-2xl border border-ink-100 bg-white px-6 py-5 text-left transition-colors hover:border-brand/50"
+    >
       <p className="min-w-[240px] flex-1 text-[15px] font-bold text-ink-900">{row.title}</p>
       <div className="w-[110px]">
         <p className="text-[13px] text-ink-500">Client Name</p>
@@ -134,13 +152,37 @@ function ContractRowCard({ row }: { row: (typeof contractRows)[number] }) {
         <p className="text-sm font-bold text-ink-900">{row.deadlineDate}</p>
       </div>
       <StatusBadge status={row.status} />
-    </div>
+    </button>
   );
 }
 
-function ContractStatusBlock() {
+function toRow(c: ApiContract): Row {
+  const date = new Date(c.createdAt);
+  const fmt = isNaN(date.getTime())
+    ? "-"
+    : date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  return {
+    id: c.id,
+    title: c.title,
+    client: "—",
+    submittedLabel: "Submitted",
+    submittedDate: fmt,
+    deadlineDate: "-",
+    status: STATUS_LABEL[c.status] ?? "Draft",
+  };
+}
+
+function ContractStatusBlock({ rows }: { rows: Row[] }) {
   const [tab, setTab] = useState<Tab>("All");
-  const rows = tab === "All" ? contractRows : contractRows.filter((r) => r.status === tab);
+  const [query, setQuery] = useState("");
+
+  const filtered = rows.filter((r) => {
+    const tabOk = tab === "All" || r.status === tab;
+    const qOk =
+      query.trim() === "" ||
+      r.title.toLowerCase().includes(query.trim().toLowerCase());
+    return tabOk && qOk;
+  });
 
   return (
     <section className="flex flex-col gap-5">
@@ -167,6 +209,8 @@ function ContractStatusBlock() {
             type="text"
             placeholder="Search"
             aria-label="Search contracts"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
             className="w-full bg-transparent text-[15px] text-ink-900 outline-none placeholder:text-ink-500"
           />
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden className="shrink-0 text-ink-900">
@@ -175,33 +219,41 @@ function ContractStatusBlock() {
           </svg>
         </div>
       </div>
-      {rows.length === 0 ? (
+      {filtered.length === 0 ? (
         <p className="rounded-2xl border border-ink-100 bg-white py-10 text-center text-[15px] text-ink-500">
           No contracts in this state yet.
         </p>
       ) : (
-        rows.map((r) => <ContractRowCard key={r.id} row={r} />)
+        filtered.map((r) => <ContractRowCard key={r.id} row={r} />)
       )}
-    </section>
-  );
-}
-
-function UpcomingDeadlines() {
-  return (
-    <section className="flex flex-col gap-5">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h2 className="text-[26px] font-extrabold tracking-tight text-ink-900">Upcoming Deadlines</h2>
-        <Button size="lg">+ New Contract</Button>
-      </div>
-      {contractRows.map((r) => (
-        <ContractRowCard key={`deadline-${r.id}`} row={r} />
-      ))}
     </section>
   );
 }
 
 export function ContractCentre({ variant }: { variant: "brand" | "creator" }) {
   const [centreTab, setCentreTab] = useState<"contracts" | "templates">("contracts");
+  const [contracts, setContracts] = useState<ApiContract[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api
+      .contracts()
+      .then((data) => setContracts(Array.isArray(data) ? data : []))
+      .catch(() => setContracts([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const rows = useMemo(() => contracts.map(toRow), [contracts]);
+
+  const stats: ContractStat[] = useMemo(() => {
+    const count = (s: ContractStatus) => rows.filter((r) => r.status === s).length;
+    return [
+      { label: "Total Sent", value: String(rows.length), description: "All contracts", delta: "" },
+      { label: "Signed", value: String(count("Signed")), description: "Accepted contracts", delta: "" },
+      { label: "Declined", value: String(count("Cancelled")), description: "Declined contracts", delta: "" },
+      { label: "Awaiting Signature", value: String(count("Awaiting Signature")), description: "Pending signature", delta: "" },
+    ];
+  }, [rows]);
 
   return (
     <div className="flex flex-col gap-8">
@@ -237,11 +289,32 @@ export function ContractCentre({ variant }: { variant: "brand" | "creator" }) {
         </div>
       )}
 
-      <StatCards stats={variant === "brand" ? brandContractStats : contractStats} />
+      {loading ? (
+        <p className="text-[15px] text-ink-500">Loading contracts...</p>
+      ) : (
+        <>
+          <StatCards stats={stats} />
+          <ContractStatusBlock rows={rows} />
 
-      <ContractStatusBlock />
-
-      <UpcomingDeadlines />
+          <section className="flex flex-col gap-5">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <h2 className="text-[26px] font-extrabold tracking-tight text-ink-900">Upcoming Deadlines</h2>
+              <Link href="/dashboard/deals">
+                <Button size="lg">+ New Contract</Button>
+              </Link>
+            </div>
+            {rows.filter((r) => r.status === "Awaiting Signature").length === 0 ? (
+              <p className="rounded-2xl border border-ink-100 bg-white py-10 text-center text-[15px] text-ink-500">
+                No contracts awaiting signature.
+              </p>
+            ) : (
+              rows
+                .filter((r) => r.status === "Awaiting Signature")
+                .map((r) => <ContractRowCard key={`deadline-${r.id}`} row={r} />)
+            )}
+          </section>
+        </>
+      )}
 
       <section className="flex flex-col gap-5">
         <div className="flex flex-wrap items-center justify-between gap-4">

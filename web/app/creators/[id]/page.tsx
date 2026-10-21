@@ -7,11 +7,11 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Navbar } from "@/components/ui/Navbar";
 import { Footer } from "@/components/ui/Footer";
-import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { api } from "@/lib/api";
 import { SendOpportunityModal } from "@/components/opportunities/SendOpportunityModal";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { api } from "@/lib/api";
 
 function Pill({ children }: { children: React.ReactNode }) {
   return (
@@ -24,8 +24,8 @@ function Pill({ children }: { children: React.ReactNode }) {
 export default function CreatorDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const id = params.id as string;
   const { user } = useAuth();
+  const id = params.id as string;
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -163,6 +163,14 @@ export default function CreatorDetailPage() {
                         Create Deal
                       </Button>
                     </Link>
+                  )}
+                  {!user && (
+                    <p className="text-[13px] text-ink-500">
+                      <Link href="/login" className="font-medium text-brand hover:underline">
+                        Log in
+                      </Link>{" "}
+                      as a brand to create a deal with this creator.
+                    </p>
                   )}
                 </div>
               </Card>

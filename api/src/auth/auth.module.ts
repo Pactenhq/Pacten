@@ -10,10 +10,12 @@ import { User } from '../users/user.entity';
 import { BrandProfile } from '../profiles/brand-profile.entity';
 import { CreatorProfile } from '../profiles/creator-profile.entity';
 import { ProfessionalProfile } from '../profiles/professional-profile.entity';
+import { ReferralsModule } from '../referrals/referrals.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, BrandProfile, CreatorProfile, ProfessionalProfile]),
+    ReferralsModule,
     PassportModule,
     JwtModule.registerAsync({
       inject: [ConfigService],

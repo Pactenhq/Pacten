@@ -29,14 +29,16 @@ type ApiOptions = {
   method?: string;
   body?: unknown;
   auth?: boolean;
+  headers?: Record<string, string>;
 };
 
 export async function apiFetch<T = any>(
   path: string,
-  { method = "GET", body, auth = false }: ApiOptions = {}
+  { method = "GET", body, auth = false, headers: extraHeaders }: ApiOptions = {}
 ): Promise<T> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
+    ...(extraHeaders ?? {}),
   };
   if (auth) {
     const token = getToken();
@@ -72,7 +74,7 @@ export async function apiFetch<T = any>(
   return data as T;
 }
 
-export type Role = "brand" | "creator" | "professional";
+export type Role = "brand" | "creator" | "professional" | "admin";
 
 export const api = {
   signup: (d: {
@@ -83,6 +85,7 @@ export const api = {
     lastName: string;
     companyName?: string;
     displayName?: string;
+    referralCode?: string;
   }) => apiFetch("/auth/signup", { method: "POST", body: d }),
 
   verifyEmail: (token: string) =>
@@ -209,7 +212,7 @@ export const api = {
       auth: true,
     }),
 
-  // Messaging (M3)
+  // Messaging
   conversations: () =>
     apiFetch<any[]>("/conversations", { auth: true }),
 
@@ -226,7 +229,7 @@ export const api = {
       auth: true,
     }),
 
-  // Deals (M3)
+  // Deals
   deals: () => apiFetch<any[]>("/deals", { auth: true }),
 
   dealDetail: (id: string) =>
@@ -240,6 +243,161 @@ export const api = {
 
   updateDealStatus: (id: string, status: string) =>
     apiFetch<any>(`/deals/${id}/status`, {
+      method: "PATCH",
+      body: { status },
+      auth: true,
+    }),
+
+  submitDealWork: (id: string) =>
+    apiFetch<any>(`/deals/${id}/submit`, { method: "POST", auth: true }),
+
+  approveDealWork: (id: string) =>
+    apiFetch<any>(`/deals/${id}/approve`, { method: "POST", auth: true }),
+
+  // Contracts (M4)
+  contracts: () => apiFetch<any[]>("/contracts", { auth: true }),
+
+  contractDetail: (id: string) =>
+    apiFetch<any>(`/contracts/${id}`, { auth: true }),
+
+  generateContract: (dealId: string, title?: string) =>
+    apiFetch<any>(`/contracts/from-deal/${dealId}`, {
+      method: "POST",
+      body: title ? { title } : {},
+      auth: true,
+    }),
+
+  acceptContract: (id: string) =>
+    apiFetch<any>(`/contracts/${id}/accept`, {
+      method: "POST",
+      auth: true,
+    }),
+
+  declineContract: (id: string) =>
+    apiFetch<any>(`/contracts/${id}/decline`, {
+      method: "POST",
+      auth: true,
+    }),
+
+  // Payments (M4, Stripe test mode)
+  createUpfrontPayment: (
+    dealId: string,
+    d?: { amountCents?: number; currency?: string },
+    idempotencyKey?: string
+  ) =>
+    apiFetch<any>(`/payments/upfront/${dealId}`, {
+      method: "POST",
+      body: d ?? {},
+      auth: true,
+      headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : undefined,
+    }),
+
+  demoConfirmPayment: (paymentId: string) =>
+    apiFetch<any>(`/payments/${paymentId}/demo-confirm`, {
+      method: "POST",
+      auth: true,
+    }),
+
+  myPayments: () => apiFetch<any[]>("/payments/my", { auth: true }),
+
+  paymentDetail: (id: string) =>
+    apiFetch<any>(`/payments/${id}`, { auth: true }),
+
+  paymentCommission: (id: string) =>
+    apiFetch<any>(`/payments/${id}/commission`, { auth: true }),
+
+  commissionRules: () =>
+    apiFetch<any[]>("/payments/commission-rules", { auth: true }),
+
+  myPayouts: () => apiFetch<any[]>("/payments/payouts/my", { auth: true }),
+
+  payoutForDeal: (dealId: string) =>
+    apiFetch<any>(`/payments/payouts/by-deal/${dealId}`, { auth: true }),
+
+  // Subscriptions (M4)
+  subscriptionPlans: (role?: string) =>
+    apiFetch<any[]>(
+      role ? `/subscriptions/plans?role=${role}` : "/subscriptions/plans",
+      { auth: true }
+    ),
+
+  mySubscription: () => apiFetch<any>("/subscriptions/me", { auth: true }),
+
+  subscriptionCheckout: (planId: string) =>
+    apiFetch<any>("/subscriptions/checkout", {
+      method: "POST",
+      body: { planId },
+      auth: true,
+    }),
+
+  cancelSubscription: () =>
+    apiFetch<any>("/subscriptions/cancel", { method: "POST", auth: true }),
+
+  // Referrals (M5)
+  referralDashboard: () =>
+    apiFetch<any>("/referrals/me", { auth: true }),
+
+  referralClick: (code: string) => apiFetch<any>(`/referrals/r/${code}`),
+
+  requestReferralPayout: (amountCents: number) =>
+    apiFetch<any>("/referrals/payouts", {
+      method: "POST",
+      body: { amountCents },
+      auth: true,
+    }),
+
+  myReferralPayouts: () =>
+    apiFetch<any[]>("/referrals/payouts/me", { auth: true }),
+
+  adminReferralPayouts: (status?: string) =>
+    apiFetch<any[]>(
+      status ? `/referrals/admin/payouts?status=${status}` : "/referrals/admin/payouts",
+      { auth: true }
+    ),
+
+  decideReferralPayout: (id: string, approved: boolean, notes?: string) =>
+    apiFetch<any>(`/referrals/admin/payouts/${id}/decide`, {
+      method: "POST",
+      body: { approved, notes },
+      auth: true,
+    }),
+
+  // Disputes (M5)
+  fileDispute: (dealId: string, reason: string, description: string) =>
+    apiFetch<any>("/disputes", {
+      method: "POST",
+      body: { dealId, reason, description },
+      auth: true,
+    }),
+
+  myDisputes: () => apiFetch<any[]>("/disputes/me", { auth: true }),
+
+  disputeDetail: (id: string) =>
+    apiFetch<any>(`/disputes/${id}`, { auth: true }),
+
+  adminDisputes: (status?: string) =>
+    apiFetch<any[]>(
+      status ? `/disputes/admin/all?status=${status}` : "/disputes/admin/all",
+      { auth: true }
+    ),
+
+  resolveDispute: (id: string, outcome: "resolved" | "rejected", resolution: string) =>
+    apiFetch<any>(`/disputes/admin/${id}/resolve`, {
+      method: "POST",
+      body: { outcome, resolution },
+      auth: true,
+    }),
+
+  // Admin (M5)
+  adminStats: () => apiFetch<any>("/admin/stats", { auth: true }),
+
+  adminUsers: (params?: { role?: string; status?: string; search?: string }) => {
+    const q = new URLSearchParams(params as any).toString();
+    return apiFetch<any>(`/admin/users${q ? `?${q}` : ""}`, { auth: true });
+  },
+
+  adminSetUserStatus: (id: string, status: string) =>
+    apiFetch<any>(`/admin/users/${id}/status`, {
       method: "PATCH",
       body: { status },
       auth: true,

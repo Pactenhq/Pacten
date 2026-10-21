@@ -7,10 +7,12 @@ import { Message } from './message.entity';
 import { MessagingService } from './messaging.service';
 import { MessagingController } from './messaging.controller';
 import { MessagingGateway } from './messaging.gateway';
+import { PlanLimitsModule } from '../common/plan-limits/plan-limits.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Conversation, Message]),
+    PlanLimitsModule,
     // Gateway ko JWT verify karne ke liye chahiye (AuthModule ye export nahi karta)
     JwtModule.registerAsync({
       inject: [ConfigService],

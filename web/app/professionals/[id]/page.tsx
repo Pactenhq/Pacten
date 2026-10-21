@@ -7,11 +7,11 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Navbar } from "@/components/ui/Navbar";
 import { Footer } from "@/components/ui/Footer";
-import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { api } from "@/lib/api";
 import { SendOpportunityModal } from "@/components/opportunities/SendOpportunityModal";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { api } from "@/lib/api";
 
 function Pill({ children }: { children: React.ReactNode }) {
   return (
@@ -24,8 +24,8 @@ function Pill({ children }: { children: React.ReactNode }) {
 export default function ProfessionalDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const id = params.id as string;
   const { user } = useAuth();
+  const id = params.id as string;
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -151,10 +151,18 @@ export default function ProfessionalDetailPage() {
                     )}
                   </div>
                 )}
-                <div className="mt-4">
+                <div className="mt-4 flex flex-col gap-3">
                   <Button onClick={startConversation} className="w-full" variant="outline">
                     Message
                   </Button>
+                  {!user && (
+                    <p className="text-[13px] text-ink-500">
+                      <Link href="/login" className="font-medium text-brand hover:underline">
+                        Log in
+                      </Link>{" "}
+                      to message this professional.
+                    </p>
+                  )}
                 </div>
               </Card>
             </div>

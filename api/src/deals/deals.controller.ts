@@ -63,4 +63,14 @@ export class DealsController {
   ) {
     return this.dealsService.updateStatus(id, req.user.id, dto);
   }
+
+  @Post(':id/submit')
+  submitWork(@Request() req: any, @Param('id') id: string) {
+    return this.dealsService.submitWork(id, req.user.id);
+  }
+
+  @Post(':id/approve')
+  approveWork(@Request() req: any, @Param('id') id: string) {
+    return this.dealsService.approveWork(id, req.user.id);
+  }
 }

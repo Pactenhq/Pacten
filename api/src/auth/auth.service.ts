@@ -15,6 +15,8 @@ import { CreatorProfile } from '../profiles/creator-profile.entity';
 import { ProfessionalProfile } from '../profiles/professional-profile.entity';
 import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
+import { ReferralsService } from '../referrals/referrals.service';
+import { EmailsService } from '../emails/emails.service';
 
 @Injectable()
 export class AuthService {
@@ -28,6 +30,8 @@ export class AuthService {
     @InjectRepository(ProfessionalProfile)
     private professionalRepo: Repository<ProfessionalProfile>,
     private jwtService: JwtService,
+    private referralsService: ReferralsService,
+    private emails: EmailsService,
   ) {}
 
   async signup(dto: SignupDto) {
@@ -82,7 +86,13 @@ export class AuthService {
       );
     }
 
-    // TODO: Send verification email (Phase 4)
+    // Attribute referral signup (silently ignores bad/self codes).
+    await this.referralsService.attributeSignup(user.id, dto.referralCode);
+
+    // Transactional email (M5). Log-only until RESEND_API_KEY is set.
+    const displayName = `${dto.firstName} ${dto.lastName}`.trim();
+    await this.emails.sendVerificationEmail(dto.email, displayName, verificationToken);
+
     return {
       message: 'Account created. Please check your email to verify.',
       userId: user.id,
@@ -102,6 +112,8 @@ export class AuthService {
     user.verificationToken = null;
     user.verificationExpiresAt = null;
     await this.usersRepo.save(user);
+    // Qualifying action for referral attribution (demo rule).
+    await this.referralsService.handleReferredVerified(user.id);
     return { message: 'Email verified successfully' };
   }
 

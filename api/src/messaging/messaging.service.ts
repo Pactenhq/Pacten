@@ -10,6 +10,7 @@ import { Repository } from 'typeorm';
 import { Conversation } from './conversation.entity';
 import { Message } from './message.entity';
 import { CreateConversationDto, SendMessageDto } from './dto/messaging.dto';
+import { PlanLimitsService } from '../common/plan-limits/plan-limits.service';
 
 @Injectable()
 export class MessagingService {
@@ -21,6 +22,7 @@ export class MessagingService {
     private conversationsRepo: Repository<Conversation>,
     @InjectRepository(Message)
     private messagesRepo: Repository<Message>,
+    private planLimits: PlanLimitsService,
   ) {}
 
   async createConversation(
@@ -105,18 +107,18 @@ export class MessagingService {
       order: { createdAt: 'ASC' },
     });
 
+    // Mark messages as read
+    await this.messagesRepo.update(
+      { conversationId, isRead: false },
+      { isRead: true },
+    );
+
     // Frontend har message ko isMine se pehchanta hai (apna = right,
     // doosre ka = left). Ye field pehle missing tha — is liye saare
     // messages "them" ban kar left par render ho rahe thay.
     for (const m of messages) {
       (m as any).isMine = m.senderId === userId;
     }
-
-    // Mark messages as read
-    await this.messagesRepo.update(
-      { conversationId, isRead: false },
-      { isRead: true },
-    );
 
     return messages;
   }
@@ -143,6 +145,9 @@ export class MessagingService {
     this.sendLog.set(userId, recent);
 
     const conversation = await this.findOne(conversationId, userId);
+
+    // Free-plan cap: monthly message allowance for free users.
+    await this.planLimits.assertCanSendMessage(userId);
 
     const message = this.messagesRepo.create({
       conversationId,
