@@ -91,16 +91,20 @@ export default function DealDetailPage() {
     try {
       // Deal-scoped read: visible to both parties. (myPayments only lists
       // payments the caller made, so the creator never saw the payment.)
+      // The endpoint answers an empty 200 when no payment exists yet,
+      // which apiFetch surfaces as {} — only a body with an id is real.
       const p = await api.paymentForDeal(id).catch(() => null);
-      setPayment(p ?? null);
-      if (p) {
+      setPayment(p && p.id ? p : null);
+      if (p && p.id) {
         try {
           setCommission(await api.paymentCommission(p.id));
         } catch {}
       }
     } catch {}
     try {
-      setPayout(await api.payoutForDeal(id));
+      // Same empty-200 contract as the payment read: require an id.
+      const po = await api.payoutForDeal(id);
+      setPayout(po && po.id ? po : null);
     } catch {
       setPayout(null);
     }
@@ -195,8 +199,16 @@ export default function DealDetailPage() {
 
   const fmtMoney = (cents: number, currency = "usd") =>
     Number.isFinite(cents)
-      ? `${(cents / 100).toFixed(2)} ${(currency || "usd").toUpperCase()}`
+      ? `$${(cents / 100).toLocaleString("en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}`
       : "—";
+
+  const personName = (u: any) =>
+    [u?.firstName, u?.lastName].filter(Boolean).join(" ").trim() ||
+    u?.email ||
+    "-";
 
   if (loading) {
     return (
@@ -235,7 +247,10 @@ export default function DealDetailPage() {
     >
       <div className="flex flex-col gap-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
-          <WelcomeHeader title={deal.title} subtitle={`Status: ${deal.status}`} />
+          <WelcomeHeader
+            title={String(deal.title ?? "").replace(/^Deal:\s*/i, "")}
+            subtitle={`Status: ${String(deal.status ?? "").charAt(0).toUpperCase()}${String(deal.status ?? "").slice(1)}`}
+          />
           <Link href="/dashboard/deals">
             <Button variant="outline">Back to Deals</Button>
           </Link>
@@ -251,7 +266,12 @@ export default function DealDetailPage() {
               </div>
               <div>
                 <dt className="text-sm text-gray-500">Agreed Budget</dt>
-                <dd className="font-medium">{deal.agreedBudget ?? "-"}</dd>
+                <dd className="font-medium">
+                  {deal.agreedBudget != null &&
+                  Number.isFinite(Number(deal.agreedBudget))
+                    ? `$${Number(deal.agreedBudget).toLocaleString()}`
+                    : "-"}
+                </dd>
               </div>
               <div>
                 <dt className="text-sm text-gray-500">Deadline</dt>
@@ -273,15 +293,11 @@ export default function DealDetailPage() {
             <dl className="space-y-3">
               <div>
                 <dt className="text-sm text-gray-500">Brand</dt>
-                <dd className="font-medium">
-                  {deal.brand?.email ?? deal.brand?.name ?? "-"}
-                </dd>
+                <dd className="font-medium">{personName(deal.brand)}</dd>
               </div>
               <div>
                 <dt className="text-sm text-gray-500">Creator</dt>
-                <dd className="font-medium">
-                  {deal.creator?.email ?? deal.creator?.name ?? "-"}
-                </dd>
+                <dd className="font-medium">{personName(deal.creator)}</dd>
               </div>
             </dl>
 
@@ -298,6 +314,7 @@ export default function DealDetailPage() {
                       disabled={updating}
                       variant={action === "cancelled" ? "outline" : "primary"}
                       size="sm"
+                      className="capitalize"
                     >
                       Mark as {action}
                     </Button>

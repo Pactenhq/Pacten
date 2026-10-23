@@ -22,15 +22,31 @@ export default function AdminLayout({
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!loading && (!user || user.role !== "admin")) {
+    if (loading) return;
+    if (!user) {
       router.replace("/login");
+    } else if (user.role !== "admin") {
+      // A signed-in non-admin used to be dumped on the login form with
+      // no explanation (while the header still showed their session).
+      // Send them to their own dashboard instead.
+      router.replace(
+        user.role === "creator"
+          ? "/dashboard/creator"
+          : user.role === "professional"
+            ? "/dashboard/professional"
+            : "/dashboard/brand"
+      );
     }
   }, [user, loading, router]);
 
   if (loading || !user || user.role !== "admin") {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-[14px] text-ink-500">Checking access…</p>
+        <p className="text-[14px] text-ink-500">
+          {user && user.role !== "admin"
+            ? "This area is for platform admins — taking you to your dashboard…"
+            : "Checking access…"}
+        </p>
       </div>
     );
   }

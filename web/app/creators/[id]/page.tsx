@@ -136,7 +136,7 @@ export default function CreatorDetailPage() {
                 <h2 className="text-lg font-bold text-ink-900">Work with {profile.displayName}</h2>
                 {profile.rate && (
                   <p className="mt-2 text-[15px] text-ink-700">
-                    Typical rate: <span className="font-bold text-ink-900">£{profile.rate}</span>
+                    Typical rate: <span className="font-bold text-ink-900">\${profile.rate}</span>
                   </p>
                 )}
                 {user?.role === "brand" && profile.userId && (

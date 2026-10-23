@@ -10,7 +10,7 @@ import { ConfigService } from '@nestjs/config';
 import { Contract, ContractStatus } from './contract.entity';
 import { User } from '../users/user.entity';
 import { DealsService } from '../deals/deals.service';
-import { DealStatus } from '../deals/deal.entity';
+import { Deal, DealStatus } from '../deals/deal.entity';
 import { PLACEHOLDER_LEGAL_WORDING } from './legal-wording';
 import { EmailsService } from '../emails/emails.service';
 
@@ -21,6 +21,8 @@ export class ContractsService {
     private contractsRepo: Repository<Contract>,
     @InjectRepository(User)
     private usersRepo: Repository<User>,
+    @InjectRepository(Deal)
+    private dealsRepo: Repository<Deal>,
     private dealsService: DealsService,
     private config: ConfigService,
     private emails: EmailsService,
@@ -34,10 +36,17 @@ export class ContractsService {
   }
 
   private buildTermsSnapshot(deal: any): string {
+    // Older deals carry a redundant "Deal: " prefix in their stored
+    // title — strip it so the snapshot (and contract title) never reads
+    // "Deal: Deal: …".
+    const cleanTitle = String(deal.title ?? '').replace(/^Deal:\s*/i, '');
+    const budget = Number(deal.agreedBudget);
     const lines = [
-      `Deal: ${deal.title}`,
+      `Deal: ${cleanTitle}`,
       deal.description ? `Description: ${deal.description}` : null,
-      deal.agreedBudget ? `Agreed budget: ${deal.agreedBudget}` : null,
+      deal.agreedBudget
+        ? `Agreed budget: ${Number.isFinite(budget) ? `$${budget.toLocaleString()}` : deal.agreedBudget}`
+        : null,
       deal.deadline ? `Deadline: ${deal.deadline}` : null,
       deal.deliverables ? `Deliverables: ${deal.deliverables}` : null,
       deal.terms ? `Terms: ${deal.terms}` : null,
@@ -74,7 +83,9 @@ export class ContractsService {
       dealId: deal.id,
       brandId: deal.brandId,
       creatorId: deal.creatorId,
-      title: title || `Contract — ${deal.title}`,
+      title:
+        title ||
+        `Contract — ${String(deal.title ?? '').replace(/^Deal:\s*/i, '')}`,
       termsSnapshot: this.buildTermsSnapshot(deal),
       legalWording: this.legalWording(),
       status: ContractStatus.SENT,
@@ -103,11 +114,42 @@ export class ContractsService {
     return saved;
   }
 
+  /**
+   * Attach display data the contract rows/pages need: both parties'
+   * names, the counterparty relative to the caller, and the deal's
+   * deadline. (The contracts list previously rendered literal
+   * placeholders — "Client Name —", "Deadline -" — for every row.)
+   */
+  private async enrich(
+    contracts: Contract[],
+    userId: string,
+  ): Promise<Contract[]> {
+    const personName = (u?: User | null) =>
+      [u?.firstName, u?.lastName].filter(Boolean).join(' ').trim() ||
+      u?.email ||
+      '—';
+    for (const c of contracts) {
+      const [brand, creator, deal] = await Promise.all([
+        this.usersRepo.findOne({ where: { id: c.brandId } }),
+        this.usersRepo.findOne({ where: { id: c.creatorId } }),
+        this.dealsRepo.findOne({ where: { id: c.dealId } }),
+      ]);
+      (c as any).brandName = personName(brand);
+      (c as any).creatorName = personName(creator);
+      (c as any).counterpartyName =
+        c.brandId === userId ? personName(creator) : personName(brand);
+      (c as any).dealDeadline = deal?.deadline ?? null;
+      (c as any).dealTitle = deal?.title ?? null;
+    }
+    return contracts;
+  }
+
   async findMine(userId: string): Promise<Contract[]> {
-    return this.contractsRepo.find({
+    const list = await this.contractsRepo.find({
       where: [{ brandId: userId }, { creatorId: userId }],
       order: { createdAt: 'DESC' },
     });
+    return this.enrich(list, userId);
   }
 
   async findOne(contractId: string, userId: string): Promise<Contract> {
@@ -121,7 +163,8 @@ export class ContractsService {
     ) {
       throw new ForbiddenException('Not a party to this contract');
     }
-    return contract;
+    const [enriched] = await this.enrich([contract], userId);
+    return enriched;
   }
 
   async accept(contractId: string, userId: string): Promise<Contract> {

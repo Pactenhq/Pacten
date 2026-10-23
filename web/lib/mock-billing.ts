@@ -232,7 +232,7 @@ export const notificationGroups: NotificationGroup[] = [
       {
         id: "n11",
         title: "Platform maintenance scheduled",
-        body: "CreatorHub will undergo brief maintenance on Sunday 2\u20134 AM.",
+        body: "Pacten will undergo brief maintenance on Sunday 2\u20134 AM.",
         time: "Mon",
         icon: "wrench",
       },

@@ -12,15 +12,17 @@ import {
 } from "@/components/marketplace/MarketplaceHero";
 import { CampaignCard } from "@/components/marketplace/Cards";
 import { FilterPanel, type CampaignFilters } from "@/components/marketplace/Filters";
-import { campaignListings } from "@/lib/mock";
 import { api } from "@/lib/api";
 
 // 
 // Filter drawer content matches "Filter campagns" (411:58388).
 export default function CampaignsPage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [campaigns, setCampaigns] = useState<any[]>(campaignListings);
-  const [allCampaigns, setAllCampaigns] = useState<any[]>(campaignListings);
+  // Start EMPTY: the page previously seeded itself with mock demo
+  // campaigns and only replaced them when the API returned rows, so
+  // fake demo cards flashed (and lingered when the API was empty).
+  const [campaigns, setCampaigns] = useState<any[]>([]);
+  const [allCampaigns, setAllCampaigns] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilters, setActiveFilters] = useState<CampaignFilters>({
@@ -55,7 +57,7 @@ export default function CampaignsPage() {
             _live: true,
             id: c.id,
             title: c.title,
-            brand: c.brand?.email ?? "Brand",
+            brand: c.brand?.displayName ?? "Brand",
             description: c.description,
             budget: c.budget ?? "",
             niches: c.niches ?? [],

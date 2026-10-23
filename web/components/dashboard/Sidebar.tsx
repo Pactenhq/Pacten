@@ -87,6 +87,13 @@ function NavIcon({ icon }: { icon: string }) {
           <path d="M3 6h18v12H3V6zM3 10h18" {...stroke} />
         </svg>
       );
+    case "shield":
+      return (
+        <svg {...common}>
+          <path d="M12 3l7 3v5c0 5-3.5 8-7 10-3.5-2-7-5-7-10V6l7-3z" {...stroke} />
+          <path d="M9.5 12l2 2 3.5-4" {...stroke} />
+        </svg>
+      );
     case "gear":
       return (
         <svg {...common}>

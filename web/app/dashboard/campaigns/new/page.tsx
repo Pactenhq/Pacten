@@ -56,19 +56,20 @@ export default function CampaignRequestPage() {
       <Navbar />
       <main className="mx-auto w-full max-w-[1200px] flex-1 px-6 py-12">
         <h1 className="text-[40px] font-extrabold tracking-tight text-ink-900">
-          Send a Collaboration Request
+          Create a Campaign
         </h1>
         <p className="mt-2 text-[16px] text-ink-500">
-          Fill in the details below and the creator will review your request.
+          Fill in the details below and publish your campaign — creators can
+          then discover it and apply.
         </p>
 
         {sent ? (
           <Card className="mt-8 p-10 text-center">
             <p className="text-[22px] font-extrabold text-ink-900">
-              Request sent
+              Campaign published
             </p>
             <p className="mx-auto mt-2 max-w-md text-[15px] text-ink-500">
-              The creator will review your request and respond shortly.
+              Your campaign is now live — creators can discover it and apply.
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
               <Button size="lg" onClick={() => setSent(false)}>
@@ -123,13 +124,13 @@ export default function CampaignRequestPage() {
                 <TextField
                   label="Budget"
                   name="budget"
-                  placeholder="e.g. £500 – £1,000"
+                  placeholder="e.g. $500 – $1,000"
                   inputMode="decimal"
                 />
                 <TextField
                   label="Deadline"
                   name="deadline"
-                  placeholder="9/10/2026"
+                  placeholder="e.g. Nov 30, 2026"
                 />
               </div>
               <div>
@@ -155,13 +156,7 @@ export default function CampaignRequestPage() {
                   className="w-full"
                   disabled={loading}
                 >
-                  {loading ? "Sending..." : "Send Request →"}
-                </Button>
-                <Button type="button" size="lg" variant="outline" className="w-full">
-                  ⚡ Get Campaign Advice
-                </Button>
-                <Button type="button" size="lg" variant="outline" className="w-full">
-                  ✦ Generate AI Brief
+                  {loading ? "Publishing..." : "Publish Campaign →"}
                 </Button>
               </div>
             </form>

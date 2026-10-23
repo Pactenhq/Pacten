@@ -6,9 +6,9 @@ const columns: Array<{ title: string; links: Array<[string, string]> }> = [
   {
     title: "Company",
     links: [
-      ["About", "/"],
-      ["Contact", "/"],
-      ["FAQ", "/pricing"],
+      ["About", "/about"],
+      ["Contact", "/contact"],
+      ["FAQ", "/pricing#faq"],
     ],
   },
   {
@@ -28,16 +28,16 @@ const columns: Array<{ title: string; links: Array<[string, string]> }> = [
   {
     title: "Legal",
     links: [
-      ["Privacy Policy", "/"],
-      ["Terms of Service", "/"],
+      ["Privacy Policy", "/privacy"],
+      ["Terms of Service", "/terms"],
     ],
   },
   {
     title: "Follow Pacten",
     links: [
-      ["LinkedIn", "/"],
-      ["Instagram", "/"],
-      ["TikTok", "/"],
+      ["LinkedIn", "https://www.linkedin.com"],
+      ["Instagram", "https://www.instagram.com"],
+      ["TikTok", "https://www.tiktok.com"],
     ],
   },
 ];

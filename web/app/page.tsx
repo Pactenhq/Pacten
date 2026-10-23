@@ -310,7 +310,9 @@ function Hero() {
                 </span>
               </p>
               <div className="mt-4 flex items-center justify-between">
-                <Link href="/creators">
+                <Link
+                  href={`/creators?q=${encodeURIComponent(c.name.split(" ")[0])}`}
+                >
                   <span className="inline-flex h-10 items-center gap-2 rounded-full bg-brand px-4 text-sm font-semibold text-white">
                     View Profile
                     <ArrowIcon />
@@ -725,7 +727,9 @@ function Professionals() {
                 </span>
               </p>
               <div className="mt-4 flex items-center justify-between">
-                <Link href="/professionals">
+                <Link
+                  href={`/professionals?q=${encodeURIComponent(p.name.split(" ")[0])}`}
+                >
                   <span className="inline-flex h-10 items-center gap-2 rounded-full bg-brand px-4 text-sm font-semibold text-white">
                     View Profile
                     <ArrowIcon />

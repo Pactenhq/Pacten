@@ -552,6 +552,16 @@ export class PaymentsService implements OnModuleInit {
             sub.status = SubscriptionStatus.ACTIVE;
             sub.stripeSubscriptionId =
               session.subscription || session.id;
+            // Keep the billing period populated on this writer too: when
+            // the webhook landed before the browser-return sync, the row
+            // was left with currentPeriodEnd = null and the subscription
+            // page showed "Next Billing Date: -".
+            if (!sub.currentPeriodEnd) {
+              const periodEnd = new Date();
+              periodEnd.setMonth(periodEnd.getMonth() + 1);
+              sub.currentPeriodEnd = periodEnd;
+            }
+            sub.cancelAtPeriodEnd = false;
             await this.subsRepo.save(sub);
             // Referral earning: 20% of this subscription payment (first
             // three payments only — enforced in ReferralsService).

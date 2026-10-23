@@ -123,7 +123,11 @@ export function PricingCards({ role }: { role: PlanRole }) {
       )}
     >
       {plans.map((plan, i) => {
-        const highlighted = plan.priceCentsMonthly > 0 && i === plans.length - 1;
+        // Only the Pro tier is highlighted / badged — previously EVERY
+        // paid plan rendered a "Most popular" badge at the same time.
+        const highlighted =
+          (plan as any).tier === "pro" ||
+          (plan.priceCentsMonthly === 2900 && !(plan as any).tier);
         return (
           <div
             key={plan.id}
@@ -134,13 +138,8 @@ export function PricingCards({ role }: { role: PlanRole }) {
                 : "border-ink-200 bg-white"
             )}
           >
-            {plan.priceCentsMonthly > 0 && (
-              <span
-                className={cn(
-                  "absolute -top-3.5 right-5 inline-flex h-7 items-center rounded-full px-3 text-xs font-semibold",
-                  highlighted ? "bg-white text-brand-dark" : "bg-brand-dark text-white"
-                )}
-              >
+            {highlighted && (
+              <span className="absolute -top-3.5 right-5 inline-flex h-7 items-center rounded-full bg-white px-3 text-xs font-semibold text-brand-dark">
                 Most popular
               </span>
             )}

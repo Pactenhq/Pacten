@@ -46,10 +46,15 @@ function personName(u: any): string {
 }
 
 function toCampaignCard(c: any, status: "Active" | "Completed"): DashboardCampaign {
+  const rawBudget = c.budget != null ? String(c.budget).trim() : "";
   return {
     title: c.title ?? "Campaign",
-    handle: c.brand?.email ? `@${String(c.brand.email).split("@")[0]}` : "@brand",
-    budget: c.budget != null ? String(c.budget) : "—",
+    handle: c.brand?.displayName ?? personName(c.brand),
+    budget: rawBudget
+      ? rawBudget.startsWith("$") || !/^\d/.test(rawBudget)
+        ? rawBudget
+        : `$${rawBudget}`
+      : "—",
     status,
     deadline: fmtDate(c.deadline),
     submitted: fmtDate(c.createdAt),

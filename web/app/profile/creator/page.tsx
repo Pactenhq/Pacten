@@ -69,7 +69,7 @@ function ServicesCard() {
               <p className="mt-0.5 truncate text-[13px] text-ink-500">{s.description}</p>
             </div>
             <span className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-lg bg-brand px-4 text-sm font-semibold text-white">
-              £0
+              $0
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
                 <path d="M2.5 7h9M8 3.5 11.5 7 8 10.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
               </svg>

@@ -70,7 +70,7 @@ function NewDealForm() {
         if (!app) return;
         setForm((f) => ({
           ...f,
-          title: app.campaign?.title ? `Deal: ${app.campaign.title}` : f.title,
+          title: app.campaign?.title ? app.campaign.title : f.title,
           creatorId: app.applicantId ?? f.creatorId,
           agreedBudget: app.proposedBudget ?? f.agreedBudget,
           description: app.coverLetter ?? f.description,
@@ -90,7 +90,7 @@ function NewDealForm() {
         if (!opp) return;
         setForm((f) => ({
           ...f,
-          title: opp.title ? `Deal: ${opp.title}` : f.title,
+          title: opp.title ? opp.title : f.title,
           creatorId: opp.recipientId ?? f.creatorId,
           agreedBudget: opp.budget ?? f.agreedBudget,
           description: opp.description ?? f.description,
@@ -173,7 +173,7 @@ function NewDealForm() {
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
           <label className="mb-1 block text-sm font-medium">Agreed Budget</label>
-          <input className={inputCls} value={form.agreedBudget} onChange={set("agreedBudget")} placeholder="£500" />
+          <input className={inputCls} value={form.agreedBudget} onChange={set("agreedBudget")} placeholder="$500" />
         </div>
         <div>
           <label className="mb-1 block text-sm font-medium">Deadline</label>

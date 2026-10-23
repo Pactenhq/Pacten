@@ -76,7 +76,9 @@ export default function ContractDetailPage() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-[32px] font-extrabold tracking-tight text-ink-900">
-            {contract.title}
+            {String(contract.title ?? "")
+              .replace(/^Deal:\s*/i, "")
+              .replace(/—\s*Deal:\s*/i, "— ")}
           </h1>
           <p className="mt-1 text-[15px] text-ink-500">
             Status: <span className="font-bold capitalize">{contract.status}</span>

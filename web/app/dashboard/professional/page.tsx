@@ -183,10 +183,10 @@ export default function ProfessionalDashboardPage() {
           <ServicesCard filledAdd />
           <QuickActions
             buttons={[
-              "Edit Profile",
-              "Add Portfolio Work",
-              "Messages",
-              "Browse Marketplace",
+              { label: "Edit Profile", href: "/dashboard/settings" },
+              { label: "Opportunities", href: "/dashboard/opportunities" },
+              { label: "Messages", href: "/dashboard/messages" },
+              { label: "Browse Marketplace", href: "/campaigns" },
             ]}
           />
         </div>

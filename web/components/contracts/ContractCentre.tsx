@@ -28,6 +28,8 @@ type ApiContract = {
   brandId: string;
   creatorId: string;
   dealId: string;
+  counterpartyName?: string;
+  dealDeadline?: string | null;
 };
 
 type Row = {
@@ -164,10 +166,10 @@ function toRow(c: ApiContract): Row {
   return {
     id: c.id,
     title: c.title,
-    client: "—",
+    client: c.counterpartyName || "—",
     submittedLabel: "Submitted",
     submittedDate: fmt,
-    deadlineDate: "-",
+    deadlineDate: c.dealDeadline || "—",
     status: STATUS_LABEL[c.status] ?? "Draft",
   };
 }

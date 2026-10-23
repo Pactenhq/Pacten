@@ -86,7 +86,7 @@ export function SendOpportunityModal({
           </label>
           <TextField
             label="Budget (optional)"
-            placeholder="e.g. £500"
+            placeholder="e.g. $500"
             value={budget}
             onChange={(e) => setBudget(e.target.value)}
           />

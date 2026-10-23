@@ -4,7 +4,6 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { TextField } from "@/components/ui/TextField";
-import { dashboardUser } from "@/lib/mock";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { api } from "@/lib/api";
 import { AuthError } from "@/components/auth/auth-forms";
@@ -15,14 +14,17 @@ import { AuthError } from "@/components/auth/auth-forms";
 export function SettingsProfileForm() {
   const { user, profile, loading, refresh } = useAuth();
   const router = useRouter();
+  // Start EMPTY and fill from the real session profile (the useEffect
+  // below). The form previously initialised with the design-mock user
+  // ("Olivia Martinez"), which flashed as a stranger's data on load.
   const [values, setValues] = useState({
-    fullName: dashboardUser.name,
+    fullName: "",
     username: "",
     location: "",
     website: "",
     bio: "",
   });
-  const [initials, setInitials] = useState(dashboardUser.initials);
+  const [initials, setInitials] = useState("");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);

@@ -11,28 +11,25 @@ import {
   useSignupForm,
 } from "@/components/auth/auth-forms";
 
-//
-// (255:10229) mobile.
-//
-// DESIGN ANOMALY (verified against the design): the
-// DESKTOP frame duplicates the brand-signup frame verbatim — stepper
-// Account/Company/Goals/Confirm, heading "Create your Business account",
-// subtext "Start finding the perfect creators for your campaigns.". It is
-// implemented exactly as drawn (no redesign), per the no-design rule. The
-// MOBILE frame differs and carries professional-specific copy, so the mobile
-// layout follows the mobile frame.
-const DESKTOP_STEPS = ["Account", "Company", "Goals", "Confirm"];
+// Professional signup. The design's DESKTOP frame duplicated the brand
+// ("Business account") wizard verbatim — a design anomaly that read as
+// a bug to every tester (professionals were asked for a company and
+// hiring goals). The design's own MOBILE frame carries the correct
+// professional copy, so this page now uses that copy on all viewports,
+// with the same single-step account form and submit behaviour as the
+// other role signups.
+const STEPS = ["Account", "Profile", "Expertise", "Confirm"];
 
-function BusinessDuplicateForm() {
+function ProfessionalForm() {
   const { field, submit, error, loading, checkEmail, email } =
     useSignupForm("professional");
   return (
     <>
       <h1 className="text-3xl font-extrabold tracking-tight text-ink-900 lg:text-4xl">
-        Create your Business account
+        Join Pacten Professional
       </h1>
       <p className="mt-2 text-[15px] text-ink-500">
-        Start finding the perfect creators for your campaigns.
+        Create your profile and connect with creators and brands.
       </p>
       <form className="mt-8 flex flex-col gap-5" onSubmit={submit}>
         <AuthError message={error} />
@@ -102,114 +99,17 @@ function BusinessDuplicateForm() {
   );
 }
 
-function ProfessionalMobileForm() {
-  const { field, submit, error, loading, checkEmail, email } =
-    useSignupForm("professional");
-  return (
-    <>
-      <h1 className="text-3xl font-extrabold tracking-tight text-ink-900">
-        Join CreatorHub Professional
-      </h1>
-      <p className="mt-2 text-[15px] text-ink-500">
-        Create your profile and connect with creators and brands.
-      </p>
-      <form className="mt-8 flex flex-col gap-5" onSubmit={submit}>
-        <AuthError message={error} />
-        {checkEmail ? (
-          <CheckEmailNotice email={email} />
-        ) : (
-          <>
-            <TextField
-              label="First Name"
-              type="text"
-              placeholder="First Name"
-              autoComplete="given-name"
-              required
-              {...field("firstName")}
-            />
-            <TextField
-              label="Last Name"
-              type="text"
-              placeholder="Last Name"
-              autoComplete="family-name"
-              required
-              {...field("lastName")}
-            />
-            <TextField
-              label="Email"
-              type="email"
-              placeholder="Email"
-              autoComplete="email"
-              required
-              {...field("email")}
-            />
-            <TextField
-              label="Professional headline"
-              name="headline"
-              type="text"
-              placeholder="Professional headline"
-              autoComplete="off"
-              required
-            />
-            <TextField
-              label="Password"
-              type="password"
-              placeholder="Password"
-              autoComplete="new-password"
-              required
-              {...field("password")}
-            />
-            <TextField
-              label="Confirm Password"
-              type="password"
-              placeholder="Confirm Password"
-              autoComplete="new-password"
-              required
-              {...field("confirmPassword")}
-            />
-            <div>
-              <Button
-                type="submit"
-                size="lg"
-                className="w-full sm:w-auto"
-                disabled={loading}
-              >
-                {loading ? "Creating account…" : "Continue"}
-              </Button>
-            </div>
-          </>
-        )}
-      </form>
-      <p className="mt-4 text-sm text-ink-500">
-        Already have an account?{" "}
-        <Link href="/login" className="font-semibold text-brand hover:underline">
-          Login
-        </Link>
-      </p>
-    </>
-  );
-}
-
 export default function ProfessionalSignupPage() {
   return (
     <main className="bg-mist/50">
       <div className="mx-auto max-w-[1380px] px-6 py-14 lg:px-12 lg:py-20">
-        {/* Desktop: exact duplicate of the desktop design. */}
         <div className="hidden lg:block">
-          <Stepper steps={DESKTOP_STEPS} activeIndex={0} />
-          <div className="mt-10 flex justify-center">
-            <Card className="fade-up fade-up-2 w-full max-w-[662px] p-10 shadow-pop">
-              <BusinessDuplicateForm />
-            </Card>
-          </div>
+          <Stepper steps={STEPS} activeIndex={0} />
         </div>
-        {/* Mobile: follows the "mob Professional singin" frame. */}
-        <div className="lg:hidden">
-          <div className="flex justify-center">
-            <Card className="w-full max-w-[560px] p-6 shadow-pop">
-              <ProfessionalMobileForm />
-            </Card>
-          </div>
+        <div className="mt-10 flex justify-center">
+          <Card className="fade-up fade-up-2 w-full max-w-[662px] p-6 shadow-pop lg:p-10">
+            <ProfessionalForm />
+          </Card>
         </div>
       </div>
     </main>

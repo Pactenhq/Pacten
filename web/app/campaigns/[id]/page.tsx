@@ -37,14 +37,18 @@ function CampaignDetailContent() {
           setCampaign({
             id: data.id,
             title: data.title,
-            brand: data.brand?.email ?? data.brand?.name ?? "Brand",
+            brand: data.brand?.displayName ?? "Brand",
             description: data.description ?? "",
             budget: data.budget ?? "",
             timeline: data.deadline ?? "",
             type: data.status ?? "",
             location: "",
             postedAt: data.createdAt
-              ? new Date(data.createdAt).toLocaleDateString()
+              ? new Date(data.createdAt).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })
               : "",
             deliverables: data.deliverables ?? "",
             notes: data.notes ?? "",

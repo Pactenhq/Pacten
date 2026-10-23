@@ -52,11 +52,11 @@ export interface MyCampaignRow {
 
 /** Five identical rows. had a "Deciilned" typo — corrected. */
 export const myCampaignRows: MyCampaignRow[] = [
-  { title: "New Product Launch", handle: "@sophie.c", budget: "0£", status: "Pending", deadline: "Nov 2, 2026", submitted: "Sep 2, 2026" },
-  { title: "New Product Launch", handle: "@sophie.c", budget: "0£", status: "Accepted", deadline: "Nov 2, 2026", submitted: "Sep 2, 2026" },
-  { title: "New Product Launch", handle: "@sophie.c", budget: "0£", status: "Completed", deadline: "Nov 2, 2026", submitted: "Sep 2, 2026" },
-  { title: "New Product Launch", handle: "@sophie.c", budget: "0£", status: "Declined", deadline: "Nov 2, 2026", submitted: "Sep 2, 2026" },
-  { title: "New Product Launch", handle: "@sophie.c", budget: "0£", status: "Declined", deadline: "Nov 2, 2026", submitted: "Sep 2, 2026" },
+  { title: "New Product Launch", handle: "@sophie.c", budget: "$0", status: "Pending", deadline: "Nov 2, 2026", submitted: "Sep 2, 2026" },
+  { title: "New Product Launch", handle: "@sophie.c", budget: "$0", status: "Accepted", deadline: "Nov 2, 2026", submitted: "Sep 2, 2026" },
+  { title: "New Product Launch", handle: "@sophie.c", budget: "$0", status: "Completed", deadline: "Nov 2, 2026", submitted: "Sep 2, 2026" },
+  { title: "New Product Launch", handle: "@sophie.c", budget: "$0", status: "Declined", deadline: "Nov 2, 2026", submitted: "Sep 2, 2026" },
+  { title: "New Product Launch", handle: "@sophie.c", budget: "$0", status: "Declined", deadline: "Nov 2, 2026", submitted: "Sep 2, 2026" },
 ];
 
 export const myCampaignPills = ["All", "Pending", "Accepted", "Completed", "Declined", "Cancelled"];
@@ -74,7 +74,7 @@ export const campaignRequests: CampaignListItem[] = [
   {
     title: "Hydrating Serum Launch",
     handle: "@sophie.c",
-    budget: "0£",
+    budget: "$0",
     status: "Pending",
     deadline: "Nov 3, 2026",
     submitted: "Sep 1, 2026",
@@ -82,7 +82,7 @@ export const campaignRequests: CampaignListItem[] = [
   {
     title: "Autumn Skincare Edit",
     handle: "@janesmith",
-    budget: "0£",
+    budget: "$0",
     status: "Pending",
     deadline: "Nov 10, 2026",
     submitted: "Aug 30, 2026",

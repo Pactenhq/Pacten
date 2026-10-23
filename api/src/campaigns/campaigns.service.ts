@@ -16,6 +16,8 @@ import {
 } from './dto/campaign.dto';
 import { EmailsService } from '../emails/emails.service';
 import { PlanLimitsService } from '../common/plan-limits/plan-limits.service';
+import { BrandProfile } from '../profiles/brand-profile.entity';
+import { In } from 'typeorm';
 
 @Injectable()
 export class CampaignsService {
@@ -24,9 +26,40 @@ export class CampaignsService {
     private campaigns: Repository<Campaign>,
     @InjectRepository(Application)
     private applications: Repository<Application>,
+    @InjectRepository(BrandProfile)
+    private brandProfiles: Repository<BrandProfile>,
     private emails: EmailsService,
     private planLimits: PlanLimitsService,
   ) {}
+
+  /**
+   * Public brand shape for campaign listings/details: the brand's
+   * display name (company name when set) WITHOUT the account email —
+   * public campaign pages must never expose the brand's email address.
+   */
+  private async attachPublicBrand(campaigns: Campaign[]): Promise<void> {
+    const ids = [...new Set(campaigns.map((c) => c.brandId).filter(Boolean))];
+    if (!ids.length) return;
+    const profiles = await this.brandProfiles.find({
+      where: { userId: In(ids) },
+    });
+    const byUser = new Map(profiles.map((p) => [p.userId, p]));
+    for (const c of campaigns) {
+      const brand: any = (c as any).brand;
+      if (!brand) continue;
+      const profile = byUser.get(c.brandId);
+      const personName = [brand.firstName, brand.lastName]
+        .filter(Boolean)
+        .join(' ')
+        .trim();
+      (c as any).brand = {
+        id: brand.id,
+        firstName: brand.firstName,
+        lastName: brand.lastName,
+        displayName: profile?.companyName || personName || 'Brand',
+      };
+    }
+  }
 
   // ---------- Campaigns ----------
 
@@ -61,7 +94,9 @@ export class CampaignsService {
       );
     }
 
-    return qb.getMany();
+    const list = await qb.getMany();
+    await this.attachPublicBrand(list);
+    return list;
   }
 
   async findOne(id: string): Promise<Campaign> {
@@ -70,6 +105,7 @@ export class CampaignsService {
       relations: { brand: true, applications: true },
     });
     if (!campaign) throw new NotFoundException('Campaign not found');
+    await this.attachPublicBrand([campaign]);
     return campaign;
   }
 
@@ -171,11 +207,17 @@ export class CampaignsService {
   }
 
   async findMyApplications(userId: string): Promise<Application[]> {
-    return this.applications.find({
+    const list = await this.applications.find({
       where: { applicantId: userId },
-      relations: { campaign: true },
+      relations: { campaign: { brand: true } },
       order: { createdAt: 'DESC' },
     });
+    // Attach the public brand shape (display name, no email) to each
+    // application's campaign so the applicant sees who posted it.
+    await this.attachPublicBrand(
+      list.map((a) => a.campaign).filter(Boolean) as Campaign[],
+    );
+    return list;
   }
 
   async updateApplicationStatus(

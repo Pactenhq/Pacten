@@ -7,7 +7,6 @@ import { Tag } from "@/components/ui/Tag";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Reveal, Stagger } from "@/components/ui/Reveal";
-import { TextField } from "@/components/ui/TextField";
 import { PricingCards } from "@/components/pricing/PricingCards";
 import { pricingComparison, pricingFaqs, rateCalculatorTiers } from "@/lib/mock-billing";
 import { cn } from "@/lib/cn";
@@ -186,25 +185,78 @@ function ResultIcon({ kind }: { kind: string }) {
   );
 }
 
+const PLATFORM_FACTOR: Record<string, number> = {
+  Instagram: 1,
+  TikTok: 0.9,
+  YouTube: 1.3,
+  "X (Twitter)": 0.7,
+};
+const CONTENT_FACTOR: Record<string, number> = {
+  "Sponsored post": 1,
+  "Story set": 0.5,
+  "Video review": 1.4,
+  "UGC content": 0.8,
+};
+
 function RateCalculator() {
   const icons = ["money", "target", "diamond", "chart"];
   const [result, setResult] = useState<string | null>(null);
+  const [platform, setPlatform] = useState("Instagram");
   const [followers, setFollowers] = useState("");
+  const [views, setViews] = useState("");
   const [engagement, setEngagement] = useState("");
+  const [deliverables, setDeliverables] = useState("");
+  const [contentType, setContentType] = useState("Sponsored post");
+  const [niche, setNiche] = useState("");
+  const [tiers, setTiers] = useState<[string, string, string] | null>(null);
+  const [confidence, setConfidence] = useState<number | null>(null);
+
+  const num = (s: string) => parseFloat(s.replace(/[^0-9.]/g, "")) || 0;
 
   const calculate = () => {
-    const f = parseFloat(followers.replace(/[^0-9.]/g, "")) || 0;
-    const e = parseFloat(engagement.replace(/[^0-9.]/g, "")) || 0;
+    const f = num(followers);
     if (f <= 0) {
       setResult("Enter your follower count to see an estimate.");
+      setTiers(null);
+      setConfidence(null);
       return;
     }
-    const base = (f / 1000) * 10;
-    const multiplier = e > 0 ? 1 + Math.min(e, 10) / 10 : 1;
-    const low = Math.round(base * multiplier * 0.8);
-    const high = Math.round(base * multiplier * 1.2);
-    setResult(`Estimated rate: $${low.toLocaleString()} – $${high.toLocaleString()} per post`);
+    const e = num(engagement);
+    const v = num(views);
+    const d = Math.max(1, Math.round(num(deliverables)) || 1);
+    const base =
+      (f / 1000) *
+      10 *
+      (PLATFORM_FACTOR[platform] ?? 1) *
+      (CONTENT_FACTOR[contentType] ?? 1);
+    const engMult = e > 0 ? 1 + Math.min(e, 10) / 10 : 1;
+    const viewMult = v > 0 ? 1 + Math.min(v / f, 1) * 0.25 : 1;
+    const mid = base * engMult * viewMult;
+    const low = Math.round(mid * 0.8);
+    const high = Math.round(mid * 1.2);
+    const rec = Math.round(mid);
+    setTiers([
+      `$${low.toLocaleString()}`,
+      `$${rec.toLocaleString()}`,
+      `$${high.toLocaleString()}`,
+    ]);
+    let conf = 45;
+    if (v > 0) conf += 15;
+    if (e > 0) conf += 15;
+    if (num(deliverables) > 0) conf += 10;
+    if (niche) conf += 10;
+    setConfidence(Math.min(conf, 95));
+    setResult(
+      `Estimated rate: $${low.toLocaleString()} – $${high.toLocaleString()} per post` +
+        (d > 1
+          ? ` · $${(low * d).toLocaleString()} – $${(high * d).toLocaleString()} for ${d} deliverables`
+          : "")
+    );
   };
+
+  const inputCls =
+    "h-[52px] w-full rounded-xl border border-ink-200 bg-white px-4 text-[15px] text-ink-900 placeholder:text-ink-400 focus:border-brand focus:outline-none";
+  const labelCls = "mb-1.5 block text-sm font-medium text-ink-700";
 
   return (
     <section className="mx-auto max-w-[1025px] px-6 py-16 lg:py-20">
@@ -227,37 +279,73 @@ function RateCalculator() {
 
       <Card className="mt-10 p-6 lg:p-10">
         <div className="flex flex-col gap-5">
-          <TextField
-            label="Platform"
-            name="platform"
-            placeholder="(DropdownPlatform goes here)"
-          />
+          <div>
+            <label className={labelCls}>Platform</label>
+            <select value={platform} onChange={(e) => setPlatform(e.target.value)} className={inputCls}>
+              {Object.keys(PLATFORM_FACTOR).map((p) => (
+                <option key={p} value={p}>{p}</option>
+              ))}
+            </select>
+          </div>
           <div className="grid gap-5 sm:grid-cols-2">
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-ink-700">Followers</label>
+              <label className={labelCls}>Followers</label>
               <input
                 value={followers}
                 onChange={(e) => setFollowers(e.target.value)}
                 placeholder="e.g. 50000"
                 inputMode="numeric"
-                className="h-[52px] w-full rounded-xl border border-ink-200 bg-white px-4 text-[15px] text-ink-900 placeholder:text-ink-400 focus:border-brand focus:outline-none"
+                className={inputCls}
               />
             </div>
-            <TextField label="Average Views per Post" name="avg-views" placeholder="e.g. 10000" />
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-ink-700">Engagement Rate (%)</label>
+              <label className={labelCls}>Average Views per Post</label>
+              <input
+                value={views}
+                onChange={(e) => setViews(e.target.value)}
+                placeholder="e.g. 20000"
+                inputMode="numeric"
+                className={inputCls}
+              />
+            </div>
+            <div>
+              <label className={labelCls}>Engagement Rate (%)</label>
               <input
                 value={engagement}
                 onChange={(e) => setEngagement(e.target.value)}
                 placeholder="e.g. 4.5"
                 inputMode="decimal"
-                className="h-[52px] w-full rounded-xl border border-ink-200 bg-white px-4 text-[15px] text-ink-900 placeholder:text-ink-400 focus:border-brand focus:outline-none"
+                className={inputCls}
               />
             </div>
-            <TextField label="Number of Deliverables" name="deliverables" placeholder="e.g. 3" />
+            <div>
+              <label className={labelCls}>Number of Deliverables</label>
+              <input
+                value={deliverables}
+                onChange={(e) => setDeliverables(e.target.value)}
+                placeholder="e.g. 3"
+                inputMode="numeric"
+                className={inputCls}
+              />
+            </div>
           </div>
-          <TextField label="Content Type" name="content-type" placeholder="Choose" />
-          <TextField label="Industry / Niche" name="industry" placeholder="Choose" />
+          <div>
+            <label className={labelCls}>Content Type</label>
+            <select value={contentType} onChange={(e) => setContentType(e.target.value)} className={inputCls}>
+              {Object.keys(CONTENT_FACTOR).map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className={labelCls}>Industry / Niche</label>
+            <select value={niche} onChange={(e) => setNiche(e.target.value)} className={inputCls}>
+              <option value="">Choose…</option>
+              {["Fashion", "Beauty", "Fitness", "Gaming", "Travel", "Food", "Business", "Lifestyle", "Technology"].map((n) => (
+                <option key={n} value={n}>{n}</option>
+              ))}
+            </select>
+          </div>
           <Button size="lg" className="mt-2 w-full" onClick={calculate}>
             Calculate My Rate
           </Button>
@@ -274,7 +362,7 @@ function RateCalculator() {
           <Card key={tier.label} className="card-lift p-6 text-center">
             <ResultIcon kind={icons[i] ?? "money"} />
             <p className="mt-4 text-4xl font-extrabold text-ink-900">
-              {tier.price}
+              {tiers ? tiers[i] ?? tier.price : tier.price}
             </p>
             <p className="mt-2 text-[15px] font-bold text-ink-900">
               {tier.label}
@@ -286,7 +374,9 @@ function RateCalculator() {
         ))}
         <Card className="card-lift p-6 text-center">
           <ResultIcon kind="chart" />
-          <p className="mt-4 text-4xl font-extrabold text-ink-900">0%</p>
+          <p className="mt-4 text-4xl font-extrabold text-ink-900">
+            {confidence !== null ? `${confidence}%` : "0%"}
+          </p>
           <p className="mt-2 text-[15px] font-bold text-ink-900">
             Confidence Score
           </p>
@@ -307,7 +397,7 @@ function RateCalculator() {
 function PricingFaq() {
   const [open, setOpen] = useState(0);
   return (
-    <section className="mx-auto max-w-[846px] px-6 py-16 lg:py-20">
+    <section id="faq" className="mx-auto max-w-[846px] px-6 py-16 lg:py-20">
       <div className="text-center">
         <Tag>FAQ</Tag>
         <h2 className="mt-6 text-4xl font-extrabold tracking-tight text-ink-900">

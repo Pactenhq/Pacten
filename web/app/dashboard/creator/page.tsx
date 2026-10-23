@@ -131,7 +131,7 @@ export default function CreatorDashboardPage() {
       <div className="flex flex-col gap-8">
         <WelcomeHeader
           title="Welcome back"
-          subtitle="Manage your campaigns and creator relationships."
+          subtitle="Manage your profile, applications and deals."
         />
 
         <ProfileCompleteness pct={completeness} />
@@ -177,10 +177,10 @@ export default function CreatorDashboardPage() {
           <ServicesCard />
           <QuickActions
             buttons={[
-              "View Public Profile",
-              "Edit Creator Profile",
-              "Add Service",
-              "Upload Portfolio",
+              { label: "View Public Profile", href: "/profile/creator" },
+              { label: "Edit Creator Profile", href: "/dashboard/settings" },
+              { label: "Browse Campaigns", href: "/campaigns" },
+              { label: "My Applications", href: "/dashboard/applications" },
             ]}
           />
         </div>

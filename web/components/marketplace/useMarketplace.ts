@@ -35,7 +35,7 @@ export function parseCompactCount(raw: unknown): number | null {
   return Number.isNaN(n) ? null : n;
 }
 
-/** "£500/hr", "$500", "500" -> 500 */
+/** "$500/hr", "$500", "500" -> 500 */
 export function parseMoney(raw: unknown): number | null {
   if (raw == null) return null;
   const s = String(raw).replace(/,/g, "");
@@ -103,7 +103,7 @@ function mapProfessional(p: any, i: number): ProfessionalFilterData {
     role: p.title || p.role || "Social Media Professional",
     experience:
       p.hourlyRate != null
-        ? `£${p.hourlyRate}/hr`
+        ? `$${p.hourlyRate}/hr`
         : (p.experience ?? ""),
     rating:
       p.rating != null && !String(p.rating).includes("★")
@@ -127,20 +127,24 @@ function mapProfessional(p: any, i: number): ProfessionalFilterData {
  * marketplace pages can filter client-side on live or fallback data alike.
  */
 export function useMarketplaceCreators(): CreatorFilterData[] {
-  const [list, setList] = useState<CreatorFilterData[]>(() =>
-    marketplaceCreators.map((c, i) => mapCreator(c, i))
-  );
+  // Start EMPTY and fill from the API. The hooks previously initialised
+  // with the built-in showcase list and only replaced it when the API
+  // returned rows — so searches briefly matched fake people and then
+  // flipped, and showcase cards (with fake ids like pf1) linked to
+  // profile pages that do not exist. The showcase list is now only an
+  // offline fallback (API unreachable).
+  const [list, setList] = useState<CreatorFilterData[]>([]);
   useEffect(() => {
     let alive = true;
     api
       .creators("?limit=100")
       .then((rows) => {
-        if (alive && Array.isArray(rows) && rows.length > 0) {
+        if (alive && Array.isArray(rows)) {
           setList(rows.map(mapCreator));
         }
       })
       .catch(() => {
-        /* keep mock fallback */
+        if (alive) setList(marketplaceCreators.map((c, i) => mapCreator(c, i)));
       });
     return () => {
       alive = false;
@@ -150,20 +154,19 @@ export function useMarketplaceCreators(): CreatorFilterData[] {
 }
 
 export function useMarketplaceProfessionals(): ProfessionalFilterData[] {
-  const [list, setList] = useState<ProfessionalFilterData[]>(() =>
-    marketplaceProfessionals.map((p, i) => mapProfessional(p, i))
-  );
+  const [list, setList] = useState<ProfessionalFilterData[]>([]);
   useEffect(() => {
     let alive = true;
     api
       .professionals("?limit=100")
       .then((rows) => {
-        if (alive && Array.isArray(rows) && rows.length > 0) {
+        if (alive && Array.isArray(rows)) {
           setList(rows.map(mapProfessional));
         }
       })
       .catch(() => {
-        /* keep mock fallback */
+        if (alive)
+          setList(marketplaceProfessionals.map((p, i) => mapProfessional(p, i)));
       });
     return () => {
       alive = false;

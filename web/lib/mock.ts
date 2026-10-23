@@ -438,7 +438,7 @@ export const creatorProfile = {
   handle: "@sophie.creates",
   headline: "Content Creator specializing in lifestyle, travel & wellness.",
   tags: ["Lifestyle", "Travel & Wellness"],
-  priceLabel: "Starting from £0",
+  priceLabel: "Starting from $0",
   photo: "/assets/marketplace/avatar-jenny-wilson.jpg",
   stats: [
     { value: "248K", label: "Total Followers", icon: "users" },
@@ -474,22 +474,22 @@ export const creatorProfile = {
     {
       title: "Sponsored Post",
       description: "Instagram feed post with authentic product showcase",
-      price: "£0",
+      price: "$0",
     },
     {
       title: "Instagram Reels",
       description: "High-quality, engaging short-form video",
-      price: "£0",
+      price: "$0",
     },
     {
       title: "TikTok Video",
       description: "Creative 15–60s video with trend integration",
-      price: "£0",
+      price: "$0",
     },
     {
       title: "UGC Content Package",
       description: "Set of 5–10 professionally edited photos/videos",
-      price: "£0",
+      price: "$0",
     },
   ] as Service[],
 };
@@ -500,7 +500,7 @@ export const professionalProfile = {
   headline:
     "Experienced digital designer helping businesses turn ideas into clear, engaging, and high-converting digital experiences.",
   tags: ["UI/UX Designer", "Web Designer"],
-  priceLabel: "Starting from £75/hour",
+  priceLabel: "Starting from $75/hour",
   photo: "/assets/marketplace/avatar-alex-morgan.jpg",
   stats: [
     { value: "42", label: "Completed Projects", icon: "check" },
@@ -514,31 +514,31 @@ export const professionalProfile = {
   website: "alexmorgan.design",
   availability: [
     { label: "Status:", value: "Available" },
-    { label: "Hourly Rate:", value: "£75/hour" },
-    { label: "Project Rate From:", value: "£500" },
+    { label: "Hourly Rate:", value: "$75/hour" },
+    { label: "Project Rate From:", value: "$500" },
     { label: "Response Time:", value: "Within 24 hours" },
   ],
   services: [
     {
       title: "UI/UX Design",
       description: "User-focused interfaces and digital experiences",
-      price: "From £500",
+      price: "From $500",
     },
     {
       title: "Website Design",
       description: "Modern, responsive websites designed around your business goals",
-      price: "From £750",
+      price: "From $750",
     },
     {
       title: "Landing Page Design",
       description:
         "High-converting landing pages for products, services, and campaigns",
-      price: "From £500",
+      price: "From $500",
     },
     {
       title: "Digital Product Design",
       description: "Web apps and product experiences from concept to final UI",
-      price: "From £1,000",
+      price: "From $1,000",
     },
   ] as Service[],
 };
@@ -551,7 +551,7 @@ export const brandProfile = {
   tags: ["Beauty", "Skincare", "Wellness"],
   stats: [
     { value: "42", label: "Completed Campaigns", icon: "check" },
-    { value: "£0,000+", label: "Monthly Budget", icon: "users" },
+    { value: "$0,000+", label: "Monthly Budget", icon: "users" },
     { value: "23", label: "Active Campaigns", icon: "eye" },
     { value: "4.9/5", label: "Average Rating", icon: "heart" },
   ] as ProfileStat[],
@@ -569,19 +569,19 @@ export const brandProfile = {
       title: "Skincare Creator Campaign",
       description:
         "Looking for beauty & lifestyle creators to showcase our new skincare collection.",
-      budget: "£500–£2,000",
+      budget: "$500–$2,000",
     },
     {
       title: "UGC Content Creator",
       description:
         "Looking for creators to produce authentic short-form video content for paid social.",
-      budget: "£500–£2,000",
+      budget: "$500–$2,000",
     },
     {
       title: "Beauty Photographer",
       description:
         "Professional product and lifestyle photography for our upcoming campaign.",
-      budget: "£500–£2,000",
+      budget: "$500–$2,000",
     },
   ],
   hiringActivity: [
@@ -613,12 +613,12 @@ export const dashboardUser = {
 };
 
 const dashboardNavBase: DashboardNavItem[] = [
-  { label: "My Campaigns", href: "/campaigns", icon: "megaphone" },
+  { label: "My Campaigns", href: "/dashboard/campaigns", icon: "megaphone" },
   { label: "Applications", href: "/dashboard/applications", icon: "file" },
   { label: "Messages", href: "/dashboard/messages", icon: "chat" },
-  { label: "Analytics", href: "#", icon: "chart" },
-  { label: "Referral", href: "/dashboard/referrals", icon: "gift" },
-  { label: "Contract", href: "/dashboard/contracts", icon: "doc" },
+  { label: "Referrals", href: "/dashboard/referrals", icon: "gift" },
+  { label: "Contracts", href: "/dashboard/contracts", icon: "doc" },
+  { label: "Disputes", href: "/dashboard/disputes", icon: "shield" },
   { label: "Subscription", href: "/dashboard/subscription", icon: "card" },
   { label: "Settings", href: "/dashboard/settings", icon: "gear" },
 ];
@@ -632,7 +632,7 @@ function withDashboardHome(
   return [{ label: "My Dashboard", href: homeHref, icon: "home" }, ...items];
 }
 
-/** Brand sidebar: base items plus the brand-only "Employer" entry. */
+/** Brand sidebar. */
 export const brandNav: DashboardNavItem[] = withDashboardHome("/dashboard/brand", [
   dashboardNavBase[0],
   { label: "Applications", href: "/dashboard/applications/received", icon: "file" },
@@ -641,17 +641,19 @@ export const brandNav: DashboardNavItem[] = withDashboardHome("/dashboard/brand"
   dashboardNavBase[2],
   dashboardNavBase[3],
   dashboardNavBase[4],
-  { label: "Employer", href: "#", icon: "briefcase" },
   dashboardNavBase[5],
   dashboardNavBase[6],
   dashboardNavBase[7],
 ]);
 
-/** Creator / Professional sidebar (no "Employer" entry in the design). */
+/** Creator / Professional sidebar. Sellers get "Browse Campaigns"
+ *  (the public marketplace) instead of the brand-oriented
+ *  "My Campaigns" manager entry. */
 export const creatorNav: DashboardNavItem[] = withDashboardHome(
   "/dashboard/creator",
   [
-    ...dashboardNavBase.slice(0, 2),
+    { label: "Browse Campaigns", href: "/campaigns", icon: "megaphone" },
+    dashboardNavBase[1],
     { label: "Opportunities", href: "/dashboard/opportunities", icon: "briefcase" },
     { label: "Deals", href: "/dashboard/deals", icon: "briefcase" },
     ...dashboardNavBase.slice(2),
@@ -660,7 +662,8 @@ export const creatorNav: DashboardNavItem[] = withDashboardHome(
 export const professionalNav: DashboardNavItem[] = withDashboardHome(
   "/dashboard/professional",
   [
-    ...dashboardNavBase.slice(0, 2),
+    { label: "Browse Campaigns", href: "/campaigns", icon: "megaphone" },
+    dashboardNavBase[1],
     { label: "Opportunities", href: "/dashboard/opportunities", icon: "briefcase" },
     { label: "Deals", href: "/dashboard/deals", icon: "briefcase" },
     ...dashboardNavBase.slice(2),
@@ -728,7 +731,7 @@ export const brandActiveCampaigns: DashboardCampaign[] = [
   {
     title: "New Product Launch",
     handle: "@sophie.c",
-    budget: "0£",
+    budget: "$0",
     status: "Active",
     deadline: "Nov 2, 2026",
     submitted: "Sep 2, 2026",
@@ -736,7 +739,7 @@ export const brandActiveCampaigns: DashboardCampaign[] = [
   {
     title: "New Product Launch",
     handle: "@sophie.c",
-    budget: "0£",
+    budget: "$0",
     status: "Active",
     deadline: "Nov 2, 2026",
     submitted: "Sep 2, 2026",
@@ -744,7 +747,7 @@ export const brandActiveCampaigns: DashboardCampaign[] = [
   {
     title: "New Product Launch",
     handle: "@sophie.c",
-    budget: "0£",
+    budget: "$0",
     status: "Active",
     deadline: "Nov 2, 2026",
     submitted: "Sep 2, 2026",
@@ -755,7 +758,7 @@ export const brandCompletedCampaigns: DashboardCampaign[] = [
   {
     title: "New Product Launch",
     handle: "@sophie.c",
-    budget: "0£",
+    budget: "$0",
     status: "Completed",
     deadline: "Nov 2, 2025",
     submitted: "Sep 2, 2025",
@@ -763,7 +766,7 @@ export const brandCompletedCampaigns: DashboardCampaign[] = [
   {
     title: "New Product Launch",
     handle: "@sophie.c",
-    budget: "0£",
+    budget: "$0",
     status: "Completed",
     deadline: "Nov 2, 2025",
     submitted: "Sep 2, 2025",
@@ -771,7 +774,7 @@ export const brandCompletedCampaigns: DashboardCampaign[] = [
   {
     title: "New Product Launch",
     handle: "@sophie.c",
-    budget: "0£",
+    budget: "$0",
     status: "Completed",
     deadline: "Nov 2, 2025",
     submitted: "Sep 2, 2025",
@@ -793,14 +796,14 @@ export const aiRecommendations: { title: string; detail: string; date: string }[
     date: "Jan 1",
   },
   {
-    title: "Partner with micro-influencers",
-    detail: "Higher engagement in your niche",
-    date: "Jan 1",
+    title: "Post campaigns on weekdays",
+    detail: "More creator applications mid-week",
+    date: "Jan 3",
   },
   {
-    title: "Partner with micro-influencers",
-    detail: "Higher engagement in your niche",
-    date: "Jan 1",
+    title: "Add a clear deliverables list",
+    detail: "Campaigns with specifics get more proposals",
+    date: "Jan 5",
   },
 ];
 
@@ -886,9 +889,9 @@ export interface ReferralRow {
 }
 
 export const recentReferrals: ReferralRow[] = [
-  { name: "Jane Smith", joined: "Jan 15, 2026", earnings: "£0", status: "Successful" },
-  { name: "Jane Smith", joined: "Jan 15, 2026", earnings: "£0", status: "Pending" },
-  { name: "Jane Smith", joined: "Jan 15, 2026", earnings: "£0", status: "Successful" },
+  { name: "Jane Smith", joined: "Jan 15, 2026", earnings: "$0", status: "Successful" },
+  { name: "Jane Smith", joined: "Jan 15, 2026", earnings: "$0", status: "Pending" },
+  { name: "Jane Smith", joined: "Jan 15, 2026", earnings: "$0", status: "Successful" },
 ];
 
 export const referralAnalytics: { value: string; label: string; hint: string; icon: string }[] = [
@@ -906,22 +909,22 @@ export const rewardMilestones: { count: string; reward: string }[] = [
 ];
 
 export const leaderboard: { rank: number; name: string; referrals: number; earnings: string }[] = [
-  { rank: 1, name: "Jane Smith", referrals: 42, earnings: "£0" },
-  { rank: 2, name: "Jane Smith", referrals: 40, earnings: "£0" },
-  { rank: 3, name: "Jane Smith", referrals: 37, earnings: "£0" },
-  { rank: 4, name: "Jane Smith", referrals: 22, earnings: "£0" },
+  { rank: 1, name: "Jane Smith", referrals: 42, earnings: "$0" },
+  { rank: 2, name: "Jane Smith", referrals: 40, earnings: "$0" },
+  { rank: 3, name: "Jane Smith", referrals: 37, earnings: "$0" },
+  { rank: 4, name: "Jane Smith", referrals: 22, earnings: "$0" },
 ];
 
 export const commissionHistory: { campaign: string; date: string; amount: string }[] = [
-  { campaign: "Creator Campaign A", date: "Jan 2025", amount: "£0" },
-  { campaign: "Creator Campaign A", date: "Jan 2025", amount: "£0" },
-  { campaign: "Creator Campaign A", date: "Jan 2025", amount: "£0" },
+  { campaign: "Creator Campaign A", date: "Jan 2025", amount: "$0" },
+  { campaign: "Creator Campaign A", date: "Jan 2025", amount: "$0" },
+  { campaign: "Creator Campaign A", date: "Jan 2025", amount: "$0" },
 ];
 
 export const discountHistory: { campaign: string; date: string; amount: string }[] = [
-  { campaign: "Creator Campaign A", date: "Jan 2025", amount: "£0" },
-  { campaign: "Creator Campaign A", date: "Jan 2025", amount: "£0" },
-  { campaign: "Creator Campaign A", date: "Jan 2025", amount: "£0" },
+  { campaign: "Creator Campaign A", date: "Jan 2025", amount: "$0" },
+  { campaign: "Creator Campaign A", date: "Jan 2025", amount: "$0" },
+  { campaign: "Creator Campaign A", date: "Jan 2025", amount: "$0" },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -1047,21 +1050,21 @@ export const homePricingPlans: Record<HomePlanRole, HomePlan[]> = {
       icon: "gift",
     },
     {
-      name: "Business",
-      price: "$79/mo",
-      features: ["Dedicated manager", "Promoted visibility", "Advanced analytics"],
-      cta: "Go Business",
-      filled: true,
-      icon: "star",
-      tag: "Best Value",
-    },
-    {
       name: "Pro",
       price: "$29/mo",
       features: ["Unlimited job posts & hires", "Featured campaigns", "Priority support"],
       cta: "Upgrade to Pro",
-      filled: false,
+      filled: true,
       icon: "briefcase",
+      tag: "Most Popular",
+    },
+    {
+      name: "Business",
+      price: "$79/mo",
+      features: ["Everything in Pro", "Dedicated manager", "Promoted visibility", "Advanced analytics"],
+      cta: "Go Business",
+      filled: false,
+      icon: "star",
     },
   ],
   creator: [
@@ -1074,48 +1077,48 @@ export const homePricingPlans: Record<HomePlanRole, HomePlan[]> = {
       icon: "gift",
     },
     {
-      name: "Elite",
-      price: "$79/mo",
-      features: ["Top-tier promotion", "5% commission", "Priority support"],
-      cta: "Go Elite",
-      filled: true,
-      icon: "star",
-      tag: "Best Value",
-    },
-    {
       name: "Pro",
       price: "$29/mo",
       features: ["Promoted profile", "Unlimited applications", "10% commission"],
       cta: "Upgrade to Pro",
-      filled: false,
+      filled: true,
       icon: "briefcase",
+      tag: "Most Popular",
+    },
+    {
+      name: "Elite",
+      price: "$79/mo",
+      features: ["Everything in Pro", "Unlimited applications", "Top-tier promotion", "5% commission", "Priority support"],
+      cta: "Go Elite",
+      filled: false,
+      icon: "star",
     },
   ],
   professional: [
     {
       name: "Free",
       price: "$0/mo",
-      features: ["Public profile", "Up to 5 applications", "15% commission"],
+      features: ["Public profile", "Apply to up to 5 projects", "15% commission"],
       cta: "Start Free",
       filled: false,
       icon: "gift",
     },
     {
-      name: "Elite",
-      price: "$79/mo",
-      features: ["Top-tier promotion", "5% commission", "Priority support"],
-      cta: "Go Elite",
-      filled: true,
-      icon: "star",
-      tag: "Best Value",
-    },
-    {
       name: "Pro",
       price: "$29/mo",
-      features: ["Promoted profile", "Unlimited applications", "10% commission"],
+      features: ["Promoted profile", "Unlimited project applications", "10% commission"],
       cta: "Upgrade to Pro",
-      filled: false,
+      filled: true,
       icon: "briefcase",
+      tag: "Most Popular",
+    },
+    {
+      name: "Elite",
+      price: "$79/mo",
+      features: ["Everything in Pro", "Unlimited project applications", "Top-tier promotion", "5% commission", "Priority support"],
+      cta: "Go Elite",
+      filled: false,
+      icon: "star",
     },
   ],
 };

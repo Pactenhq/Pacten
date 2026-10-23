@@ -111,18 +111,34 @@ export default function DealsPage() {
                         href={`/dashboard/deals/${deal.id}`}
                         className="font-medium text-blue-600 hover:underline"
                       >
-                        {deal.title}
+                        {String(deal.title ?? "").replace(/^Deal:\s*/i, "")}
                       </Link>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">
-                      {deal.creator?.email ?? deal.creator?.name ?? "-"}
+                      {(() => {
+                        // Show the COUNTERPARTY's name (never a raw email):
+                        // brands see the creator, sellers see the brand.
+                        const partner =
+                          user?.id && deal.brandId === user.id
+                            ? deal.creator
+                            : deal.brand;
+                        const name = [partner?.firstName, partner?.lastName]
+                          .filter(Boolean)
+                          .join(" ")
+                          .trim();
+                        return name || partner?.email || "-";
+                      })()}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">
-                      {deal.agreedBudget ?? "-"}
+                      {deal.agreedBudget != null &&
+                      deal.agreedBudget !== "" &&
+                      Number.isFinite(Number(deal.agreedBudget))
+                        ? `$${Number(deal.agreedBudget).toLocaleString()}`
+                        : "-"}
                     </td>
                     <td className="px-6 py-4">
                       <span
-                        className={`rounded-full px-3 py-1 text-xs font-medium ${statusColor(deal.status)}`}
+                        className={`rounded-full px-3 py-1 text-xs font-medium capitalize ${statusColor(deal.status)}`}
                       >
                         {deal.status}
                       </span>

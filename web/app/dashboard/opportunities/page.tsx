@@ -92,11 +92,23 @@ export default function OpportunitiesPage() {
         <div className="mt-8 flex flex-col gap-4">
           {items.map((o) => {
             const other = isBrand ? o.recipient : o.brand;
+            const personName = [other?.firstName, other?.lastName]
+              .filter(Boolean)
+              .join(" ")
+              .trim();
             const otherName =
               other?.displayName ||
               other?.companyName ||
+              personName ||
               other?.email ||
               "Unknown";
+            const budgetNum = Number(
+              String(o.budget ?? "").replace(/[^0-9.]/g, "")
+            );
+            const budgetLabel =
+              o.budget && Number.isFinite(budgetNum) && budgetNum > 0
+                ? `$${budgetNum.toLocaleString()}`
+                : o.budget;
             return (
               <Card key={o.id} className="p-6">
                 <div className="flex flex-wrap items-start justify-between gap-4">
@@ -116,7 +128,7 @@ export default function OpportunitiesPage() {
                       <span className="font-semibold text-ink-700">
                         {otherName}
                       </span>
-                      {o.budget ? ` · Budget: ${o.budget}` : ""}
+                      {o.budget ? ` · Budget: ${budgetLabel}` : ""}
                     </p>
                     {o.description && (
                       <p className="mt-2 whitespace-pre-line text-[15px] text-ink-700">

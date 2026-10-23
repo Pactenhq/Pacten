@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/cn";
 import { Card } from "@/components/ui/Card";
@@ -607,9 +608,16 @@ export function PerformanceInsights({
       </div>
 
       <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        {Array.from({ length: 6 }).map((_, i) => (
+        {[
+          "Profile Quality",
+          "Campaign Reach",
+          "Engagement",
+          "Response Rate",
+          "Completion Rate",
+          "Review Score",
+        ].map((label) => (
           <div
-            key={i}
+            key={label}
             className="rounded-2xl border border-brand-100 bg-brand-50/50 p-4"
           >
             <p className="text-[22px] font-extrabold tracking-tight">
@@ -617,7 +625,7 @@ export function PerformanceInsights({
               <span className="text-ink-900">/100</span>
             </p>
             <p className="mt-1 text-[13px] font-medium text-ink-700">
-              Profile Quality
+              {label}
             </p>
           </div>
         ))}
@@ -710,7 +718,7 @@ export function TrustScore({
             {tier}
           </span>
           <p className="text-[32px] font-extrabold tracking-tight">
-            <span className="text-brand">{score}</span>
+            <span className="text-brand">{Math.min(score, 100)}</span>
             <span className="text-ink-900">/100</span>
           </p>
         </div>
@@ -750,50 +758,45 @@ export function TrustScore({
 }
 
 export function AvailabilityCalendar() {
-  // July 2025: the 1st is a Tuesday. Status pills .
-  const weeks: (number | null)[][] = [
-    [null, null, 1, 2, 3, 4, 5],
-    [6, 7, 8, 9, 10, 11, 12],
-    [13, 14, 15, 16, 17, 18, 19],
-    [20, 21, 22, 23, 24, 25, 26],
-    [27, 28, 29, 30, 31, null, null],
+  // Real calendar for the CURRENT month (the widget previously rendered
+  // a hard-coded July 2025 grid with invented per-day statuses and dead
+  // prev/next buttons). Prev/next now navigate; today is highlighted;
+  // no fake availability statuses are shown.
+  const [view, setView] = useState(() => {
+    const n = new Date();
+    return { year: n.getFullYear(), month: n.getMonth() };
+  });
+  const today = new Date();
+  const firstDow = new Date(view.year, view.month, 1).getDay();
+  const daysInMonth = new Date(view.year, view.month + 1, 0).getDate();
+  const cells: (number | null)[] = [
+    ...Array.from({ length: firstDow }, () => null),
+    ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
   ];
-  const marked: Record<number, "Active" | "Available" | "Blocked"> = {
-    1: "Active",
-    2: "Available",
-    3: "Active",
-    7: "Available",
-    8: "Available",
-    10: "Active",
-    15: "Active",
-    18: "Available",
-    24: "Blocked",
-    30: "Blocked",
-  };
+  while (cells.length % 7 !== 0) cells.push(null);
+  const weeks: (number | null)[][] = [];
+  for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
+  const marked: Record<number, "Active" | "Available" | "Blocked"> = {};
+  const isToday = (day: number) =>
+    day === today.getDate() &&
+    view.month === today.getMonth() &&
+    view.year === today.getFullYear();
+  const shiftMonth = (delta: number) =>
+    setView((v) => {
+      const d = new Date(v.year, v.month + delta, 1);
+      return { year: d.getFullYear(), month: d.getMonth() };
+    });
   return (
     <section>
       <h2 className="text-[22px] font-extrabold text-ink-900">
         Availability & Calendar
       </h2>
-      <div className="mt-3 flex items-center gap-6 text-[13px] font-medium text-ink-700">
-        <span className="inline-flex items-center gap-2">
-          <span className="h-2.5 w-2.5 rounded-full bg-brand" aria-hidden />
-          Active
-        </span>
-        <span className="inline-flex items-center gap-2">
-          <span className="h-2.5 w-2.5 rounded-full bg-success" aria-hidden />
-          Available
-        </span>
-        <span className="inline-flex items-center gap-2">
-          <span className="h-2.5 w-2.5 rounded-full bg-red-500" aria-hidden />
-          Blocked
-        </span>
-      </div>
       <Card className="mt-4 p-6">
         <div className="flex items-center justify-center gap-3">
           <button
             type="button"
             aria-label="Previous month"
+            onClick={() => shiftMonth(-1)}
             className="flex h-8 w-8 items-center justify-center rounded-full text-ink-400 hover:bg-ink-50"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -801,10 +804,13 @@ export function AvailabilityCalendar() {
               <path d="m14 9-3 3 3 3" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
-          <p className="text-[16px] font-extrabold text-ink-900">7 / 2025</p>
+          <p className="text-[16px] font-extrabold text-ink-900">
+            {view.month + 1} / {view.year}
+          </p>
           <button
             type="button"
             aria-label="Next month"
+            onClick={() => shiftMonth(1)}
             className="flex h-8 w-8 items-center justify-center rounded-full text-ink-400 hover:bg-ink-50"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -830,7 +836,12 @@ export function AvailabilityCalendar() {
               >
                 {day !== null && (
                   <>
-                    <p className="text-right text-[13px] text-ink-700">{day}</p>
+                    <p
+                      className={`text-right text-[13px] ${isToday(day) ? "font-extrabold text-brand" : "text-ink-700"}`}
+                    >
+                      {day}
+                      {isToday(day) ? " · Today" : ""}
+                    </p>
                     {status && (
                       <p className="mt-2 text-center">
                         <span
@@ -884,27 +895,43 @@ export function ServicesCard({ filledAdd = false }: { filledAdd?: boolean }) {
 }
 
 /** Quick actions: outline buttons + tip card (creator/professional dashboards). */
-export function QuickActions({ buttons }: { buttons: string[] }) {
+export function QuickActions({
+  buttons,
+}: {
+  buttons: Array<string | { label: string; href: string }>;
+}) {
   return (
     <section>
       <h2 className="text-[22px] font-extrabold text-ink-900">Quick Actions</h2>
       <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {buttons.map((label) => (
-          <Button
-            key={label}
-            variant="outline"
-            size="lg"
-            className="border-brand-300 text-brand hover:border-brand hover:text-brand"
-          >
-            {label}
-          </Button>
-        ))}
+        {buttons.map((b) => {
+          const label = typeof b === "string" ? b : b.label;
+          const href = typeof b === "string" ? undefined : b.href;
+          const btn = (
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full border-brand-300 text-brand hover:border-brand hover:text-brand"
+            >
+              {label}
+            </Button>
+          );
+          // Entries with an href render as real navigation — the widget
+          // previously rendered every quick action as a dead button.
+          return href ? (
+            <Link key={label} href={href}>
+              {btn}
+            </Link>
+          ) : (
+            <span key={label}>{btn}</span>
+          );
+        })}
       </div>
       <Card className="mt-4 flex items-start gap-4 p-5">
         <IconChip name="lightbulb" />
         <p className="text-[14px] leading-relaxed text-ink-700">
-          <span className="font-bold text-ink-900">Tip:</span> Creators with
-          complete profiles get 3× more campaign requests.
+          <span className="font-bold text-ink-900">Tip:</span>{" "}
+          Creators with complete profiles get 3× more campaign requests.
         </p>
       </Card>
     </section>
@@ -1100,7 +1127,7 @@ export function RewardsCards() {
                 >
                   {g.badge}
                 </span>
-                <span className="font-bold text-ink-900">0£</span>
+                <span className="font-bold text-ink-900">$0</span>
               </li>
             ))}
           </ul>
@@ -1188,6 +1215,18 @@ export function CommissionHistory({
 }: {
   entries: { campaign: string; date: string; amount: string }[];
 }) {
+  // The empty state renders ONLY when there are no entries — it used
+  // to be appended unconditionally under the populated list.
+  if (entries.length === 0) {
+    return (
+      <Card>
+        <EmptyState
+          title="No commission history yet"
+          body="Your commission earnings from completed campaigns will appear here."
+        />
+      </Card>
+    );
+  }
   return (
     <div>
       <div className="overflow-hidden rounded-2xl border border-ink-100 bg-white">
@@ -1214,12 +1253,6 @@ export function CommissionHistory({
           ))}
         </ul>
       </div>
-      <Card className="mt-4">
-        <EmptyState
-          title="No commission history yet"
-          body="Your commission earnings from completed campaigns will appear here."
-        />
-      </Card>
     </div>
   );
 }
@@ -1229,6 +1262,16 @@ export function DiscountHistory({
 }: {
   entries: { campaign: string; date: string; amount: string }[];
 }) {
+  if (entries.length === 0) {
+    return (
+      <Card>
+        <EmptyState
+          title="No discount history yet"
+          body="Your referral and milestone discounts will appear here once you earn them."
+        />
+      </Card>
+    );
+  }
   return (
     <div>
       <div className="overflow-hidden rounded-2xl border border-ink-100 bg-white">
@@ -1255,12 +1298,6 @@ export function DiscountHistory({
           ))}
         </ul>
       </div>
-      <Card className="mt-4">
-        <EmptyState
-          title="No discount history yet"
-          body="Your referral and milestone discounts will appear here once you earn them."
-        />
-      </Card>
     </div>
   );
 }
@@ -1271,6 +1308,18 @@ export function RecentReferrals({
 }: {
   rows: { name: string; joined: string; earnings: string; status: string }[];
 }) {
+  // Empty state only when there are no rows (it was appended under the
+  // populated list unconditionally).
+  if (rows.length === 0) {
+    return (
+      <Card>
+        <EmptyState
+          title="No referrals yet"
+          body="Share your referral link with friends and start earning rewards when they join Pacten."
+        />
+      </Card>
+    );
+  }
   return (
     <div>
       <div className="overflow-hidden rounded-2xl border border-ink-100 bg-white">
@@ -1310,12 +1359,6 @@ export function RecentReferrals({
           ))}
         </ul>
       </div>
-      <Card className="mt-4">
-        <EmptyState
-          title="No referrals yet"
-          body="Share your referral link with friends and start earning rewards when they join CreatorHub."
-        />
-      </Card>
     </div>
   );
 }
