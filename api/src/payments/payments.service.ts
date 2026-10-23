@@ -599,6 +599,22 @@ export class PaymentsService implements OnModuleInit {
     });
   }
 
+  // The deal's succeeded payment, readable by EITHER party to the deal.
+  // (myPayments only lists payments the caller made, so the payee —
+  // creator/professional — never saw the payment on their deal page.)
+  async getPaymentForDeal(
+    dealId: string,
+    userId: string,
+  ): Promise<Payment | null> {
+    const payment = await this.paymentsRepo.findOne({
+      where: { dealId, status: PaymentStatus.SUCCEEDED },
+      order: { createdAt: 'DESC' },
+    });
+    if (!payment) return null;
+    // Reuses getPayment's party check (payer, deal brand or deal creator).
+    return this.getPayment(payment.id, userId);
+  }
+
   async getPayment(paymentId: string, userId: string): Promise<Payment> {
     const payment = await this.paymentsRepo.findOne({
       where: { id: paymentId },

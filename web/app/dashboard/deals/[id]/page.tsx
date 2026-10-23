@@ -89,14 +89,13 @@ export default function DealDetailPage() {
       );
     } catch {}
     try {
-      const payments = await api.myPayments();
-      const mine = (Array.isArray(payments) ? payments : []).find(
-        (p: any) => p.dealId === id && p.status === "succeeded"
-      );
-      setPayment(mine ?? null);
-      if (mine) {
+      // Deal-scoped read: visible to both parties. (myPayments only lists
+      // payments the caller made, so the creator never saw the payment.)
+      const p = await api.paymentForDeal(id).catch(() => null);
+      setPayment(p ?? null);
+      if (p) {
         try {
-          setCommission(await api.paymentCommission(mine.id));
+          setCommission(await api.paymentCommission(p.id));
         } catch {}
       }
     } catch {}
@@ -195,7 +194,9 @@ export default function DealDetailPage() {
   const isCreator = user?.role === "creator" || user?.role === "professional";
 
   const fmtMoney = (cents: number, currency = "usd") =>
-    `${(cents / 100).toFixed(2)} ${currency.toUpperCase()}`;
+    Number.isFinite(cents)
+      ? `${(cents / 100).toFixed(2)} ${(currency || "usd").toUpperCase()}`
+      : "—";
 
   if (loading) {
     return (

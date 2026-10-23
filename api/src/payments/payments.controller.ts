@@ -69,6 +69,11 @@ export class PaymentsController {
     return this.paymentsService.getCommissionForPayment(id, req.user.id);
   }
 
+  @Get('by-deal/:dealId')
+  paymentForDeal(@Request() req: any, @Param('dealId') dealId: string) {
+    return this.paymentsService.getPaymentForDeal(dealId, req.user.id);
+  }
+
   @Get('payouts/my')
   myPayouts(@Request() req: any) {
     return this.payoutsService.myPayouts(req.user.id);

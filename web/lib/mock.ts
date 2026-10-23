@@ -860,12 +860,12 @@ export const trustScoreEmptyBreakdown: TrustScoreBreakdown[] = [
 export const referralInfo = {
   title: "Invite friends and earn rewards",
   subtitle:
-    "Share CreatorHub with your network and get rewarded when they join.",
+    "Share Pacten with your network and get rewarded when they join.",
   linkLabel: "Your Referral Link",
-  link: "https://creatorhub.io/ref/YOURCODE",
+  link: "",
   linkHint: "Share this link to earn rewards when friends sign up.",
   codeLabel: "Your Referral Code",
-  code: "YOURCODE",
+  code: "",
   codeStatus: "Active",
   codeHint: "Friends can also use your code during signup.",
 };
@@ -1030,41 +1030,95 @@ export interface HomePlan {
   tag?: string;
 }
 
-export const homePricingPlans: HomePlan[] = [
-  {
-    name: "Free",
-    price: "$0/mo",
-    features: ["Browse creators", "Browse professionals", "Brand profile"],
-    cta: "Start Free",
-    filled: false,
-    icon: "gift",
-  },
-  {
-    name: "Elite",
-    price: "$79/mo",
-    features: [
-      "Team workspaces",
-      "Premium search placement",
-      "Priority support",
-    ],
-    cta: "Go Elite",
-    filled: true,
-    icon: "star",
-    tag: "Best Value",
-  },
-  {
-    name: "Pro",
-    price: "$19/mo",
-    features: [
-      "Priority search access",
-      "More active campaigns",
-      "AI Campaign Assistant",
-    ],
-    cta: "Upgrade to Pro",
-    filled: false,
-    icon: "briefcase",
-  },
-];
+// Per-role home pricing cards — names/prices follow the client's FINAL
+// pricing (Oct 21, 2026): every role Free $0 / Pro $29; top tier is
+// "Business" ($79) for brands and "Elite" ($79) for creators/professionals.
+// The transactional source of truth stays the subscription plans API.
+export type HomePlanRole = "brand" | "creator" | "professional";
+
+export const homePricingPlans: Record<HomePlanRole, HomePlan[]> = {
+  brand: [
+    {
+      name: "Free",
+      price: "$0/mo",
+      features: ["Browse creators", "1 job post", "1 hire"],
+      cta: "Start Free",
+      filled: false,
+      icon: "gift",
+    },
+    {
+      name: "Business",
+      price: "$79/mo",
+      features: ["Dedicated manager", "Promoted visibility", "Advanced analytics"],
+      cta: "Go Business",
+      filled: true,
+      icon: "star",
+      tag: "Best Value",
+    },
+    {
+      name: "Pro",
+      price: "$29/mo",
+      features: ["Unlimited job posts & hires", "Featured campaigns", "Priority support"],
+      cta: "Upgrade to Pro",
+      filled: false,
+      icon: "briefcase",
+    },
+  ],
+  creator: [
+    {
+      name: "Free",
+      price: "$0/mo",
+      features: ["Public profile", "Up to 5 applications", "15% commission"],
+      cta: "Start Free",
+      filled: false,
+      icon: "gift",
+    },
+    {
+      name: "Elite",
+      price: "$79/mo",
+      features: ["Top-tier promotion", "5% commission", "Priority support"],
+      cta: "Go Elite",
+      filled: true,
+      icon: "star",
+      tag: "Best Value",
+    },
+    {
+      name: "Pro",
+      price: "$29/mo",
+      features: ["Promoted profile", "Unlimited applications", "10% commission"],
+      cta: "Upgrade to Pro",
+      filled: false,
+      icon: "briefcase",
+    },
+  ],
+  professional: [
+    {
+      name: "Free",
+      price: "$0/mo",
+      features: ["Public profile", "Up to 5 applications", "15% commission"],
+      cta: "Start Free",
+      filled: false,
+      icon: "gift",
+    },
+    {
+      name: "Elite",
+      price: "$79/mo",
+      features: ["Top-tier promotion", "5% commission", "Priority support"],
+      cta: "Go Elite",
+      filled: true,
+      icon: "star",
+      tag: "Best Value",
+    },
+    {
+      name: "Pro",
+      price: "$29/mo",
+      features: ["Promoted profile", "Unlimited applications", "10% commission"],
+      cta: "Upgrade to Pro",
+      filled: false,
+      icon: "briefcase",
+    },
+  ],
+};
 
 export const homeSearchChips = [
   "Fashion",

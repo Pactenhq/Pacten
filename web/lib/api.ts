@@ -321,6 +321,9 @@ export const api = {
   payoutForDeal: (dealId: string) =>
     apiFetch<any>(`/payments/payouts/by-deal/${dealId}`, { auth: true }),
 
+  paymentForDeal: (dealId: string) =>
+    apiFetch<any>(`/payments/by-deal/${dealId}`, { auth: true }),
+
   // Subscriptions (M4)
   subscriptionPlans: (role?: string) =>
     apiFetch<any[]>(
