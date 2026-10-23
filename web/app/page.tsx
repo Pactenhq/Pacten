@@ -371,6 +371,7 @@ function PlanIcon({ icon }: { icon: "gift" | "star" | "briefcase" }) {
 
 function PricingSection() {
   const toggles = ["For Business", "For Creator", "For Professional"];
+  const roles = ["brand", "creator", "professional"] as const;
   const [active, setActive] = useState(0);
   return (
     <section id="pricing" className="mx-auto max-w-[1380px] px-6 py-16 text-center lg:px-12">
@@ -407,7 +408,7 @@ function PricingSection() {
         </div>
       </div>
       <Stagger className="mx-auto mt-10 grid max-w-[1100px] gap-5 text-left md:grid-cols-3" from="scale">
-        {homePricingPlans.map((plan) => (
+        {homePricingPlans[roles[active]].map((plan) => (
           <div key={plan.name} className="relative">
             {plan.tag && (
               <span className="animate-glow absolute -top-3.5 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-md bg-brand px-3 py-1 text-xs font-bold text-white">
@@ -427,7 +428,7 @@ function PricingSection() {
                   </li>
                 ))}
               </ul>
-              <Link href="/signup/brand" className="block">
+              <Link href={`/signup/${roles[active]}`} className="block">
                 <Button variant={plan.filled ? "primary" : "outline"} className="mt-7 w-full" size="lg">
                   {plan.cta}
                 </Button>
