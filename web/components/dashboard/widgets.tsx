@@ -1050,9 +1050,8 @@ export function ReferralHero({
               {info.codeStatus}
             </span>
           </div>
-          <p className="mt-4 inline-block rounded-xl bg-brand-50/60 px-5 py-3 text-[16px] font-extrabold tracking-[0.15em]">
-            <span className="text-brand">YOUR</span>
-            <span className="text-ink-900">CODE</span>
+          <p className="mt-4 inline-block rounded-xl bg-brand-50/60 px-5 py-3 text-[16px] font-extrabold tracking-[0.15em] text-ink-900">
+            {info.code}
           </p>
           <p className="mt-3 text-[13px] text-ink-500">{info.codeHint}</p>
         </Card>
