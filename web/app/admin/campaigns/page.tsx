@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { api } from "@/lib/api";
 
 const STATUSES = ["draft", "open", "closed", "completed"];
@@ -15,6 +16,10 @@ export default function AdminCampaignsPage() {
   const [status, setStatus] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [pendingDelete, setPendingDelete] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
 
   const load = () => {
     setLoading(true);
@@ -50,8 +55,7 @@ export default function AdminCampaignsPage() {
     }
   };
 
-  const remove = async (id: string, title: string) => {
-    if (!window.confirm(`Delete the campaign "${title}"? This cannot be undone.`)) return;
+  const remove = async (id: string) => {
     setBusy(id);
     setError("");
     try {
@@ -153,7 +157,7 @@ export default function AdminCampaignsPage() {
                         size="sm"
                         variant="danger-outline"
                         disabled={busy === c.id}
-                        onClick={() => remove(c.id, c.title)}
+                        onClick={() => setPendingDelete({ id: c.id, title: c.title })}
                       >
                         Delete
                       </Button>
@@ -165,6 +169,20 @@ export default function AdminCampaignsPage() {
           </div>
         )}
       </Card>
+      {pendingDelete && (
+        <ConfirmDialog
+          title="Delete campaign"
+          message={`Delete the campaign "${pendingDelete.title}"? This cannot be undone.`}
+          confirmLabel="Delete"
+          danger
+          busy={busy === pendingDelete.id}
+          onCancel={() => setPendingDelete(null)}
+          onConfirm={async () => {
+            await remove(pendingDelete.id);
+            setPendingDelete(null);
+          }}
+        />
+      )}
     </div>
   );
 }

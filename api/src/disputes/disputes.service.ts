@@ -83,10 +83,15 @@ export class DisputesService {
   }
 
   async myDisputes(userId: string) {
-    return this.disputesRepo.find({
-      where: [{ filedById: userId }],
-      order: { createdAt: 'DESC' },
-    });
+    // Both parties to a deal see its disputes, not only the filer:
+    // the filer is always a party (enforced in fileDispute), so joining
+    // the deal covers filed-by-me plus filed-by-the-other-party.
+    return this.disputesRepo
+      .createQueryBuilder('dispute')
+      .innerJoin('dispute.deal', 'deal')
+      .where('deal.brandId = :userId OR deal.creatorId = :userId', { userId })
+      .orderBy('dispute.createdAt', 'DESC')
+      .getMany();
   }
 
   async getDispute(userId: string, role: string, id: string) {

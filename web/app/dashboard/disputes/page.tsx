@@ -38,7 +38,7 @@ export default function DisputesPage() {
           Disputes
         </h1>
         <p className="mt-1 text-[15px] text-ink-500">
-          Issues you raised on your deals. Our team reviews each one.
+          Disputes on your deals. Our team reviews each one.
         </p>
       </div>
       <Card className="mt-6 p-6">

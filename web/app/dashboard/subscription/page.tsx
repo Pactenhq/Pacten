@@ -5,6 +5,7 @@ import Link from "next/link";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Tag } from "@/components/ui/Tag";
 import { dashboardUser, brandNav, creatorNav, professionalNav } from "@/lib/mock";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -37,6 +38,7 @@ export default function SubscriptionPage() {
   const [periodEnd, setPeriodEnd] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
+  const [confirmCancel, setConfirmCancel] = useState(false);
 
   useEffect(() => {
     api
@@ -51,8 +53,6 @@ export default function SubscriptionPage() {
   }, []);
 
   const cancel = async () => {
-    if (!confirm("Cancel your subscription at the end of the billing period?"))
-      return;
     setCancelling(true);
     try {
       const sub = await api.cancelSubscription();
@@ -147,7 +147,7 @@ export default function SubscriptionPage() {
                 ) : (
                   <button
                     type="button"
-                    onClick={cancel}
+                    onClick={() => setConfirmCancel(true)}
                     disabled={cancelling || !plan || plan.priceCentsMonthly === 0}
                     className="inline-flex h-12 w-full items-center justify-center rounded-xl border border-danger bg-white px-6 text-[15px] font-semibold text-danger transition-colors hover:bg-danger-bg disabled:opacity-40"
                   >
@@ -210,6 +210,19 @@ export default function SubscriptionPage() {
           </div>
         )}
       </div>
+      {confirmCancel && (
+        <ConfirmDialog
+          title="Cancel subscription"
+          message="Cancel your subscription at the end of the billing period?"
+          confirmLabel="Cancel subscription"
+          busy={cancelling}
+          onCancel={() => setConfirmCancel(false)}
+          onConfirm={async () => {
+            await cancel();
+            setConfirmCancel(false);
+          }}
+        />
+      )}
     </DashboardShell>
   );
 }
