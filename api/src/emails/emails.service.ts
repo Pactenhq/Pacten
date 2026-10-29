@@ -2,11 +2,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 /**
- * Transactional emails (M5). Provider: Resend (client-owned account).
- * Without RESEND_API_KEY the service runs in log-only mode — templates are
- * still built and every send is logged, so flows can be verified locally.
- * Set EMAIL_FROM to override the default sender (needs domain verification
- * in Resend: pacten.net DNS, pending from Sania).
+ * Transactional emails (M4 — Admin, Disputes & Notifications). Provider:
+ * Resend (client-owned account). Without RESEND_API_KEY the service runs
+ * in log-only mode — templates are still built and every send is logged,
+ * so flows can be verified locally. Set EMAIL_FROM to override the
+ * default sender (sending domain pacten.info, verified in Resend).
  */
 @Injectable()
 export class EmailsService {
@@ -81,6 +81,18 @@ ${body}
     );
   }
 
+  sendPasswordResetEmail(to: string, token: string) {
+    const url = `${this.frontendUrl}/reset-password?token=${token}`;
+    return this.send(
+      to,
+      'Reset your Pacten password',
+      this.layout(
+        'Reset your password',
+        `<p>We received a request to reset your Pacten password. Click the button below to choose a new password. This link expires in 1 hour.</p>${this.btn(url, 'Reset password')}<p style="font-size:12px;color:#888;">Or paste this link: ${url}</p><p style="font-size:12px;color:#888;">If you did not request this, you can safely ignore this email.</p>`,
+      ),
+    );
+  }
+
   sendApplicationReceived(to: string, campaignTitle: string) {
     return this.send(
       to,
@@ -115,6 +127,17 @@ ${body}
     );
   }
 
+  sendContractDeclined(to: string, contractTitle: string) {
+    return this.send(
+      to,
+      'Contract declined — Pacten',
+      this.layout(
+        'Contract declined',
+        `<p>The contract <strong>${contractTitle}</strong> was declined by the other party. You can review it in your dashboard and generate a new contract if needed.</p>`,
+      ),
+    );
+  }
+
   sendPaymentSucceeded(to: string, amount: string, dealTitle: string) {
     return this.send(
       to,
@@ -140,6 +163,29 @@ ${body}
     );
   }
 
+  sendPayoutRequested(to: string, amountCents: number) {
+    const amount = `$${(amountCents / 100).toFixed(2)}`;
+    return this.send(
+      to,
+      'Payout request received — Pacten',
+      this.layout(
+        'Payout request received',
+        `<p>Your referral payout request of <strong>${amount}</strong> was received and is pending admin review. Approved payouts are transferred manually.</p>`,
+      ),
+    );
+  }
+
+  sendSubscriptionCancelled(to: string, planName: string, accessUntil?: string) {
+    return this.send(
+      to,
+      'Subscription cancelled — Pacten',
+      this.layout(
+        'Subscription cancelled',
+        `<p>Your <strong>${planName}</strong> subscription has been cancelled.${accessUntil ? ` You will keep access until <strong>${accessUntil}</strong>.` : ''}</p>`,
+      ),
+    );
+  }
+
   sendDisputeFiled(to: string, disputeId: string, dealId: string) {
     return this.send(
       to,
@@ -158,6 +204,20 @@ ${body}
       this.layout(
         resolved ? 'Dispute resolved' : 'Dispute closed',
         `<p>Your dispute (ref ${disputeId.slice(0, 8)}) has been ${resolved ? 'resolved' : 'closed'} by our team. You can view the resolution notes in your dashboard.</p>`,
+      ),
+    );
+  }
+
+  sendNewMessage(to: string, senderName: string, preview: string) {
+    const excerpt =
+      preview.length > 120 ? `${preview.slice(0, 120)}…` : preview;
+    const url = `${this.frontendUrl}/dashboard/messages`;
+    return this.send(
+      to,
+      `New message from ${senderName} — Pacten`,
+      this.layout(
+        'New message',
+        `<p><strong>${senderName}</strong> sent you a message:</p><p style="background:#f6f6f6;padding:12px;border-radius:8px;">${excerpt}</p>${this.btn(url, 'View messages')}`,
       ),
     );
   }

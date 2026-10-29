@@ -15,6 +15,7 @@ import { CreatorProfile } from '../profiles/creator-profile.entity';
 import { ProfessionalProfile } from '../profiles/professional-profile.entity';
 import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
+import { ConfigService } from '@nestjs/config';
 import { ReferralsService } from '../referrals/referrals.service';
 import { EmailsService } from '../emails/emails.service';
 
@@ -32,6 +33,7 @@ export class AuthService {
     private jwtService: JwtService,
     private referralsService: ReferralsService,
     private emails: EmailsService,
+    private config: ConfigService,
   ) {}
 
   async signup(dto: SignupDto) {
@@ -175,11 +177,15 @@ export class AuthService {
     user.passwordResetExpiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
     await this.usersRepo.save(user);
 
-    // TODO: send email via transactional email service (M5)
+    await this.emails.sendPasswordResetEmail(user.email, token);
+
+    // The reset link travels by email. The token is also returned outside
+    // production so local/dev tests can complete the flow without an
+    // inbox; it is never exposed in production.
+    const isProduction = this.config.get('NODE_ENV') === 'production';
     return {
       message: 'If an account exists, a reset link has been sent',
-      // Exposed for development/testing only — remove in production
-      resetToken: token,
+      ...(isProduction ? {} : { resetToken: token }),
     };
   }
 

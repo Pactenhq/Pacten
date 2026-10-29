@@ -186,7 +186,7 @@ export class ContractsService {
     contract.acceptedAt = new Date();
     const saved = await this.contractsRepo.save(contract);
 
-    // Notify the generating party (M5 transactional email).
+    // Notify the generating party (transactional email).
     try {
       const other = await this.usersRepo.findOne({
         where: { id: contract.generatedById },
@@ -231,6 +231,20 @@ export class ContractsService {
     }
 
     contract.status = ContractStatus.DECLINED;
-    return this.contractsRepo.save(contract);
+    const saved = await this.contractsRepo.save(contract);
+
+    // Notify the generating party (transactional email).
+    try {
+      const other = await this.usersRepo.findOne({
+        where: { id: contract.generatedById },
+      });
+      if (other && other.id !== userId) {
+        await this.emails.sendContractDeclined(other.email, saved.title);
+      }
+    } catch {
+      // Email is best-effort.
+    }
+
+    return saved;
   }
 }

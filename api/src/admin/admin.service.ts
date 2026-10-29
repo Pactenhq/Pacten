@@ -1,5 +1,6 @@
 import {
   Injectable,
+  Logger,
   NotFoundException,
   BadRequestException,
   OnModuleInit,
@@ -15,6 +16,7 @@ import {
   ReferralPayout,
   ReferralPayoutStatus,
 } from '../referrals/referral-payout.entity';
+import { CommissionRule } from '../payments/commission-rule.entity';
 
 // Dev/demo admin. Only seeded when none exists and NOT in production.
 const DEMO_ADMIN_EMAIL = 'admin@pacten.demo';
@@ -22,6 +24,8 @@ const DEMO_ADMIN_PASSWORD = 'AdminPass123';
 
 @Injectable()
 export class AdminService implements OnModuleInit {
+  private readonly logger = new Logger(AdminService.name);
+
   constructor(
     @InjectRepository(User)
     private readonly usersRepo: Repository<User>,
@@ -31,13 +35,18 @@ export class AdminService implements OnModuleInit {
     private readonly disputesRepo: Repository<Dispute>,
     @InjectRepository(ReferralPayout)
     private readonly payoutsRepo: Repository<ReferralPayout>,
+    @InjectRepository(CommissionRule)
+    private readonly rulesRepo: Repository<CommissionRule>,
     private readonly config: ConfigService,
   ) {}
 
   async onModuleInit() {
+    await this.bootstrapAdminFromEnv();
     if (this.config.get('NODE_ENV') === 'production') return;
+    // Keyed by the demo email (not "any admin"): the env bootstrap admin
+    // must not suppress the dev demo admin, or dev/test logins break.
     const existing = await this.usersRepo.findOne({
-      where: { role: UserRole.ADMIN },
+      where: { email: DEMO_ADMIN_EMAIL },
     });
     if (existing) return;
     const passwordHash = await bcrypt.hash(DEMO_ADMIN_PASSWORD, 12);
@@ -50,6 +59,46 @@ export class AdminService implements OnModuleInit {
         lastName: 'Admin',
         status: UserStatus.ACTIVE,
       }),
+    );
+  }
+
+  /**
+   * One-time platform admin creation from env vars (staging/production).
+   * Set ADMIN_EMAIL + ADMIN_PASSWORD (min 8 chars), boot once, verify
+   * login, then REMOVE ADMIN_PASSWORD. The password is never logged.
+   * Skips silently when vars are absent; never escalates an existing
+   * non-admin user and never overwrites an existing account.
+   */
+  private async bootstrapAdminFromEnv() {
+    const email = this.config.get('ADMIN_EMAIL');
+    const password = this.config.get('ADMIN_PASSWORD');
+    if (!email || !password) return;
+    if (password.length < 8) {
+      this.logger.warn('ADMIN_PASSWORD too short — admin bootstrap skipped.');
+      return;
+    }
+    const existing = await this.usersRepo.findOne({ where: { email } });
+    if (existing) {
+      if (existing.role !== UserRole.ADMIN) {
+        this.logger.warn(
+          `ADMIN_EMAIL ${email} already exists as a non-admin — bootstrap skipped.`,
+        );
+      }
+      return;
+    }
+    const passwordHash = await bcrypt.hash(password, 12);
+    await this.usersRepo.save(
+      this.usersRepo.create({
+        email,
+        passwordHash,
+        role: UserRole.ADMIN,
+        firstName: 'Pacten',
+        lastName: 'Admin',
+        status: UserStatus.ACTIVE,
+      }),
+    );
+    this.logger.log(
+      `Admin account created for ${email} — remove ADMIN_PASSWORD now.`,
     );
   }
 
@@ -71,6 +120,23 @@ export class AdminService implements OnModuleInit {
       this.usersRepo.count(),
     ]);
     return { users, usersByRole, deals, openDisputes, pendingPayouts };
+  }
+
+  /** Platform settings: commission rules (rates the payment flow reads). */
+  async listCommissionRules() {
+    return this.rulesRepo.find({ order: { role: 'ASC', tier: 'ASC' } });
+  }
+
+  async updateCommissionRule(id: string, rateBasisPoints: number) {
+    if (!Number.isInteger(rateBasisPoints) || rateBasisPoints < 0 || rateBasisPoints > 10000) {
+      throw new BadRequestException(
+        'rateBasisPoints must be a whole number between 0 and 10000 (0–100%)',
+      );
+    }
+    const rule = await this.rulesRepo.findOne({ where: { id } });
+    if (!rule) throw new NotFoundException('Commission rule not found');
+    rule.rateBasisPoints = rateBasisPoints;
+    return this.rulesRepo.save(rule);
   }
 
   async listUsers(opts: {

@@ -5,8 +5,10 @@ import {
   Patch,
   Body,
   Param,
+  Query,
   UseGuards,
   Request,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { DealsService } from './deals.service';
 import {
@@ -34,6 +36,19 @@ export class DealsController {
   @Get()
   findMyDeals(@Request() req: any) {
     return this.dealsService.findMyDeals(req.user.id);
+  }
+
+  // Admin: all deals (M4 deal/payment overview)
+  @Get('admin/all')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
+  adminList(
+    @Query('status') status?: string,
+    @Query('search') search?: string,
+    @Query('take', new ParseIntPipe({ optional: true })) take?: number,
+    @Query('skip', new ParseIntPipe({ optional: true })) skip?: number,
+  ) {
+    return this.dealsService.adminList({ status, search, take, skip });
   }
 
   @Get(':id')

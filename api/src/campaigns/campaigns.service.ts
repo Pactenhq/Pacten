@@ -138,6 +138,84 @@ export class CampaignsService {
     await this.campaigns.remove(campaign);
   }
 
+  // ---------- Admin (M4: job/campaign management) ----------
+
+  private safeCampaign(campaign: Campaign, applicationCount: number) {
+    const b: any = (campaign as any).brand;
+    return {
+      ...campaign,
+      applicationCount,
+      brand: b
+        ? {
+            id: b.id,
+            email: b.email,
+            firstName: b.firstName,
+            lastName: b.lastName,
+            role: b.role,
+          }
+        : null,
+    };
+  }
+
+  async adminList(opts: {
+    status?: string;
+    search?: string;
+    take?: number;
+    skip?: number;
+  }) {
+    const take = Math.min(Math.max(opts.take ?? 50, 1), 100);
+    const skip = Math.max(opts.skip ?? 0, 0);
+    const qb = this.campaigns
+      .createQueryBuilder('c')
+      .leftJoinAndSelect('c.brand', 'brand')
+      .orderBy('c.createdAt', 'DESC');
+    if (opts.status) {
+      qb.andWhere('c.status = :status', { status: opts.status });
+    }
+    if (opts.search) {
+      qb.andWhere('(c.title ILIKE :search OR c.description ILIKE :search)', {
+        search: `%${opts.search}%`,
+      });
+    }
+    const [list, total] = await qb.take(take).skip(skip).getManyAndCount();
+    const ids = list.map((c) => c.id);
+    const counts =
+      ids.length > 0
+        ? await this.applications
+            .createQueryBuilder('a')
+            .select('a.campaignId', 'campaignId')
+            .addSelect('COUNT(*)', 'count')
+            .where('a.campaignId IN (:...ids)', { ids })
+            .groupBy('a.campaignId')
+            .getRawMany()
+        : [];
+    const countById = new Map<string, number>(
+      counts.map((r) => [r.campaignId, parseInt(r.count, 10)]),
+    );
+    return {
+      campaigns: list.map((c) =>
+        this.safeCampaign(c, countById.get(c.id) ?? 0),
+      ),
+      total,
+      take,
+      skip,
+    };
+  }
+
+  async adminSetStatus(
+    id: string,
+    status: CampaignStatus,
+  ): Promise<Campaign> {
+    const campaign = await this.findOne(id);
+    campaign.status = status;
+    return this.campaigns.save(campaign);
+  }
+
+  async adminRemove(id: string): Promise<void> {
+    const campaign = await this.findOne(id);
+    await this.campaigns.remove(campaign);
+  }
+
   // ---------- Applications ----------
 
   async apply(

@@ -11,6 +11,7 @@ import { Conversation } from './conversation.entity';
 import { Message } from './message.entity';
 import { CreateConversationDto, SendMessageDto } from './dto/messaging.dto';
 import { PlanLimitsService } from '../common/plan-limits/plan-limits.service';
+import { EmailsService } from '../emails/emails.service';
 
 @Injectable()
 export class MessagingService {
@@ -23,6 +24,7 @@ export class MessagingService {
     @InjectRepository(Message)
     private messagesRepo: Repository<Message>,
     private planLimits: PlanLimitsService,
+    private emails: EmailsService,
   ) {}
 
   async createConversation(
@@ -160,6 +162,35 @@ export class MessagingService {
     // Update conversation timestamp
     conversation.updatedAt = new Date();
     await this.conversationsRepo.save(conversation);
+
+    // Notify the other participant by email (transactional email).
+    // One email per message; the in-app realtime feed stays the
+    // primary channel.
+    try {
+      const recipient =
+        conversation.participant1Id === userId
+          ? conversation.participant2
+          : conversation.participant1;
+      const sender =
+        conversation.participant1Id === userId
+          ? conversation.participant1
+          : conversation.participant2;
+      if (recipient?.email) {
+        const senderName =
+          [sender?.firstName, sender?.lastName]
+            .filter(Boolean)
+            .join(' ') ||
+          sender?.email ||
+          'Someone';
+        await this.emails.sendNewMessage(
+          recipient.email,
+          senderName,
+          dto.content,
+        );
+      }
+    } catch {
+      // Email is best-effort.
+    }
 
     return saved;
   }

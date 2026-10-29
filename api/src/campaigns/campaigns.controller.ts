@@ -9,7 +9,9 @@ import {
   Query,
   UseGuards,
   Request,
+  ParseIntPipe,
 } from '@nestjs/common';
+import { IsEnum } from 'class-validator';
 import { CampaignsService } from './campaigns.service';
 import {
   CreateCampaignDto,
@@ -23,6 +25,11 @@ import { UserRole } from '../users/user.entity';
 import { CampaignStatus } from './campaign.entity';
 import { ApplicationStatus } from './application.entity';
 
+class AdminCampaignStatusDto {
+  @IsEnum(CampaignStatus)
+  status: CampaignStatus;
+}
+
 @Controller('campaigns')
 export class CampaignsController {
   constructor(private readonly campaignsService: CampaignsService) {}
@@ -34,6 +41,36 @@ export class CampaignsController {
     @Query('niche') niche?: string,
   ) {
     return this.campaignsService.findAll({ search, niche });
+  }
+
+  // Admin: all campaigns (M4)
+  @Get('admin/all')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  adminList(
+    @Query('status') status?: string,
+    @Query('search') search?: string,
+    @Query('take', new ParseIntPipe({ optional: true })) take?: number,
+    @Query('skip', new ParseIntPipe({ optional: true })) skip?: number,
+  ) {
+    return this.campaignsService.adminList({ status, search, take, skip });
+  }
+
+  @Patch('admin/:id/status')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  adminSetStatus(
+    @Param('id') id: string,
+    @Body() dto: AdminCampaignStatusDto,
+  ) {
+    return this.campaignsService.adminSetStatus(id, dto.status);
+  }
+
+  @Delete('admin/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  adminRemove(@Param('id') id: string) {
+    return this.campaignsService.adminRemove(id);
   }
 
   // Brand: create campaign

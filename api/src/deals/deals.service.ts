@@ -203,6 +203,53 @@ export class DealsService {
     return deal;
   }
 
+  // ---------- Admin (M4: deal/payment overview) ----------
+
+  async adminList(opts: {
+    status?: string;
+    search?: string;
+    take?: number;
+    skip?: number;
+  }) {
+    const take = Math.min(Math.max(opts.take ?? 50, 1), 100);
+    const skip = Math.max(opts.skip ?? 0, 0);
+    const qb = this.dealsRepo
+      .createQueryBuilder('d')
+      .leftJoinAndSelect('d.brand', 'brand')
+      .leftJoinAndSelect('d.creator', 'creator')
+      .orderBy('d.createdAt', 'DESC');
+    if (opts.status) {
+      qb.andWhere('d.status = :status', { status: opts.status });
+    }
+    if (opts.search) {
+      qb.andWhere('d.title ILIKE :search', { search: `%${opts.search}%` });
+    }
+    const [list, total] = await qb.take(take).skip(skip).getManyAndCount();
+    const safe = (u: any) =>
+      u
+        ? {
+            id: u.id,
+            email: u.email,
+            firstName: u.firstName,
+            lastName: u.lastName,
+            role: u.role,
+          }
+        : null;
+    return {
+      deals: list.map((d: any) => {
+        const { application, ...rest } = d;
+        return {
+          ...rest,
+          brand: safe(d.brand),
+          creator: safe(d.creator),
+        };
+      }),
+      total,
+      take,
+      skip,
+    };
+  }
+
   async update(
     dealId: string,
     userId: string,

@@ -7,6 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { MoreThanOrEqual, Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
+import { SettingsService } from '../../settings/settings.service';
 import {
   Subscription,
   SubscriptionStatus,
@@ -31,6 +32,8 @@ import { Message } from '../../messaging/message.entity';
  *                                         final number yet)
  * Enforcement queries the user's CURRENT subscription state at action
  * time, so upgrades take effect immediately.
+ * Limits are admin-editable on /admin/settings (M4); the settings
+ * table is seeded from these env vars on first boot.
  */
 @Injectable()
 export class PlanLimitsService {
@@ -48,10 +51,20 @@ export class PlanLimitsService {
     @InjectRepository(Message)
     private messagesRepo: Repository<Message>,
     private config: ConfigService,
+    private settings: SettingsService,
   ) {}
 
-  private limit(envKey: string, fallback: number): number {
-    const raw = parseInt(this.config.get<string>(envKey) ?? '', 10);
+  /**
+   * Effective cap: the admin setting (DB, editable on /admin/settings)
+   * wins; the env var is the fallback for installs without a settings
+   * row; then the built-in default. Settings rows are seeded from the
+   * env vars on first boot, so behaviour is unchanged until an admin
+   * edits a value.
+   */
+  private cap(key: string, fallback: number): number {
+    const fromSettings = this.settings.getCachedNumber(key);
+    if (fromSettings !== undefined) return fromSettings;
+    const raw = parseInt(this.config.get<string>(key) ?? '', 10);
     return Number.isFinite(raw) && raw >= 0 ? raw : fallback;
   }
 
@@ -74,21 +87,21 @@ export class PlanLimitsService {
 
   async assertCanCreateCampaign(brandId: string): Promise<void> {
     if (await this.isPaidUser(brandId)) return;
-    const limit = this.limit('FREE_BRAND_JOB_LIMIT', 1);
+    const limit = this.cap('FREE_BRAND_JOB_LIMIT', 1);
     const count = await this.campaignsRepo.count({ where: { brandId } });
     if (count >= limit) throw this.limitError('job post(s)', limit);
   }
 
   async assertCanCreateDeal(brandId: string): Promise<void> {
     if (await this.isPaidUser(brandId)) return;
-    const limit = this.limit('FREE_BRAND_HIRE_LIMIT', 1);
+    const limit = this.cap('FREE_BRAND_HIRE_LIMIT', 1);
     const count = await this.dealsRepo.count({ where: { brandId } });
     if (count >= limit) throw this.limitError('hire(s)', limit);
   }
 
   async assertCanApply(userId: string): Promise<void> {
     if (await this.isPaidUser(userId)) return;
-    const limit = this.limit('FREE_APPLICATION_LIMIT', 5);
+    const limit = this.cap('FREE_APPLICATION_LIMIT', 5);
     const count = await this.applicationsRepo.count({
       where: { applicantId: userId },
     });
@@ -97,7 +110,7 @@ export class PlanLimitsService {
 
   async assertCanSendMessage(userId: string): Promise<void> {
     if (await this.isPaidUser(userId)) return;
-    const limit = this.limit('FREE_MESSAGE_LIMIT', 50);
+    const limit = this.cap('FREE_MESSAGE_LIMIT', 50);
     const monthStart = new Date();
     monthStart.setDate(1);
     monthStart.setHours(0, 0, 0, 0);

@@ -17,9 +17,9 @@ export default function AdminOverviewPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const cards = [
+  const cards: { label: string; value: string | number; href?: string }[] = [
     { label: "Users", value: stats?.users ?? "–", href: "/admin/users" },
-    { label: "Deals", value: stats?.deals ?? "–", href: "/admin/users" },
+    { label: "Deals", value: stats?.deals ?? "–", href: "/admin/deals" },
     {
       label: "Open disputes",
       value: stats?.openDisputes ?? "–",
@@ -41,16 +41,23 @@ export default function AdminOverviewPage() {
         Marketplace at a glance.
       </p>
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {cards.map((c) => (
-          <Link key={c.label} href={c.href}>
+        {cards.map((c) => {
+          const inner = (
             <Card className="p-6 transition hover:shadow-md">
               <p className="text-[13px] font-semibold text-ink-500">{c.label}</p>
               <p className="mt-1 text-[32px] font-extrabold text-ink-900">
                 {loading ? "…" : c.value}
               </p>
             </Card>
-          </Link>
-        ))}
+          );
+          return c.href ? (
+            <Link key={c.label} href={c.href}>
+              {inner}
+            </Link>
+          ) : (
+            <div key={c.label}>{inner}</div>
+          );
+        })}
       </div>
       {stats?.usersByRole && (
         <Card className="mt-6 p-6">

@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Subscription } from './subscription.entity';
 import { SubscriptionPlan } from './subscription-plan.entity';
+import { User } from '../users/user.entity';
 import { SubscriptionsService } from './subscriptions.service';
 import { SubscriptionsController } from './subscriptions.controller';
 import { PaymentsModule } from '../payments/payments.module';
@@ -9,7 +10,7 @@ import { ReferralsModule } from '../referrals/referrals.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Subscription, SubscriptionPlan]),
+    TypeOrmModule.forFeature([Subscription, SubscriptionPlan, User]),
     PaymentsModule, // StripeService
     ReferralsModule, // subscription-payment referral earnings
   ],

@@ -14,6 +14,7 @@ import { ReferralsModule } from './referrals/referrals.module';
 import { DisputesModule } from './disputes/disputes.module';
 import { AdminModule } from './admin/admin.module';
 import { EmailsModule } from './emails/emails.module';
+import { SettingsModule } from './settings/settings.module';
 import { OpportunitiesModule } from './opportunities/opportunities.module';
 
 @Module({
@@ -57,6 +58,7 @@ import { OpportunitiesModule } from './opportunities/opportunities.module';
     DisputesModule,
     AdminModule,
     EmailsModule,
+    SettingsModule,
     OpportunitiesModule,
   ],
 })

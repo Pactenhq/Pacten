@@ -15,6 +15,8 @@ import {
 import { SubscriptionPlan } from './subscription-plan.entity';
 import { StripeService } from '../payments/stripe.service';
 import { ReferralsService } from '../referrals/referrals.service';
+import { User } from '../users/user.entity';
+import { EmailsService } from '../emails/emails.service';
 
 // Seed plans — the client's FINAL pricing (Oct 2026). Configurable via
 // the subscription_plans table afterwards. Tiers: brands free/pro/business;
@@ -121,9 +123,12 @@ export class SubscriptionsService implements OnModuleInit {
     private subsRepo: Repository<Subscription>,
     @InjectRepository(SubscriptionPlan)
     private plansRepo: Repository<SubscriptionPlan>,
+    @InjectRepository(User)
+    private usersRepo: Repository<User>,
     private stripe: StripeService,
     private config: ConfigService,
     private referrals: ReferralsService,
+    private emails: EmailsService,
   ) {}
 
   async onModuleInit() {
@@ -310,7 +315,29 @@ export class SubscriptionsService implements OnModuleInit {
     });
     if (!sub) throw new NotFoundException('No active subscription');
     sub.cancelAtPeriodEnd = true;
-    return this.subsRepo.save(sub);
+    const saved = await this.subsRepo.save(sub);
+    // Notify the subscriber (transactional email). Webhook-driven
+    // cancellations (syncFromStripeEvent) do not email, to avoid
+    // double-notifying when the user already cancelled here.
+    try {
+      const [user, plan] = await Promise.all([
+        this.usersRepo.findOne({ where: { id: userId } }),
+        this.plansRepo.findOne({ where: { id: sub.planId } }),
+      ]);
+      if (user) {
+        const accessUntil = saved.currentPeriodEnd
+          ? new Date(saved.currentPeriodEnd).toISOString().slice(0, 10)
+          : undefined;
+        await this.emails.sendSubscriptionCancelled(
+          user.email,
+          plan?.name ?? 'Pacten',
+          accessUntil,
+        );
+      }
+    } catch {
+      // Email is best-effort.
+    }
+    return saved;
   }
 
   /** Called from the Stripe webhook for subscription events. */

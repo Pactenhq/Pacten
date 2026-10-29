@@ -425,6 +425,15 @@ export class ReferralsService implements OnModuleInit {
       }
       remaining -= take;
     }
+    // Notify the requester (transactional email).
+    try {
+      const user = await this.usersRepo.findOne({ where: { id: userId } });
+      if (user) {
+        await this.emails.sendPayoutRequested(user.email, amountCents);
+      }
+    } catch {
+      // Email is best-effort.
+    }
     return payout;
   }
 

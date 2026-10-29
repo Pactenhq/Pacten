@@ -8,8 +8,9 @@ import {
   UseGuards,
   ParseIntPipe,
 } from '@nestjs/common';
-import { IsEnum } from 'class-validator';
+import { IsDefined, IsEnum, IsInt, Max, Min } from 'class-validator';
 import { AdminService } from './admin.service';
+import { SettingsService } from '../settings/settings.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../common/roles.guard';
 import { Roles } from '../common/roles.decorator';
@@ -20,11 +21,26 @@ class SetStatusDto {
   status: UserStatus;
 }
 
+class UpdateSettingsDto {
+  @IsDefined()
+  values: Record<string, number>;
+}
+
+class UpdateCommissionRuleDto {
+  @IsInt()
+  @Min(0)
+  @Max(10000)
+  rateBasisPoints: number;
+}
+
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(UserRole.ADMIN)
 export class AdminController {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(
+    private readonly adminService: AdminService,
+    private readonly settingsService: SettingsService,
+  ) {}
 
   @Get('stats')
   stats() {
@@ -45,5 +61,28 @@ export class AdminController {
   @Patch('users/:id/status')
   setUserStatus(@Param('id') id: string, @Body() dto: SetStatusDto) {
     return this.adminService.setUserStatus(id, dto.status);
+  }
+
+  @Get('settings')
+  listSettings() {
+    return this.settingsService.list();
+  }
+
+  @Patch('settings')
+  updateSettings(@Body() dto: UpdateSettingsDto) {
+    return this.settingsService.update(dto.values);
+  }
+
+  @Get('commission-rules')
+  listCommissionRules() {
+    return this.adminService.listCommissionRules();
+  }
+
+  @Patch('commission-rules/:id')
+  updateCommissionRule(
+    @Param('id') id: string,
+    @Body() dto: UpdateCommissionRuleDto,
+  ) {
+    return this.adminService.updateCommissionRule(id, dto.rateBasisPoints);
   }
 }

@@ -8,8 +8,11 @@ import { useAuth } from "@/components/auth/AuthProvider";
 const NAV = [
   { href: "/admin", label: "Overview" },
   { href: "/admin/users", label: "Users" },
+  { href: "/admin/campaigns", label: "Campaigns" },
+  { href: "/admin/deals", label: "Deals" },
   { href: "/admin/payouts", label: "Referral Payouts" },
   { href: "/admin/disputes", label: "Disputes" },
+  { href: "/admin/settings", label: "Settings" },
 ];
 
 export default function AdminLayout({

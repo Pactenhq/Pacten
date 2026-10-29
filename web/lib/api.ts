@@ -420,6 +420,55 @@ export const api = {
       body: { status },
       auth: true,
     }),
+
+  // Admin campaigns (M4)
+  adminCampaigns: (params?: { status?: string; search?: string }) => {
+    const q = new URLSearchParams(params as any).toString();
+    return apiFetch<any>(`/campaigns/admin/all${q ? `?${q}` : ""}`, {
+      auth: true,
+    });
+  },
+
+  adminSetCampaignStatus: (id: string, status: string) =>
+    apiFetch<any>(`/campaigns/admin/${id}/status`, {
+      method: "PATCH",
+      body: { status },
+      auth: true,
+    }),
+
+  adminDeleteCampaign: (id: string) =>
+    apiFetch<any>(`/campaigns/admin/${id}`, {
+      method: "DELETE",
+      auth: true,
+    }),
+
+  // Admin deals (M4)
+  adminDeals: (params?: { status?: string; search?: string }) => {
+    const q = new URLSearchParams(params as any).toString();
+    return apiFetch<any>(`/deals/admin/all${q ? `?${q}` : ""}`, {
+      auth: true,
+    });
+  },
+
+  // Admin settings (M4)
+  adminSettings: () => apiFetch<any>("/admin/settings", { auth: true }),
+
+  adminSaveSettings: (values: Record<string, number>) =>
+    apiFetch<any>("/admin/settings", {
+      method: "PATCH",
+      body: { values },
+      auth: true,
+    }),
+
+  adminCommissionRules: () =>
+    apiFetch<any>("/admin/commission-rules", { auth: true }),
+
+  adminSaveCommissionRule: (id: string, rateBasisPoints: number) =>
+    apiFetch<any>(`/admin/commission-rules/${id}`, {
+      method: "PATCH",
+      body: { rateBasisPoints },
+      auth: true,
+    }),
 };
 
 export function dashboardPathForRole(role: string): string {
