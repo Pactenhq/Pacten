@@ -1,18 +1,19 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { DashboardShell } from "@/components/dashboard/DashboardShell";
+import type { DashboardNavItem } from "@/lib/mock";
 
-const NAV = [
-  { href: "/admin", label: "Overview" },
-  { href: "/admin/users", label: "Users" },
-  { href: "/admin/campaigns", label: "Campaigns" },
-  { href: "/admin/deals", label: "Deals" },
-  { href: "/admin/payouts", label: "Referral Payouts" },
-  { href: "/admin/disputes", label: "Disputes" },
-  { href: "/admin/settings", label: "Settings" },
+const ADMIN_NAV: DashboardNavItem[] = [
+  { href: "/admin", label: "Overview", icon: "home" },
+  { href: "/admin/users", label: "Users", icon: "shield" },
+  { href: "/admin/campaigns", label: "Campaigns", icon: "megaphone" },
+  { href: "/admin/deals", label: "Deals", icon: "briefcase" },
+  { href: "/admin/payouts", label: "Referral Payouts", icon: "gift" },
+  { href: "/admin/disputes", label: "Disputes", icon: "file" },
+  { href: "/admin/settings", label: "Settings", icon: "gear" },
 ];
 
 export default function AdminLayout({
@@ -22,7 +23,6 @@ export default function AdminLayout({
 }) {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const pathname = usePathname();
 
   useEffect(() => {
     if (loading) return;
@@ -55,35 +55,12 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-ink-50">
-      <header className="border-b border-ink-100 bg-white">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <p className="text-[18px] font-extrabold text-ink-900">
-            Pacten <span className="text-brand">Admin</span>
-          </p>
-          <p className="text-[13px] text-ink-500">{user.email}</p>
-        </div>
-        <nav className="mx-auto flex max-w-6xl gap-1 px-6">
-          {NAV.map((n) => {
-            const active =
-              n.href === "/admin" ? pathname === n.href : pathname.startsWith(n.href);
-            return (
-              <Link
-                key={n.href}
-                href={n.href}
-                className={`rounded-t-xl px-4 py-3 text-[14px] font-semibold ${
-                  active
-                    ? "bg-ink-50 text-brand"
-                    : "text-ink-500 hover:text-ink-900"
-                }`}
-              >
-                {n.label}
-              </Link>
-            );
-          })}
-        </nav>
-      </header>
-      <main className="mx-auto max-w-6xl px-6 py-8">{children}</main>
-    </div>
+    <DashboardShell
+      nav={ADMIN_NAV}
+      userName="Pacten Admin"
+      userInitials="PA"
+    >
+      {children}
+    </DashboardShell>
   );
 }

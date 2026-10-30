@@ -475,5 +475,6 @@ export function dashboardPathForRole(role: string): string {
   if (role === "brand") return "/dashboard/brand";
   if (role === "creator") return "/dashboard/creator";
   if (role === "professional") return "/dashboard/professional";
+  if (role === "admin") return "/admin";
   return "/dashboard/brand";
 }

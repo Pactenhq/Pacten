@@ -2,7 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Card } from "@/components/ui/Card";
+import {
+  SectionCard,
+  StatCard,
+  WelcomeHeader,
+} from "@/components/dashboard/widgets";
 import { api } from "@/lib/api";
 
 export default function AdminOverviewPage() {
@@ -17,38 +21,53 @@ export default function AdminOverviewPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const cards: { label: string; value: string | number; href?: string }[] = [
-    { label: "Users", value: stats?.users ?? "–", href: "/admin/users" },
-    { label: "Deals", value: stats?.deals ?? "–", href: "/admin/deals" },
+  const cards: {
+    label: string;
+    value: string | number;
+    href?: string;
+    icon: string;
+  }[] = [
+    {
+      label: "Users",
+      value: stats?.users ?? "–",
+      href: "/admin/users",
+      icon: "people",
+    },
+    {
+      label: "Deals",
+      value: stats?.deals ?? "–",
+      href: "/admin/deals",
+      icon: "moneybag",
+    },
     {
       label: "Open disputes",
       value: stats?.openDisputes ?? "–",
       href: "/admin/disputes",
+      icon: "clipboard",
     },
     {
       label: "Pending payouts",
       value: stats?.pendingPayouts ?? "–",
       href: "/admin/payouts",
+      icon: "gift",
     },
   ];
 
   return (
     <div>
-      <h1 className="text-[28px] font-extrabold tracking-tight text-ink-900">
-        Overview
-      </h1>
-      <p className="mt-1 text-[15px] text-ink-500">
-        Marketplace at a glance.
-      </p>
+      <WelcomeHeader
+        title="Overview"
+        subtitle="Marketplace at a glance."
+      />
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((c) => {
           const inner = (
-            <Card className="p-6 transition hover:shadow-md">
-              <p className="text-[13px] font-semibold text-ink-500">{c.label}</p>
-              <p className="mt-1 text-[32px] font-extrabold text-ink-900">
-                {loading ? "…" : c.value}
-              </p>
-            </Card>
+            <StatCard
+              value={loading ? "…" : String(c.value)}
+              label={c.label}
+              delta=""
+              icon={c.icon}
+            />
           );
           return c.href ? (
             <Link key={c.label} href={c.href}>
@@ -60,9 +79,8 @@ export default function AdminOverviewPage() {
         })}
       </div>
       {stats?.usersByRole && (
-        <Card className="mt-6 p-6">
-          <p className="text-[15px] font-bold text-ink-900">Users by role</p>
-          <ul className="mt-3 divide-y divide-ink-100">
+        <SectionCard title="Users by role" className="mt-6">
+          <ul className="divide-y divide-ink-100">
             {stats.usersByRole.map((r: any) => (
               <li
                 key={r.role}
@@ -75,7 +93,7 @@ export default function AdminOverviewPage() {
               </li>
             ))}
           </ul>
-        </Card>
+        </SectionCard>
       )}
     </div>
   );

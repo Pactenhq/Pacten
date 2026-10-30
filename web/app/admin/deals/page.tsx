@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { WelcomeHeader } from "@/components/dashboard/widgets";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { api } from "@/lib/api";
@@ -46,12 +47,10 @@ export default function AdminDealsPage() {
 
   return (
     <div>
-      <h1 className="text-[28px] font-extrabold tracking-tight text-ink-900">
-        Deals
-      </h1>
-      <p className="mt-1 text-[15px] text-ink-500">
-        {total} deals. Deal and payment visibility across the marketplace.
-      </p>
+      <WelcomeHeader
+        title="Deals"
+        subtitle={`${total} deals. Deal and payment visibility across the marketplace.`}
+      />
       <Card className="mt-6 p-6">
         <div className="mb-4 flex flex-wrap gap-3">
           <input

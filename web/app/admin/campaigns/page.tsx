@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { WelcomeHeader } from "@/components/dashboard/widgets";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -70,12 +71,10 @@ export default function AdminCampaignsPage() {
 
   return (
     <div>
-      <h1 className="text-[28px] font-extrabold tracking-tight text-ink-900">
-        Campaigns
-      </h1>
-      <p className="mt-1 text-[15px] text-ink-500">
-        {total} campaigns. Close abusive listings or remove them entirely.
-      </p>
+      <WelcomeHeader
+        title="Campaigns"
+        subtitle={`${total} campaigns. Close abusive listings or remove them entirely.`}
+      />
       <Card className="mt-6 p-6">
         <div className="mb-4 flex flex-wrap gap-3">
           <input

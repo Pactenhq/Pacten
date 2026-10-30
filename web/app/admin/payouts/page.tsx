@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { WelcomeHeader } from "@/components/dashboard/widgets";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { api } from "@/lib/api";
@@ -39,13 +40,10 @@ export default function AdminPayoutsPage() {
 
   return (
     <div>
-      <h1 className="text-[28px] font-extrabold tracking-tight text-ink-900">
-        Referral Payouts
-      </h1>
-      <p className="mt-1 text-[15px] text-ink-500">
-        Cash payouts are approved manually. Approving marks the payout paid —
-        the cash transfer itself happens off-platform.
-      </p>
+      <WelcomeHeader
+        title="Referral Payouts"
+        subtitle="Cash payouts are approved manually. Approving marks the payout paid — the cash transfer itself happens off-platform."
+      />
       <div className="mt-4 flex gap-2">
         {["requested", "paid", "rejected", ""].map((f) => (
           <button

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { WelcomeHeader } from "@/components/dashboard/widgets";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { api } from "@/lib/api";
@@ -46,12 +47,10 @@ export default function AdminDisputesPage() {
 
   return (
     <div>
-      <h1 className="text-[28px] font-extrabold tracking-tight text-ink-900">
-        Disputes
-      </h1>
-      <p className="mt-1 text-[15px] text-ink-500">
-        Review and resolve disputes filed on deals.
-      </p>
+      <WelcomeHeader
+        title="Disputes"
+        subtitle="Review and resolve disputes filed on deals."
+      />
       <div className="mt-4 flex gap-2">
         {["", "open", "under_review", "resolved", "rejected"].map((f) => (
           <button

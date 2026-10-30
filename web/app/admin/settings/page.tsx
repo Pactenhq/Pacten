@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card } from "@/components/ui/Card";
+import {
+  SectionCard,
+  WelcomeHeader,
+} from "@/components/dashboard/widgets";
 import { Button } from "@/components/ui/Button";
 import { api } from "@/lib/api";
 
@@ -92,20 +95,17 @@ export default function AdminSettingsPage() {
 
   return (
     <div>
-      <h1 className="text-[28px] font-extrabold tracking-tight text-ink-900">
-        Settings
-      </h1>
-      <p className="mt-1 text-[15px] text-ink-500">
-        Platform limits and commission rates. Changes apply immediately.
-      </p>
+      <WelcomeHeader
+        title="Settings"
+        subtitle="Platform limits and commission rates. Changes apply immediately."
+      />
       {message && (
         <p className="mt-4 text-[14px] font-medium text-green-700">{message}</p>
       )}
       {error && (
         <p className="mt-4 text-[14px] font-medium text-red-700">{error}</p>
       )}
-      <Card className="mt-6 p-6">
-        <p className="text-[15px] font-bold text-ink-900">Free-plan limits</p>
+      <SectionCard title="Free-plan limits" className="mt-6">
         {loading ? (
           <p className="mt-3 text-[14px] text-ink-500">Loading…</p>
         ) : (
@@ -137,9 +137,8 @@ export default function AdminSettingsPage() {
             </Button>
           </>
         )}
-      </Card>
-      <Card className="mt-6 p-6">
-        <p className="text-[15px] font-bold text-ink-900">Commission rates</p>
+      </SectionCard>
+      <SectionCard title="Commission rates" className="mt-6">
         <p className="mt-1 text-[13px] text-ink-500">
           Share of each payment kept by the platform, by payee role and
           subscription tier. Brands are never charged.
@@ -205,7 +204,7 @@ export default function AdminSettingsPage() {
             </table>
           </div>
         )}
-      </Card>
+      </SectionCard>
     </div>
   );
 }
