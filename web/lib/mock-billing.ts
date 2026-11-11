@@ -20,11 +20,7 @@ export interface ComparisonRow {
  */
 export const pricingComparison: ComparisonRow[] = [
   { feature: "Free Plan", pacten: true, collabstr: "check" },
-  { feature: "Lowest Creator Commission", pacten: "2.5%", collabstr: "15%" },
-  { feature: "AI Campaign Briefs", pacten: true, collabstr: "x" },
-  { feature: "AI Creator Matching", pacten: true, collabstr: "x" },
-  { feature: "AI Pricing Suggestions", pacten: true, collabstr: "x" },
-  { feature: "AI Profile Optimisation", pacten: true, collabstr: "x" },
+  { feature: "Lowest Creator Commission", pacten: "5%", collabstr: "15%" },
   { feature: "Creator Teams", pacten: true, collabstr: "x" },
   { feature: "Hire Creative Professionals", pacten: true, collabstr: "x" },
   { feature: "Unlimited Messaging", pacten: true, collabstr: "check" },
@@ -90,41 +86,12 @@ export const pricingFaqs: Faq[] = [
   },
 ];
 
-/** Subscription plan details */
-export const subscriptionPlan = {
-  tag: "10% commission",
-  name: "Pro",
-  price: "$19/mo",
-  blurb:
-    "For businesses and agencies looking to find top talent and run multiple campaigns.",
-  features: [
-    "Priority search access",
-    "More active campaigns",
-    "Campaign analytics",
-    "AI Campaign Assistant",
-  ],
-  billingCycle: "Monthly",
-  nextBillingDate: "Oct 24, 2026",
-  amount: "$19",
-  card: {
-    brand: "Mastercard",
-    last4: "4242",
-    expiry: "04/2028",
-    isDefault: true,
-  },
-};
-
 export interface BillingRow {
   plan: string;
   date: string;
   amount: string;
   status: "Paid" | "Pending" | "Failed";
 }
-
-/** Billing history */
-export const billingHistory: BillingRow[] = [
-  { plan: "Pro", date: "Apr 12, 2026", amount: "$19", status: "Paid" },
-];
 
 export type NotificationIcon = "check" | "chat" | "user" | "star" | "wrench";
 
@@ -141,126 +108,3 @@ export interface NotificationGroup {
   items: NotificationItem[];
 }
 
-/**
- * Notification items. Rows whose copy was not
- * recoverable from cache are omitted rather than invented.
- */
-export const notificationGroups: NotificationGroup[] = [
-  {
-    label: "Today",
-    items: [
-      {
-        id: "n1",
-        title: "Campaign accepted",
-        body: "Status updated to Accepted",
-        time: "2 hours ago",
-        icon: "check",
-      },
-      {
-        id: "n2",
-        title: "Message received",
-        body: "New message from Sophie Carter",
-        time: "2 hours ago",
-        icon: "chat",
-      },
-      {
-        id: "n3",
-        title: "Creator assigned",
-        body: "Sophie Carter was added to this campaign",
-        time: "2 hours ago",
-        icon: "user",
-      },
-      {
-        id: "n4",
-        title: "Job application shortlisted",
-        body: "You've been shortlisted for a product review role.",
-        time: "2 hours ago",
-        icon: "star",
-      },
-    ],
-  },
-  {
-    label: "Yesterday",
-    items: [
-      {
-        id: "n5",
-        title: "Campaign accepted",
-        body: "Status updated to Accepted",
-        time: "Yesterday",
-        icon: "check",
-      },
-      {
-        id: "n6",
-        title: "Application status update",
-        body: "Your application to the Travel Creator Program moved to review.",
-        time: "Yesterday",
-        icon: "check",
-      },
-      {
-        id: "n7",
-        title: "Message received",
-        body: "New message from Sophie Carter",
-        time: "Yesterday",
-        icon: "chat",
-      },
-      {
-        id: "n8",
-        title: "Creator assigned",
-        body: "Sophie Carter was added to this campaign",
-        time: "Yesterday",
-        icon: "user",
-      },
-    ],
-  },
-  {
-    label: "Last Week",
-    items: [
-      {
-        id: "n9",
-        title: "Campaign accepted",
-        body: "Status updated to Accepted",
-        time: "Mon",
-        icon: "check",
-      },
-      {
-        id: "n10",
-        title: "Campaign accepted",
-        body: "Status updated to Accepted",
-        time: "Mon",
-        icon: "check",
-      },
-      {
-        id: "n11",
-        title: "Platform maintenance scheduled",
-        body: "Pacten will undergo brief maintenance on Sunday 2\u20134 AM.",
-        time: "Mon",
-        icon: "wrench",
-      },
-    ],
-  },
-];
-
-/** Notification preview items */
-export const notificationPreview: NotificationItem[] = [
-  {
-    id: "n1",
-    title: "Campaign accepted",
-    body: "Status updated to Accepted",
-    time: "2 h ago",
-    icon: "check",
-  },
-  {
-    id: "n2",
-    title: "Message received",
-    body: "New message from Sophie Carter",
-    time: "2 h ago",
-    icon: "chat",
-  },
-  {
-    id: "n3",
-    title: "Creator assigned",
-    body: "Sophie Carter was added to this campaign",
-    time: "2 h ago",
-    icon: "user",
-  },
-];

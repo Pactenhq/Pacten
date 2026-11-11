@@ -10,6 +10,7 @@ import { Footer } from "@/components/ui/Footer";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { api } from "@/lib/api";
+import { Avatar } from "@/components/ui/Avatar";
 import { SendOpportunityModal } from "@/components/opportunities/SendOpportunityModal";
 import { useAuth } from "@/components/auth/AuthProvider";
 
@@ -75,12 +76,22 @@ export default function CreatorDetailPage() {
             <div>
               <Card className="p-6 sm:p-8">
                 <div className="flex flex-wrap items-start gap-5">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={profile.avatarUrl || "/assets/marketplace/creator-theresa-webb.jpg"}
-                    alt={profile.displayName}
-                    className="h-24 w-24 rounded-2xl object-cover"
-                  />
+                  {/* No stock-photo fallback: without a real avatar the
+                      initials Avatar renders (same as marketplace cards).
+                      The old fallback showed a stranger's photo
+                      (creator-theresa-webb.jpg) as the person's face. */}
+                  {profile.avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={profile.avatarUrl}
+                      alt={profile.displayName}
+                      className="h-24 w-24 rounded-2xl object-cover"
+                    />
+                  ) : (
+                    <span className="flex h-24 w-24 items-center justify-center rounded-2xl bg-ink-50 dark:bg-ink-900">
+                      <Avatar name={profile.displayName} size="lg" />
+                    </span>
+                  )}
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <h1 className="text-2xl font-extrabold text-ink-900 dark:text-ink-50">
@@ -119,6 +130,40 @@ export default function CreatorDetailPage() {
                         </span>
                       ))}
                     </div>
+                    {/* Languages / Industries / Skills (Nov 2026): the
+                        settings form saves them and the marketplace
+                        filters on them, but the public profile never
+                        showed them — a visitor could not see them. */}
+                    {(profile.languages ?? []).length > 0 && (
+                      <div className="mt-4">
+                        <p className="text-[13px] font-semibold text-ink-500 dark:text-ink-300">Languages</p>
+                        <div className="mt-1.5 flex flex-wrap gap-2">
+                          {profile.languages.map((l: string) => (
+                            <Pill key={l}>{l}</Pill>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {(profile.industries ?? []).length > 0 && (
+                      <div className="mt-4">
+                        <p className="text-[13px] font-semibold text-ink-500 dark:text-ink-300">Industries</p>
+                        <div className="mt-1.5 flex flex-wrap gap-2">
+                          {profile.industries.map((v: string) => (
+                            <Pill key={v}>{v}</Pill>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {(profile.skills ?? []).length > 0 && (
+                      <div className="mt-4">
+                        <p className="text-[13px] font-semibold text-ink-500 dark:text-ink-300">Skills</p>
+                        <div className="mt-1.5 flex flex-wrap gap-2">
+                          {profile.skills.map((s: string) => (
+                            <Pill key={s}>{s}</Pill>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
                 {profile.bio && (
@@ -136,7 +181,9 @@ export default function CreatorDetailPage() {
                 <h2 className="text-lg font-bold text-ink-900 dark:text-ink-50">Work with {profile.displayName}</h2>
                 {profile.rate && (
                   <p className="mt-2 text-[15px] text-ink-700 dark:text-ink-200">
-                    Typical rate: <span className="font-bold text-ink-900 dark:text-ink-50">\${profile.rate}</span>
+                    {/* Was `\${profile.rate}` in JSX text — rendered
+                        literally as "${...}" instead of the value. */}
+                    Typical rate: <span className="font-bold text-ink-900 dark:text-ink-50">{`$${String(profile.rate).replace(/^\$/, "")}`}</span>
                   </p>
                 )}
                 {user?.role === "brand" && profile.userId && (

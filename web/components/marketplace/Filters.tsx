@@ -335,6 +335,8 @@ export interface CreatorFilters {
   language: string;
   /** Selected industry from the Industry Experience dropdown; "" = no filter. */
   industry: string;
+  /** Selected skill from the Skills dropdown; "" = no skill filter. */
+  skill: string;
 }
 
 export interface ProfessionalFilters {
@@ -363,6 +365,7 @@ const DEFAULT_CREATOR_FILTERS: CreatorFilters = {
   availableNow: false,
   language: "",
   industry: "",
+  skill: "",
 };
 
 const DEFAULT_PROFESSIONAL_FILTERS: ProfessionalFilters = {
@@ -387,7 +390,7 @@ export function FilterPanel({
   onProfessionalFilterChange,
 }: {
   kind: FilterKind;
-  /** Distinct real skills across the loaded professionals; feeds the Skills dropdown. */
+  /** Distinct real skills across the loaded rows; feeds the Skills dropdown. */
   skillOptions?: string[];
   /** Distinct real languages across the loaded rows; feeds the Language dropdown. */
   languageOptions?: string[];
@@ -486,6 +489,11 @@ export function FilterPanel({
             label="Language"
             options={languageOptions}
             onChange={(language) => emitCreator({ language })}
+          />
+          <SelectRow
+            label="Skills"
+            options={skillOptions}
+            onChange={(skill) => emitCreator({ skill })}
           />
           <SelectRow
             label="Industry Experience"

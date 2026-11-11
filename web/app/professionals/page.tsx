@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Navbar } from "@/components/ui/Navbar";
 import { Footer } from "@/components/ui/Footer";
 import { Drawer } from "@/components/ui/Drawer";
@@ -40,6 +40,20 @@ function categoryMatches(pill: string, p: { role?: string; category?: string; sk
 export default function ProfessionalsPage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const allProfessionals = useMarketplaceProfessionals();
+  // The hook returns a NEW array identity when its fetch resolves — even
+  // for zero rows — so identity change (not length) is the "loaded"
+  // signal. The timeout covers an unreachable API, which otherwise
+  // never resolves. The empty state renders only after the list has
+  // settled, never while still loading.
+  const [listSettled, setListSettled] = useState(false);
+  const initialListRef = useRef(allProfessionals);
+  useEffect(() => {
+    if (allProfessionals !== initialListRef.current) setListSettled(true);
+  }, [allProfessionals]);
+  useEffect(() => {
+    const t = setTimeout(() => setListSettled(true), 30000);
+    return () => clearTimeout(t);
+  }, []);
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<ProfessionalFilters>({
     category: "All",
@@ -193,12 +207,25 @@ export default function ProfessionalsPage() {
                   Filters
                 </Button>
               </div>
-              <Stagger className="grid grid-cols-2 gap-4 sm:gap-5 xl:grid-cols-3" from="scale" stagger={0.08}>
-                {paged.map((p) => (
-                  <ProfessionalCard key={p.id} professional={p} />
-                ))}
-              </Stagger>
-              <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+              {!listSettled ? (
+                <div className="flex flex-col items-center rounded-2xl border border-dashed border-ink-200 dark:border-ink-700 bg-ink-50/60 dark:bg-ink-900/60 px-6 py-10 text-center">
+                  <p className="text-[15px] font-bold text-ink-900 dark:text-ink-50">Loading professionals…</p>
+                </div>
+              ) : paged.length === 0 ? (
+                <div className="flex flex-col items-center rounded-2xl border border-dashed border-ink-200 dark:border-ink-700 bg-ink-50/60 dark:bg-ink-900/60 px-6 py-10 text-center">
+                  <p className="text-[15px] font-bold text-ink-900 dark:text-ink-50">No professionals found</p>
+                  <p className="mt-1 max-w-[380px] text-[14px] text-ink-500 dark:text-ink-300">Try adjusting your search or filters.</p>
+                </div>
+              ) : (
+                <>
+                  <Stagger className="grid grid-cols-2 gap-4 sm:gap-5 xl:grid-cols-3" from="scale" stagger={0.08}>
+                    {paged.map((p) => (
+                      <ProfessionalCard key={p.id} professional={p} />
+                    ))}
+                  </Stagger>
+                  <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+                </>
+              )}
             </div>
           </div>
         </div>

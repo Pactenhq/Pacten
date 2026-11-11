@@ -60,23 +60,29 @@ function PhotoTags({ tags }: { tags: string[] }) {
 //: photo with niche tags
 // overlaid, name + verified badge, followers + rating, "View Profile"
 // pill button and platform glyphs.
-export function CreatorCard({ creator }: { creator: CreatorCardData }) {
+export function CreatorCard({ creator }: { creator: CreatorCardData & { isVerified?: boolean } }) {
   return (
     <Card className="card-lift zoom-on-hover overflow-hidden p-0">
       <div className="relative h-[200px] w-full overflow-hidden bg-ink-50 dark:bg-ink-900 sm:h-[300px]">
-        <Image
-          src={creator.photo}
-          alt={creator.name}
-          fill
-          className="object-cover object-top"
-          sizes="(max-width: 640px) 50vw, (max-width: 1280px) 50vw, 33vw"
-        />
+        {creator.photo ? (
+          <Image
+            src={creator.photo}
+            alt={creator.name}
+            fill
+            className="object-cover object-top"
+            sizes="(max-width: 640px) 50vw, (max-width: 1280px) 50vw, 33vw"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center">
+            <Avatar name={creator.name} size="lg" />
+          </div>
+        )}
         <PhotoTags tags={creator.niches} />
       </div>
       <div className="p-3 sm:p-5">
         <div className="flex items-center gap-1.5">
           <p className="truncate text-base font-bold text-ink-900 dark:text-ink-50 sm:text-xl">{creator.name}</p>
-          <VerifiedBadge />
+          {creator.isVerified ? <VerifiedBadge /> : null}
         </div>
         <div className="mt-1 flex items-center justify-between gap-1">
           <p className="truncate text-xs text-ink-600 dark:text-ink-300 sm:text-[15px]">
@@ -116,18 +122,24 @@ export function CreatorCard({ creator }: { creator: CreatorCardData }) {
 export function ProfessionalCard({
   professional,
 }: {
-  professional: ProfessionalCardData;
+  professional: ProfessionalCardData & { isVerified?: boolean };
 }) {
   return (
     <Card className="card-lift zoom-on-hover overflow-hidden p-0">
       <div className="relative h-[300px] w-full overflow-hidden bg-ink-50 dark:bg-ink-900">
-        <Image
-          src={professional.photo}
-          alt={professional.name}
-          fill
-          className="object-cover object-top"
-          sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
-        />
+        {professional.photo ? (
+          <Image
+            src={professional.photo}
+            alt={professional.name}
+            fill
+            className="object-cover object-top"
+            sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center">
+            <Avatar name={professional.name} size="lg" />
+          </div>
+        )}
         <PhotoTags tags={[professional.category]} />
         <button
           type="button"
@@ -147,7 +159,7 @@ export function ProfessionalCard({
       <div className="p-5">
         <div className="flex items-center gap-2">
           <p className="truncate text-xl font-bold text-ink-900 dark:text-ink-50">{professional.name}</p>
-          <VerifiedBadge />
+          {professional.isVerified ? <VerifiedBadge /> : null}
         </div>
         <div className="mt-1.5 flex items-center justify-between">
           <p className="text-[15px] text-ink-600 dark:text-ink-300">

@@ -157,12 +157,6 @@ export function WidgetIcon({
           <path d="M5 15V6a2 2 0 0 1 2-2h9" {...stroke} />
         </svg>
       );
-    case "paperclip":
-      return (
-        <svg {...common}>
-          <path d="m8 12.5 6.5-6.5a3 3 0 0 1 4.2 4.2L11 17.9a5 5 0 0 1-7-7l7.5-7.5" {...stroke} />
-        </svg>
-      );
     default:
       return (
         <svg {...common}>
@@ -535,137 +529,6 @@ export function EmptyState({
 }
 
 /* ------------------------------------------------------------------ */
-/* Brand widgets: AI assistant + performance insights                    */
-/* ------------------------------------------------------------------ */
-
-export function AIAssistant({ questions }: { questions: string[] }) {
-  const [draft, setDraft] = useState("");
-  return (
-    <section>
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h2 className="text-[22px] font-extrabold text-brand dark:text-brand-200">
-            AI Business Assistant
-          </h2>
-          <p className="mt-1 text-[15px] text-ink-500 dark:text-ink-300">
-            Ask me anything about your business.
-          </p>
-        </div>
-        <Button>Generate Insights</Button>
-      </div>
-      <div className="mt-5 flex flex-wrap gap-2">
-        {questions.map((q) => (
-          <button
-            key={q}
-            type="button"
-            onClick={() => setDraft(q)}
-            className="rounded-full border border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900 px-4 py-2 text-[13px] font-medium text-ink-700 dark:text-ink-200 transition-colors hover:border-brand-200 hover:bg-brand-50 dark:hover:bg-white/10 hover:text-brand dark:hover:text-brand-200"
-          >
-            {q}
-          </button>
-        ))}
-      </div>
-      <form
-        className="mt-4 flex items-end gap-2 rounded-2xl border border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900 p-3"
-        onSubmit={(e) => e.preventDefault()}
-      >
-        <textarea
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          placeholder="Ask a business question..."
-          aria-label="Ask a business question"
-          rows={3}
-          className="min-h-[88px] flex-1 resize-none bg-transparent px-2 pt-1 text-[14px] text-ink-900 dark:text-ink-50 placeholder:text-ink-400 dark:placeholder:text-ink-300 focus:outline-none"
-        />
-        <span aria-hidden className="pb-2 text-ink-300 dark:text-ink-200">
-          <WidgetIcon name="paperclip" />
-        </span>
-        <Button type="submit" className="shrink-0">
-          Send Message
-        </Button>
-      </form>
-    </section>
-  );
-}
-
-export function PerformanceInsights({
-  recommendations,
-}: {
-  recommendations: { title: string; detail: string; date: string }[];
-}) {
-  return (
-    <section>
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h2 className="text-[22px] font-extrabold text-brand dark:text-brand-200">
-            AI Performance Insights
-          </h2>
-          <p className="mt-1 text-[15px] text-ink-500 dark:text-ink-300">
-            Weekly analysis powered by AI
-          </p>
-        </div>
-        <Button>Generate Insights</Button>
-      </div>
-
-      <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        {[
-          "Profile Quality",
-          "Campaign Reach",
-          "Engagement",
-          "Response Rate",
-          "Completion Rate",
-          "Review Score",
-        ].map((label) => (
-          <div
-            key={label}
-            className="rounded-2xl border border-brand-100 bg-brand-50/50 dark:bg-white/10 p-4"
-          >
-            <p className="text-[22px] font-extrabold tracking-tight">
-              <span className="text-brand dark:text-brand-200">0</span>
-              <span className="text-ink-900 dark:text-ink-50">/100</span>
-            </p>
-            <p className="mt-1 text-[13px] font-medium text-ink-700 dark:text-ink-200">
-              {label}
-            </p>
-          </div>
-        ))}
-      </div>
-
-      <Card className="mt-5 p-6">
-        <div className="flex items-center justify-between">
-          <h3 className="text-[19px] font-bold text-ink-900 dark:text-ink-50">
-            Latest
-            <br />
-            Recommendations
-          </h3>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 dark:bg-white/10 px-3 py-1 text-[12px] font-semibold text-brand dark:text-brand-200">
-            Powered by AI
-          </span>
-        </div>
-        <ul className="mt-4 space-y-4">
-          {recommendations.map((rec, i) => (
-            <li key={i} className="flex items-center gap-4">
-              <IconChip name="lightbulb" />
-              <span className="min-w-0 flex-1">
-                <span className="block text-[15px] font-bold text-ink-900 dark:text-ink-50">
-                  {rec.title}
-                </span>
-                <span className="mt-0.5 block text-[13px] text-ink-500 dark:text-ink-300">
-                  {rec.detail}
-                </span>
-              </span>
-              <span className="shrink-0 text-[13px] text-ink-400 dark:text-ink-300">
-                {rec.date}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </Card>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
 /* Creator / Professional widgets                                        */
 /* ------------------------------------------------------------------ */
 
@@ -931,7 +794,10 @@ export function QuickActions({
         <IconChip name="lightbulb" />
         <p className="text-[14px] leading-relaxed text-ink-700 dark:text-ink-200">
           <span className="font-bold text-ink-900 dark:text-ink-50">Tip:</span>{" "}
-          Creators with complete profiles get 3× more campaign requests.
+          {/* Was "Creators with complete profiles get 3× more campaign
+              requests." — a fabricated multiplier with no data behind it.
+              Neutral wording keeps the advice without the invented number. */}
+          Complete your profile to get more campaign requests.
         </p>
       </Card>
     </section>

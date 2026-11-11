@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { Drawer } from "@/components/ui/Drawer";
 import { Footer } from "@/components/ui/Footer";
@@ -39,7 +39,9 @@ export function DashboardShell({
   // When a real session exists, show the logged-in user's name instead of
   // the mock prop. Visual layout unchanged.
   const { user, displayName, loading: authLoading, logout } = useAuth();
-  const shownName = !authLoading && user ? displayName : userName;
+  // While the session is still resolving, show a neutral loading label —
+  // never the mock `userName` prop (a stranger's name flashing on load).
+  const shownName = authLoading ? "Loading…" : user ? displayName : userName;
   const shownInitials =
     !authLoading && user
       ? shownName
@@ -82,15 +84,11 @@ export function DashboardShell({
             <ThemeToggle />
             <NotificationBell />
             <span className="hidden items-center gap-2.5 sm:flex">
-              <span className="relative h-[33px] w-[33px] shrink-0 overflow-hidden rounded-full">
-                <Image
-                  src="/assets/profile/avatar-reviewer.jpg"
-                  alt={shownName}
-                  fill
-                  className="object-cover"
-                  sizes="33px"
-                />
-              </span>
+              {/* No stock-photo fallback: the header used to show a
+                  stranger's photo (avatar-reviewer.jpg) as the logged-in
+                  user's face. The initials Avatar renders instead — the
+                  same component the marketplace cards use. */}
+              <Avatar name={shownName} size="sm" />
               <span className="text-[15px] font-semibold text-ink-900 dark:text-ink-50">
                 {shownName}
               </span>

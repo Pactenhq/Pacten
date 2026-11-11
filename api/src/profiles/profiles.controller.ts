@@ -34,8 +34,9 @@ export class ProfilesController {
     @Query('q') query?: string,
     @Query('limit') limit?: number,
     @Query('offset') offset?: number,
+    @Query('sort') sort?: string,
   ) {
-    return this.profilesService.searchCreators({ niche, platform, query, limit, offset });
+    return this.profilesService.searchCreators({ niche, platform, query, limit, offset, sort });
   }
 
   @Get('professionals')
@@ -45,8 +46,9 @@ export class ProfilesController {
     @Query('q') query?: string,
     @Query('limit') limit?: number,
     @Query('offset') offset?: number,
+    @Query('sort') sort?: string,
   ) {
-    return this.profilesService.searchProfessionals({ skill, platform, query, limit, offset });
+    return this.profilesService.searchProfessionals({ skill, platform, query, limit, offset, sort });
   }
 
   // Declared BEFORE the ':id' routes below: 'by-user' would otherwise

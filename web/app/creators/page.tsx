@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Navbar } from "@/components/ui/Navbar";
 import { Footer } from "@/components/ui/Footer";
 import { Drawer } from "@/components/ui/Drawer";
@@ -43,6 +43,20 @@ function FilterButton({ onClick }: { onClick: () => void }) {
 export default function CreatorsPage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const allCreators = useMarketplaceCreators();
+  // The hook returns a NEW array identity when its fetch resolves — even
+  // for zero rows — so identity change (not length) is the "loaded"
+  // signal. The timeout covers an unreachable API, which otherwise
+  // never resolves. The empty state renders only after the list has
+  // settled, never while still loading.
+  const [listSettled, setListSettled] = useState(false);
+  const initialListRef = useRef(allCreators);
+  useEffect(() => {
+    if (allCreators !== initialListRef.current) setListSettled(true);
+  }, [allCreators]);
+  useEffect(() => {
+    const t = setTimeout(() => setListSettled(true), 30000);
+    return () => clearTimeout(t);
+  }, []);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("All");
   const [filters, setFilters] = useState<CreatorFilters>({
@@ -53,6 +67,7 @@ export default function CreatorsPage() {
     availableNow: false,
     language: "",
     industry: "",
+    skill: "",
   });
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 9;
@@ -70,6 +85,16 @@ export default function CreatorsPage() {
   const industryOptions = useMemo(
     () =>
       [...new Set(allCreators.flatMap((c) => c.industriesList ?? []))].sort(
+        (a, b) => a.localeCompare(b)
+      ),
+    [allCreators]
+  );
+
+  // Distinct real skills across the loaded creators, for the Skills
+  // dropdown (same source the profile pages render from: API `skills`).
+  const skillOptions = useMemo(
+    () =>
+      [...new Set(allCreators.flatMap((c) => c.skillsList ?? []))].sort(
         (a, b) => a.localeCompare(b)
       ),
     [allCreators]
@@ -107,6 +132,11 @@ export default function CreatorsPage() {
       return false;
     }
     if (filters.industry && !(c.industriesList ?? []).includes(filters.industry)) {
+      return false;
+    }
+    // Skills membership, same semantics as the professionals Skills
+    // filter: only creators carrying the selected skill pass.
+    if (filters.skill && !(c.skillsList ?? []).includes(filters.skill)) {
       return false;
     }
     // Range/boolean filters only exclude items that actually carry data;
@@ -169,17 +199,30 @@ export default function CreatorsPage() {
           <div className="flex gap-8">
             <aside className="hidden w-[300px] shrink-0 lg:block">
               <div className="sticky top-24 rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 p-5 shadow-card">
-                <FilterPanel kind="creators" languageOptions={languageOptions} industryOptions={industryOptions} onCreatorFilterChange={handleFilter} />
+                <FilterPanel kind="creators" languageOptions={languageOptions} industryOptions={industryOptions} skillOptions={skillOptions} onCreatorFilterChange={handleFilter} />
               </div>
             </aside>
             <div className="min-w-0 flex-1">
               <FilterButton onClick={() => setDrawerOpen(true)} />
-              <Stagger className="grid grid-cols-2 gap-4 sm:gap-5 xl:grid-cols-3" from="scale" stagger={0.08}>
-                {paged.map((c) => (
-                  <CreatorCard key={c.id} creator={c} />
-                ))}
-              </Stagger>
-              <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+              {!listSettled ? (
+                <div className="flex flex-col items-center rounded-2xl border border-dashed border-ink-200 dark:border-ink-700 bg-ink-50/60 dark:bg-ink-900/60 px-6 py-10 text-center">
+                  <p className="text-[15px] font-bold text-ink-900 dark:text-ink-50">Loading creators…</p>
+                </div>
+              ) : paged.length === 0 ? (
+                <div className="flex flex-col items-center rounded-2xl border border-dashed border-ink-200 dark:border-ink-700 bg-ink-50/60 dark:bg-ink-900/60 px-6 py-10 text-center">
+                  <p className="text-[15px] font-bold text-ink-900 dark:text-ink-50">No creators found</p>
+                  <p className="mt-1 max-w-[380px] text-[14px] text-ink-500 dark:text-ink-300">Try adjusting your search or filters.</p>
+                </div>
+              ) : (
+                <>
+                  <Stagger className="grid grid-cols-2 gap-4 sm:gap-5 xl:grid-cols-3" from="scale" stagger={0.08}>
+                    {paged.map((c) => (
+                      <CreatorCard key={c.id} creator={c} />
+                    ))}
+                  </Stagger>
+                  <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -190,7 +233,7 @@ export default function CreatorsPage() {
         onClose={() => setDrawerOpen(false)}
         title="Filters"
       >
-        <FilterPanel kind="creators" languageOptions={languageOptions} industryOptions={industryOptions} onCreatorFilterChange={handleFilter} />
+        <FilterPanel kind="creators" languageOptions={languageOptions} industryOptions={industryOptions} skillOptions={skillOptions} onCreatorFilterChange={handleFilter} />
       </Drawer>
     </>
   );

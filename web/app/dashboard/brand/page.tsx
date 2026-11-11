@@ -6,9 +6,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import {
-  AIAssistant,
   CampaignCard,
-  PerformanceInsights,
   RequestsTable,
   SectionCard,
   StatCard,
@@ -16,8 +14,6 @@ import {
 } from "@/components/dashboard/widgets";
 import { Button } from "@/components/ui/Button";
 import {
-  aiAssistantQuestions,
-  aiRecommendations,
   brandNav,
   dashboardUser,
   type DashboardCampaign,
@@ -185,8 +181,6 @@ export default function BrandDashboardPage() {
           )}
         </SectionCard>
 
-        <AIAssistant questions={aiAssistantQuestions} />
-        <PerformanceInsights recommendations={aiRecommendations} />
       </div>
     </DashboardShell>
   );

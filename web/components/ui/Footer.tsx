@@ -88,7 +88,7 @@ export function Footer({ logoTone = "dark" }: { logoTone?: "dark" | "brand" }) {
         </div>
         <div className="mt-10 border-t border-ink-100 dark:border-ink-800 pt-6">
           <p className="text-center text-sm text-ink-500 dark:text-ink-300">
-            © 2025 Pacten Ltd. All rights reserved.
+            © 2026 Pacten Ltd. All rights reserved.
           </p>
         </div>
       </div>

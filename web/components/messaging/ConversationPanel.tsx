@@ -12,9 +12,10 @@ import { useAuth } from "@/components/auth/AuthProvider";
 
 // Open-conversation panel, rebuilt from the design "inbox" (411:59061)
 // Frame 412: header (photo avatar, name/handle, filled "View Profile"
-// button, kebab), "Sep 2" date divider, incoming (#ebf3ff) / outgoing
-// (#d3d8f0) bubbles with timestamps, and the composer box
-// ("Type your message..." + paperclip + "Send Message").
+// button, kebab), date divider (the FIRST message's real date — the old
+// code hardcoded the Figma placeholder "Sep 2" for every thread),
+// incoming (#ebf3ff) / outgoing (#d3d8f0) bubbles with timestamps, and
+// the composer box ("Type your message..." + paperclip + "Send Message").
 // Real conversations (UUID id) load/persist messages via the API.
 // Naye messages WebSocket (socket.io) se foran aate hain; agar socket
 // connect na ho sake to 5s polling fallback ke taur par chalti hai.
@@ -31,6 +32,19 @@ export function fmtTime(t: string): string {
       return d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
   }
   return t;
+}
+
+// ISO timestamp ko design-style date ("Nov 11") me badlo. Jo strings
+// pehle se display format me hain ("now") unka matlab aaj ki date hai —
+// optimistic message ya legacy display string.
+export function fmtDate(t: string): string {
+  let d: Date | null = null;
+  if (/^\d{4}-\d{2}-\d{2}T/.test(t)) {
+    const parsed = new Date(t);
+    if (!isNaN(parsed.getTime())) d = parsed;
+  }
+  if (!d) d = new Date();
+  return d.toLocaleDateString([], { month: "short", day: "numeric" });
 }
 
 export function ConversationPanel({
@@ -62,9 +76,32 @@ export function ConversationPanel({
     userIdRef.current = (user as any)?.id ?? null;
   }, [user]);
 
-  // Keep local state in sync when the parent loads real messages
+  // Keep local state in sync when the parent loads real messages —
+  // MERGE, don't replace (Nov 2026). The parent refetches after load
+  // and again when the session resolves, and a plain replace wiped a
+  // message the user just sent (or the socket just delivered) whenever
+  // the refetch raced the send — the bubble then only came back after a
+  // page reload. Local-only rows (optimistic `m-…` ids) survive a
+  // refetch; a temp whose body already arrived in the incoming list
+  // (refetch raced the REST response) is a duplicate and is dropped.
   useEffect(() => {
-    setMessages(initialMessages);
+    setMessages((prev) => {
+      const incoming = initialMessages ?? [];
+      const keptTemps = prev.filter(
+        (m) =>
+          String(m.id).startsWith("m-") &&
+          !incoming.some((im: any) => im.from === "me" && im.body === m.body)
+      );
+      const sameOrder =
+        prev.length === incoming.length &&
+        prev.every((p, i) => String(p.id) === String((incoming[i] as any).id));
+      if (keptTemps.length === 0 && sameOrder) return prev;
+      const byId = new Map(prev.map((m) => [String(m.id), m]));
+      return [
+        ...incoming.map((m: any) => byId.get(String(m.id)) ?? m),
+        ...keptTemps,
+      ];
+    });
   }, [initialMessages]);
 
   // Realtime: WebSocket connection for new messages on real conversations
@@ -191,24 +228,36 @@ export function ConversationPanel({
     setDraft("");
     setSendError("");
     if (isReal && convId) {
+      // Optimistic: the bubble renders immediately (Nov 2026 — the old
+      // code only added it after the REST round-trip, which awaits the
+      // email send server-side, so on slow staging the user saw nothing
+      // until a reload). The temp row is swapped for the real message
+      // when the response lands; a socket echo dedups by id.
+      const tempId = `m-${Date.now()}`;
+      setMessages((prev) => [
+        ...prev,
+        { id: tempId, from: "me", body, time: "now" },
+      ]);
       api
         .sendMessage(convId, body)
         .then((m: any) => {
           setMessages((prev) => {
             // WebSocket broadcast REST response se pehle aa sakta hai —
             // agar socket ne message pehle hi add kar diya hai to
-            // dobara add na karo (duplicate bubble bug).
+            // dobara add na karo (duplicate bubble bug); the temp row
+            // is then dropped.
             if (m?.id && prev.some((x) => String(x.id) === String(m.id)))
-              return prev;
-            return [
-              ...prev,
-              {
-                id: m?.id ?? `m-${Date.now()}`,
-                from: "me",
-                body: m?.content ?? body,
-                time: m?.createdAt ?? "now",
-              },
-            ];
+              return prev.filter((x) => String(x.id) !== tempId);
+            return prev.map((x) =>
+              String(x.id) === tempId
+                ? {
+                    id: m?.id ?? tempId,
+                    from: "me",
+                    body: m?.content ?? body,
+                    time: m?.createdAt ?? "now",
+                  }
+                : x
+            );
           });
         })
         .catch((err: any) => {
@@ -216,13 +265,12 @@ export function ConversationPanel({
           if (String(err?.message || "").includes("Free plan limit")) {
             setSendError(err.message);
             setDraft(body);
+            // The optimistic bubble never happened — drop it.
+            setMessages((prev) => prev.filter((x) => String(x.id) !== tempId));
             return;
           }
-          // API unavailable — keep client-side only
-          setMessages((prev) => [
-            ...prev,
-            { id: `m-${Date.now()}`, from: "me", body, time: "now" },
-          ]);
+          // API unavailable — the optimistic bubble stays as the
+          // client-side copy (previous behaviour, now immediate).
         });
     } else {
       setMessages((m) => [
@@ -280,11 +328,16 @@ export function ConversationPanel({
 
       {/* Thread */}
       <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-5">
-        <div className="flex items-center gap-3">
-          <hr className="flex-1 border-ink-100 dark:border-ink-800" />
-          <span className="text-[13px] font-medium text-ink-500 dark:text-ink-300">Sep 2</span>
-          <hr className="flex-1 border-ink-100 dark:border-ink-800" />
-        </div>
+        {/* Date divider: the FIRST message's real date (Nov 2026 — was
+            the hardcoded Figma placeholder "Sep 2" on every thread).
+            No divider on an empty thread — there is no date to show. */}
+        {messages.length > 0 && (
+          <div className="flex items-center gap-3">
+            <hr className="flex-1 border-ink-100 dark:border-ink-800" />
+            <span className="text-[13px] font-medium text-ink-500 dark:text-ink-300">{fmtDate(messages[0].time)}</span>
+            <hr className="flex-1 border-ink-100 dark:border-ink-800" />
+          </div>
+        )}
         {messages.map((m) =>
           m.from === "them" ? (
             <div key={m.id} className="flex max-w-[75%] flex-col gap-1 self-start">

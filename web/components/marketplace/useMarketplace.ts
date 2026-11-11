@@ -7,13 +7,6 @@ import {
   type ProfessionalCardData,
 } from "@/lib/mock";
 
-const FALLBACK_AVATARS = [
-  "/assets/marketplace/creator-theresa-webb.jpg",
-  "/assets/marketplace/creator-maya-chen.jpg",
-  "/assets/marketplace/creator-kristin-watson.jpg",
-  "/assets/marketplace/creator-alex-rivera.jpg",
-];
-
 /** "12.4K" -> 12400, "2.3M" -> 2300000, "500" -> 500, "—" -> null */
 export function parseCompactCount(raw: unknown): number | null {
   if (raw == null) return null;
@@ -61,6 +54,7 @@ export interface CreatorFilterData extends CreatorCardData {
   rateValue: number | null;
   languagesList: string[];
   industriesList: string[];
+  skillsList: string[];
 }
 
 export interface ProfessionalFilterData extends ProfessionalCardData {
@@ -74,7 +68,7 @@ export interface ProfessionalFilterData extends ProfessionalCardData {
   industriesList: string[];
 }
 
-function mapCreator(p: any, i: number): CreatorFilterData {
+function mapCreator(p: any): CreatorFilterData {
   return {
     id: p.id,
     name: p.displayName || p.name || "Creator",
@@ -91,8 +85,11 @@ function mapCreator(p: any, i: number): CreatorFilterData {
     niches: p.niches?.length ? p.niches : [],
     languagesList: Array.isArray(p.languages) ? p.languages : [],
     industriesList: Array.isArray(p.industries) ? p.industries : [],
+    skillsList: Array.isArray(p.skills) ? p.skills : [],
     platforms: p.platforms?.length ? p.platforms : [],
-    photo: p.avatarUrl || p.photo || FALLBACK_AVATARS[i % FALLBACK_AVATARS.length],
+    // No stock-photo fallback: when there is no real avatar, photo is
+    // empty and the card renders the initials Avatar instead.
+    photo: p.avatarUrl || p.photo || "",
     isVerified: p.isVerified,
     availableNow: p.availableNow,
     followersCount: parseCompactCount(p.followers),
@@ -100,7 +97,7 @@ function mapCreator(p: any, i: number): CreatorFilterData {
   };
 }
 
-function mapProfessional(p: any, i: number): ProfessionalFilterData {
+function mapProfessional(p: any): ProfessionalFilterData {
   return {
     id: p.id,
     name: p.displayName || p.name || "Professional",
@@ -119,7 +116,9 @@ function mapProfessional(p: any, i: number): ProfessionalFilterData {
         ? `${Number(p.rating).toFixed(1)}★`
         : (p.rating ?? "New"),
     category: p.skills?.[0] || p.category || "",
-    photo: p.avatarUrl || p.photo || FALLBACK_AVATARS[i % FALLBACK_AVATARS.length],
+    // No stock-photo fallback: when there is no real avatar, photo is
+    // empty and the card renders the initials Avatar instead.
+    photo: p.avatarUrl || p.photo || "",
     isVerified: p.isVerified,
     availableNow: p.availableNow,
     openToProjects: p.openToProjects,
@@ -131,21 +130,38 @@ function mapProfessional(p: any, i: number): ProfessionalFilterData {
   };
 }
 
+export interface MarketplaceListOptions {
+  /** Opt-in API sort, e.g. "createdAt:desc" (newest first). Without it
+   *  the API keeps its default order (rating DESC). */
+  sort?: string;
+  /** Max rows to fetch. Defaults to 100 — the exact current behavior. */
+  limit?: number;
+}
+
+function buildListParams(options?: MarketplaceListOptions): string {
+  const params = new URLSearchParams();
+  params.set("limit", String(options?.limit ?? 100));
+  if (options?.sort) params.set("sort", options.sort);
+  return `?${params.toString()}`;
+}
+
 /**
  * Loads the public marketplace lists from the real API only. When the
  * API is unreachable the lists stay EMPTY — never fabricated showcase
  * people. Every item carries the raw fields the filter panel filters
  * on, so the marketplace pages can filter client-side on live data.
  */
-export function useMarketplaceCreators(): CreatorFilterData[] {
+export function useMarketplaceCreators(options?: MarketplaceListOptions): CreatorFilterData[] {
   // Start EMPTY and fill from the API. Showing the built-in showcase
   // list as a fallback made searches match fake people whose cards
   // linked to profile pages that do not exist.
+  const sort = options?.sort;
+  const limit = options?.limit;
   const [list, setList] = useState<CreatorFilterData[]>([]);
   useEffect(() => {
     let alive = true;
     api
-      .creators("?limit=100")
+      .creators(buildListParams({ sort, limit }))
       .then((rows) => {
         if (alive && Array.isArray(rows)) {
           setList(rows.map(mapCreator));
@@ -157,16 +173,18 @@ export function useMarketplaceCreators(): CreatorFilterData[] {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [sort, limit]);
   return list;
 }
 
-export function useMarketplaceProfessionals(): ProfessionalFilterData[] {
+export function useMarketplaceProfessionals(options?: MarketplaceListOptions): ProfessionalFilterData[] {
+  const sort = options?.sort;
+  const limit = options?.limit;
   const [list, setList] = useState<ProfessionalFilterData[]>([]);
   useEffect(() => {
     let alive = true;
     api
-      .professionals("?limit=100")
+      .professionals(buildListParams({ sort, limit }))
       .then((rows) => {
         if (alive && Array.isArray(rows)) {
           setList(rows.map(mapProfessional));
@@ -178,6 +196,6 @@ export function useMarketplaceProfessionals(): ProfessionalFilterData[] {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [sort, limit]);
   return list;
 }

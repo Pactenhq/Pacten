@@ -39,6 +39,13 @@ export class CreatorProfile {
   @Column('text', { array: true, default: '{}' })
   industries: string[];
 
+  // Skills (Nov 2026, showcase follow-up): text array like
+  // languages/industries — feeds the creators Skills filter. Added
+  // because the filter was ordered while creators had no skills field
+  // at all; a filter with no data source would have been decorative.
+  @Column('text', { array: true, default: '{}' })
+  skills: string[];
+
   @Column('text', { array: true, default: '{}' })
   platforms: string[];
 

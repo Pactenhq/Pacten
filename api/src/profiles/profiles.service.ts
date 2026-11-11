@@ -31,7 +31,7 @@ export class ProfilesService {
   async updateMyProfile(userId: string, role: UserRole, data: any) {
     const allowedFields: Record<string, string[]> = {
       [UserRole.BRAND]: ['companyName', 'website', 'industry', 'description', 'logoUrl', 'location'],
-      [UserRole.CREATOR]: ['displayName', 'bio', 'avatarUrl', 'niches', 'languages', 'industries', 'platforms', 'followers', 'location', 'availableNow', 'rate'],
+      [UserRole.CREATOR]: ['displayName', 'bio', 'avatarUrl', 'niches', 'languages', 'industries', 'skills', 'platforms', 'followers', 'location', 'availableNow', 'rate'],
       [UserRole.PROFESSIONAL]: ['displayName', 'title', 'bio', 'avatarUrl', 'skills', 'languages', 'industries', 'platforms', 'hourlyRate', 'location', 'availableNow', 'openToProjects', 'yearsExperience'],
     };
 
@@ -100,7 +100,7 @@ export class ProfilesService {
     return publicProfile;
   }
 
-  async searchCreators(filters: { niche?: string; platform?: string; query?: string; limit?: number; offset?: number }) {
+  async searchCreators(filters: { niche?: string; platform?: string; query?: string; limit?: number; offset?: number; sort?: string }) {
     const qb = this.creatorRepo.createQueryBuilder('c')
       .where('c.availableNow = :available', { available: true });
 
@@ -114,14 +114,25 @@ export class ProfilesService {
       qb.andWhere('(c.displayName ILIKE :q OR c.bio ILIKE :q)', { q: `%${filters.query}%` });
     }
 
-    qb.orderBy('c.rating', 'DESC')
-      .limit(filters.limit || 20)
+    // Default ordering is UNCHANGED: rating DESC (verified in the query
+    // builder — not oldest-first). `sort` is opt-in only, e.g.
+    // sort=createdAt:desc for the homepage showcase (newest first).
+    // Only whitelisted columns are ever ordered on — the raw value is
+    // never interpolated into the query.
+    const sort = parseSort(filters.sort);
+    if (sort) {
+      qb.orderBy(`c.${sort.field}`, sort.direction);
+      if (sort.field !== 'rating') qb.addOrderBy('c.rating', 'DESC');
+    } else {
+      qb.orderBy('c.rating', 'DESC');
+    }
+    qb.limit(filters.limit || 20)
       .offset(filters.offset || 0);
 
     return qb.getMany();
   }
 
-  async searchProfessionals(filters: { skill?: string; platform?: string; query?: string; limit?: number; offset?: number }) {
+  async searchProfessionals(filters: { skill?: string; platform?: string; query?: string; limit?: number; offset?: number; sort?: string }) {
     const qb = this.professionalRepo.createQueryBuilder('p')
       .where('p.availableNow = :available', { available: true });
 
@@ -135,10 +146,33 @@ export class ProfilesService {
       qb.andWhere('(p.displayName ILIKE :q OR p.bio ILIKE :q OR p.title ILIKE :q)', { q: `%${filters.query}%` });
     }
 
-    qb.orderBy('p.rating', 'DESC')
-      .limit(filters.limit || 20)
+    // Same default as creators: rating DESC, unchanged. `sort` opt-in.
+    const sort = parseSort(filters.sort);
+    if (sort) {
+      qb.orderBy(`p.${sort.field}`, sort.direction);
+      if (sort.field !== 'rating') qb.addOrderBy('p.rating', 'DESC');
+    } else {
+      qb.orderBy('p.rating', 'DESC');
+    }
+    qb.limit(filters.limit || 20)
       .offset(filters.offset || 0);
 
     return qb.getMany();
   }
+}
+
+/**
+ * Parses `sort=field:direction` (e.g. `createdAt:desc`) into a whitelisted
+ * order-by. Returns null for anything missing, malformed or naming a
+ * column that is not whitelisted — callers then keep their default order.
+ * Direction defaults to DESC; only an explicit `asc` flips it.
+ */
+function parseSort(sort: string | undefined): { field: string; direction: 'ASC' | 'DESC' } | null {
+  if (!sort) return null;
+  const [field, dir] = sort.split(':');
+  if (field !== 'createdAt' && field !== 'rating') return null;
+  return {
+    field,
+    direction: (dir || 'desc').toLowerCase() === 'asc' ? 'ASC' : 'DESC',
+  };
 }

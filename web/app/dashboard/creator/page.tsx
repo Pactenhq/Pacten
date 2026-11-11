@@ -14,15 +14,12 @@ import {
   SectionCard,
   ServicesCard,
   StatCard,
-  TrustScore,
   VisibilityBoost,
   WelcomeHeader,
 } from "@/components/dashboard/widgets";
 import {
   creatorNav,
   dashboardUser,
-  trustScoreBreakdown,
-  trustScoreEmptyBreakdown,
   type DashboardCampaign,
 } from "@/lib/mock";
 import { api } from "@/lib/api";
@@ -34,7 +31,7 @@ import { api } from "@/lib/api";
 // active campaigns = active deals, requests = received opportunities.
 // "Profile Views" ka koi data source MVP me nahi (analytics Phase 2) —
 // us ki jagah real Pending Requests count hai. Profile completeness
-// asal profile fields se gintee hai. TrustScore / Availability /
+// asal profile fields se gintee hai. Availability /
 // Services abhi design blocks hain (backend source MVP scope me nahi).
 
 function moneyOf(v: any): number {
@@ -222,14 +219,6 @@ export default function CreatorDashboardPage() {
         </SectionCard>
 
         <AvailabilityCalendar />
-
-        <TrustScore
-          score={completedDeals.length > 0 ? 123 : 0}
-          tier="Strong"
-          breakdown={
-            completedDeals.length > 0 ? trustScoreBreakdown : trustScoreEmptyBreakdown
-          }
-        />
 
         <VisibilityBoost />
       </div>

@@ -19,7 +19,6 @@ export function SettingsProfileForm() {
   // ("Olivia Martinez"), which flashed as a stranger's data on load.
   const [values, setValues] = useState({
     fullName: "",
-    username: "",
     location: "",
     website: "",
     bio: "",
@@ -27,6 +26,12 @@ export function SettingsProfileForm() {
     // creator/professional roles (brand profiles have no such fields).
     languages: "",
     industries: "",
+    skills: "",
+    platforms: "",
+    // Creator-only: niches feed the Category pills; rate is the
+    // "Typical rate" the public profile shows.
+    niches: "",
+    rate: "",
   });
   const [initials, setInitials] = useState("");
   const [saving, setSaving] = useState(false);
@@ -42,12 +47,15 @@ export function SettingsProfileForm() {
           : p.displayName || `${user.firstName} ${user.lastName}`;
       setValues({
         fullName: name,
-        username: "",
         location: p.location || "",
         website: p.website || "",
         bio: user.role === "brand" ? p.description || "" : p.bio || "",
         languages: Array.isArray(p.languages) ? p.languages.join(", ") : "",
         industries: Array.isArray(p.industries) ? p.industries.join(", ") : "",
+        skills: Array.isArray(p.skills) ? p.skills.join(", ") : "",
+        platforms: Array.isArray(p.platforms) ? p.platforms.join(", ") : "",
+        niches: Array.isArray(p.niches) ? p.niches.join(", ") : "",
+        rate: p.rate != null ? String(p.rate) : "",
       });
       setInitials(
         name
@@ -96,9 +104,14 @@ export function SettingsProfileForm() {
       } else {
         payload.displayName = values.fullName;
         payload.bio = values.bio;
-        payload.website = values.website;
         payload.languages = parseList(values.languages);
         payload.industries = parseList(values.industries);
+        payload.skills = parseList(values.skills);
+        payload.platforms = parseList(values.platforms);
+        if (user.role === "creator") {
+          payload.niches = parseList(values.niches);
+          payload.rate = values.rate.trim();
+        }
       }
       await api.updateProfile(payload);
       await refresh();
@@ -148,13 +161,14 @@ export function SettingsProfileForm() {
             placeholder="Full Name"
             {...field("fullName")}
           />
-          <TextField
-            label="Username"
-            placeholder="Username"
-            {...field("username")}
-          />
           <TextField label="Location" {...field("location")} />
-          <TextField label="Website" {...field("website")} />
+          {/* Website is a brand-profile field only: creator/professional
+              profiles have no website column, so the input was silently
+              discarded for them (same class as the removed Username
+              field). Brand keeps it — its allowlist carries `website`. */}
+          {user?.role === "brand" && (
+            <TextField label="Website" {...field("website")} />
+          )}
           {user?.role !== "brand" && (
             <>
               <TextField
@@ -168,6 +182,34 @@ export function SettingsProfileForm() {
                 placeholder="Fashion, Beauty, Fitness"
                 hint="Separate with commas — these feed the marketplace Industry Experience filter."
                 {...field("industries")}
+              />
+              <TextField
+                label="Skills"
+                placeholder="Video Editing, Photography"
+                hint="Separate with commas — these feed the marketplace Skills filter."
+                {...field("skills")}
+              />
+              <TextField
+                label="Platforms"
+                placeholder="TikTok, Instagram, YouTube"
+                hint="Separate with commas."
+                {...field("platforms")}
+              />
+            </>
+          )}
+          {user?.role === "creator" && (
+            <>
+              <TextField
+                label="Niches"
+                placeholder="Fashion, Beauty, Fitness"
+                hint="Separate with commas — these feed the Category filter."
+                {...field("niches")}
+              />
+              <TextField
+                label="Rate"
+                placeholder="500"
+                hint="Your typical rate, e.g. 500 — shown on your public profile."
+                {...field("rate")}
               />
             </>
           )}

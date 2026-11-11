@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/ui/Navbar";
 import { Footer } from "@/components/ui/Footer";
@@ -13,7 +13,9 @@ import { Reveal, Stagger } from "@/components/ui/Reveal";
 import { TiltCard } from "@/components/ui/TiltCard";
 import { GlowOrb } from "@/components/ui/Animated";
 import { cn } from "@/lib/cn";
-import { homePricingPlans, homeSearchChips } from "@/lib/mock";
+import { homeSearchChips } from "@/lib/mock";
+import { api } from "@/lib/api";
+import { HomeShowcase } from "@/components/home/Showcase";
 
 // Home page sections in order.
 
@@ -24,15 +26,6 @@ function SparkleIcon({ className }: { className?: string }) {
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden className={className}>
       <path d="M8 1.5 9.7 6.3 14.5 8 9.7 9.7 8 14.5 6.3 9.7 1.5 8 6.3 6.3 8 1.5Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
       <path d="M13 1.5l.7 1.8 1.8.7-1.8.7L13 6.5l-.7-1.8-1.8-.7 1.8-.7L13 1.5Z" fill="currentColor" />
-    </svg>
-  );
-}
-
-function CheckIcon({ className }: { className?: string }) {
-  return (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden className={className}>
-      <circle cx="9" cy="9" r="8" stroke="currentColor" strokeWidth="1.6" />
-      <path d="m6 9.3 2.2 2.2L12.2 7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -74,6 +67,18 @@ function BuildingIcon({ className }: { className?: string }) {
   );
 }
 
+// Restored Nov 2026 (user decision): the Figma-style pricing cards used
+// these icons; they were removed when the showcase pack switched the
+// homepage pricing to the /pricing PricingCards rendering.
+function CheckIcon({ className }: { className?: string }) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden className={className}>
+      <circle cx="9" cy="9" r="8" stroke="currentColor" strokeWidth="1.6" />
+      <path d="m6 9.3 2.2 2.2L12.2 7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 function GiftIcon({ className }: { className?: string }) {
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden className={className}>
@@ -90,6 +95,16 @@ function StarPersonIcon({ className }: { className?: string }) {
       <path d="M3.5 19.5c1.2-3.6 3.9-5.4 6.5-5.4 1 0 2 .3 2.9.8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       <path d="m17.5 14 1 2 2.2.3-1.6 1.5.4 2.2-2-1-2 1 .4-2.2-1.6-1.5 2.2-.3 1-2Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
     </svg>
+  );
+}
+
+function PlanIcon({ icon }: { icon: "gift" | "star" | "briefcase" }) {
+  return (
+    <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 dark:bg-white/10 text-brand dark:text-brand-200">
+      {icon === "gift" && <GiftIcon />}
+      {icon === "star" && <StarPersonIcon />}
+      {icon === "briefcase" && <BriefcaseIcon />}
+    </span>
   );
 }
 
@@ -205,8 +220,9 @@ function Hero() {
         </div>
       </div>
 
-      {/* Extension point: homepage creator showcase cards lived here.
-          Genuine creator profiles belong on /creators (real API data).
+      {/* Homepage showcase (Nov 2026): real creator/professional
+          profiles now render between Hero and Pricing via
+          components/home/Showcase.tsx (newest first, real API data).
           Never render hardcoded names, follower counts, or ratings. */}
       </div>
     </section>
@@ -222,13 +238,96 @@ function Hero() {
 
 /* ------------------------------ pricing ----------------------------- */
 
-function PlanIcon({ icon }: { icon: "gift" | "star" | "briefcase" }) {
+// Pricing cards — Figma-style (user decision Nov 2026): light cards in
+// light mode, dark cards in dark mode (ONE structure with dark:
+// variants — Card already renders dark:bg-ink-900 and the text carries
+// dark: classes), NO dark highlighted Pro card, NO "Most popular" badge,
+// CTAs to /signup/[role]. Prices + benefits come from the real
+// subscription plans API; the hardcoded homePricingPlans copy from
+// @/lib/mock is no longer used on the homepage.
+
+type HomePlan = {
+  id: string;
+  name: string;
+  tier: string;
+  priceCentsMonthly: number;
+  benefits: string[];
+};
+
+function HomePricingCards({
+  role,
+}: {
+  role: "brand" | "creator" | "professional";
+}) {
+  const [plans, setPlans] = useState<HomePlan[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    api
+      .subscriptionPlans(role)
+      .then((data) => setPlans(Array.isArray(data) ? data : []))
+      .catch(() => setPlans([]))
+      .finally(() => setLoading(false));
+  }, [role]);
+
+  if (loading) {
+    return <p className="text-center text-[15px] text-ink-500 dark:text-ink-300">Loading plans...</p>;
+  }
+
+  if (plans.length === 0) {
+    return (
+      <p className="text-center text-[15px] text-ink-500 dark:text-ink-300">
+        Plans are unavailable right now. Please try again later.
+      </p>
+    );
+  }
+
   return (
-    <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 dark:bg-white/10 text-brand dark:text-brand-200">
-      {icon === "gift" && <GiftIcon />}
-      {icon === "star" && <StarPersonIcon />}
-      {icon === "briefcase" && <BriefcaseIcon />}
-    </span>
+    <Stagger className="mx-auto mt-10 grid max-w-[1100px] gap-5 text-left md:grid-cols-3" from="scale">
+      {plans.map((plan) => {
+        // Pro is the "filled" card (brand border + primary CTA), exactly
+        // as the Figma design had it — a border accent, NOT a dark fill.
+        const filled = plan.tier === "pro";
+        const icon =
+          plan.tier === "free" ? "gift" : plan.tier === "pro" ? "briefcase" : "star";
+        const price =
+          plan.priceCentsMonthly === 0
+            ? "$0/mo"
+            : `$${(plan.priceCentsMonthly / 100).toFixed(plan.priceCentsMonthly % 100 === 0 ? 0 : 2)}/mo`;
+        const cta =
+          plan.tier === "free"
+            ? "Start Free"
+            : plan.tier === "pro"
+              ? "Upgrade to Pro"
+              : plan.name === "Business"
+                ? "Go Business"
+                : "Go Elite";
+        return (
+          <div key={plan.id} className="relative">
+            <Card className={cn("card-lift h-full p-7", filled && "border-2 border-brand")}>
+              <PlanIcon icon={icon} />
+              <p className="mt-5 text-[22px] font-extrabold text-ink-900 dark:text-ink-50">{plan.name}</p>
+              <p className="mt-1 text-[15px] font-bold text-brand dark:text-brand-200">{price}</p>
+              <div className="my-5 border-t border-ink-100 dark:border-ink-800" />
+              <ul className="space-y-3">
+                {plan.benefits.map((f) => (
+                  <li key={f} className="flex items-center gap-2.5 text-[15px] text-ink-700 dark:text-ink-200">
+                    <CheckIcon className="shrink-0 text-brand dark:text-brand-200" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Link href={`/signup/${role}`} className="block">
+                <Button variant={filled ? "primary" : "outline"} className="mt-7 w-full" size="lg">
+                  {cta}
+                </Button>
+              </Link>
+            </Card>
+          </div>
+        );
+      })}
+    </Stagger>
   );
 }
 
@@ -270,36 +369,7 @@ function PricingSection() {
         ))}
         </div>
       </div>
-      <Stagger className="mx-auto mt-10 grid max-w-[1100px] gap-5 text-left md:grid-cols-3" from="scale">
-        {homePricingPlans[roles[active]].map((plan) => (
-          <div key={plan.name} className="relative">
-            {plan.tag && (
-              <span className="animate-glow absolute -top-3.5 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-md bg-brand px-3 py-1 text-xs font-bold text-white">
-                {plan.tag}
-              </span>
-            )}
-            <Card className={cn("card-lift h-full p-7", plan.filled && "border-2 border-brand")}>
-              <PlanIcon icon={plan.icon} />
-              <p className="mt-5 text-[22px] font-extrabold text-ink-900 dark:text-ink-50">{plan.name}</p>
-              <p className="mt-1 text-[15px] font-bold text-brand dark:text-brand-200">{plan.price}</p>
-              <div className="my-5 border-t border-ink-100 dark:border-ink-800" />
-              <ul className="space-y-3">
-                {plan.features.map((f) => (
-                  <li key={f} className="flex items-center gap-2.5 text-[15px] text-ink-700 dark:text-ink-200">
-                    <CheckIcon className="shrink-0 text-brand dark:text-brand-200" />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <Link href={`/signup/${roles[active]}`} className="block">
-                <Button variant={plan.filled ? "primary" : "outline"} className="mt-7 w-full" size="lg">
-                  {plan.cta}
-                </Button>
-              </Link>
-            </Card>
-          </div>
-        ))}
-      </Stagger>
+      <HomePricingCards role={roles[active]} />
       <Reveal className="mt-10" from="up">
         <Link href="/pricing">
           <Button size="lg" className="min-w-[171px]">
@@ -679,6 +749,7 @@ export default function HomePage() {
       <Navbar />
       <main>
         <Hero />
+        <HomeShowcase />
         <PricingSection />
         <MarketplaceSection />
         <HowItWorks />
