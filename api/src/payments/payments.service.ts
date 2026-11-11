@@ -511,6 +511,13 @@ export class PaymentsService implements OnModuleInit {
         if (sessionRef) {
           await this.referrals.reverseEarningsBySource(sessionRef);
         }
+        // Renewal-payment refund: the charge carries the invoice id
+        // (charge.invoice), which is the sourceId the renewal branch
+        // credits the referral earning under — reverse that earning too
+        // (client rule: no rewards on refunds/chargebacks).
+        if (event.data.invoice) {
+          await this.referrals.reverseEarningsBySource(event.data.invoice);
+        }
         if (piId || sessionRef) {
           await this.recordEvent(event.id, event.type, payment?.id || null, event.data);
         }
@@ -585,9 +592,137 @@ export class PaymentsService implements OnModuleInit {
               session.amount_total ?? plan.priceCentsMonthly,
               session.id,
             );
+            // Billing History (defect #1): the subscription is active but
+            // no Payment row existed, so /payments/my was empty. Record
+            // it here too — deduped by session id, so whichever path
+            // (webhook or return-path sync) lands first wins.
+            if (
+              !session.payment_status ||
+              session.payment_status === 'paid'
+            ) {
+              await this.recordSubscriptionPayment({
+                userId: session.metadata.userId,
+                plan,
+                stripeCheckoutSessionId: session.id,
+                amountCents:
+                  session.amount_total ?? plan.priceCentsMonthly,
+                currency: session.currency ?? plan.currency,
+                stripePaymentIntentId:
+                  typeof session.payment_intent === 'string'
+                    ? session.payment_intent
+                    : (session.payment_intent?.id ?? null),
+              });
+            }
           }
         }
         await this.recordEvent(event.id, event.type, null, event.data);
+        break;
+      }
+      case 'invoice.payment_succeeded': {
+        // Renewal fix (staging, Nov 11 2026): renewals never created a
+        // Payment row — invoice.payment_succeeded was stored for audit
+        // only — so Billing History showed the initial checkout and then
+        // nothing, even though the subscriber kept paying monthly.
+        const invoice = event.data;
+        const stripeSubId =
+          typeof invoice?.subscription === 'string'
+            ? invoice.subscription
+            : invoice?.subscription?.id;
+        // Not a subscription invoice (e.g. a one-off invoice): ignore,
+        // do not crash.
+        if (!stripeSubId) {
+          await this.recordEvent(event.id, event.type, null, event.data);
+          break;
+        }
+        // Only renewals belong here. The FIRST invoice
+        // (billing_reason = 'subscription_create') IS the initial
+        // payment, already recorded by the checkout paths (demo
+        // checkout / live return-path sync / checkout.session.completed
+        // webhook) — recording it again would double the initial row.
+        // A billing_reason that is absent (older payloads) is treated
+        // as a renewal; Stripe always sends it on current invoices.
+        if (
+          invoice.billing_reason &&
+          invoice.billing_reason !== 'subscription_cycle'
+        ) {
+          await this.recordEvent(event.id, event.type, null, event.data);
+          break;
+        }
+        // Resolve the local subscription by its Stripe id — this is the
+        // only key the invoice carries; the user and plan follow from it.
+        const sub = await this.subsRepo.findOne({
+          where: { stripeSubscriptionId: stripeSubId },
+        });
+        if (!sub) {
+          await this.recordEvent(event.id, event.type, null, event.data);
+          break;
+        }
+        const plan = await this.plansRepo.findOne({
+          where: { id: sub.planId },
+        });
+        if (!plan) {
+          await this.recordEvent(event.id, event.type, null, event.data);
+          break;
+        }
+        const amountCents =
+          invoice.amount_paid ?? invoice.amount_due ?? 0;
+        if (!amountCents || amountCents <= 0 || !invoice.id) {
+          await this.recordEvent(event.id, event.type, null, event.data);
+          break;
+        }
+        // Replay guard: a redelivered event id is already dropped at the
+        // top of handleWebhook; a NEW event id for the same invoice
+        // (Stripe retry / manual replay) is caught here by invoice id.
+        // Referral credit runs only when a NEW Payment row is created,
+        // so a replay can never double-credit either.
+        const already = await this.paymentsRepo.findOne({
+          where: { stripeInvoiceId: invoice.id },
+        });
+        if (already) {
+          await this.recordEvent(
+            event.id,
+            event.type,
+            already.id,
+            event.data,
+          );
+          break;
+        }
+        const paymentIntentId =
+          typeof invoice.payment_intent === 'string'
+            ? invoice.payment_intent
+            : (invoice.payment_intent?.id ?? null);
+        const payment = await this.recordRenewalPayment({
+          userId: sub.userId,
+          plan,
+          stripeInvoiceId: invoice.id,
+          amountCents,
+          currency: invoice.currency ?? plan.currency,
+          stripePaymentIntentId: paymentIntentId,
+        });
+        // Referral earning: the SAME existing mechanism as the initial
+        // payment — ReferralsService.handleSubscriptionPayment, 20% of
+        // this payment, first THREE subscription payments only (dup
+        // check on sourceId + prior-count check inside the service).
+        // sourceId = the invoice id, unique per renewal, so the initial
+        // payment (sourceId = checkout session id) and each renewal
+        // count as separate payments toward the three.
+        await this.referrals.handleSubscriptionPayment(
+          sub.userId,
+          amountCents,
+          invoice.id,
+        );
+        // Advance the billing period when the invoice carries it, so
+        // "Next Billing Date" moves forward after a renewal.
+        const periodEndUnix =
+          invoice.period_end ?? invoice.lines?.data?.[0]?.period?.end;
+        if (periodEndUnix) {
+          const periodEnd = new Date(periodEndUnix * 1000);
+          if (!sub.currentPeriodEnd || periodEnd > sub.currentPeriodEnd) {
+            sub.currentPeriodEnd = periodEnd;
+            await this.subsRepo.save(sub);
+          }
+        }
+        await this.recordEvent(event.id, event.type, payment.id, event.data);
         break;
       }
       case 'customer.subscription.updated':
@@ -615,6 +750,110 @@ export class PaymentsService implements OnModuleInit {
     }
 
     return { received: true };
+  }
+
+  /**
+   * Record the Payment row for a completed SUBSCRIPTION checkout.
+   *
+   * Defect #1 (staging, Nov 11 2026): checkout activated the subscription
+   * on every path — demo simulation, live return-path sync, webhook —
+   * but none of them created a Payment, so GET /payments/my returned []
+   * and Billing History always showed "No billing activity yet." for a
+   * paying subscriber. Every activation path now calls this.
+   *
+   * Deduped by stripeCheckoutSessionId (unique column): the webhook and
+   * the return-path sync can settle the same session, and a retry must
+   * never create a second row. The find-first check covers the normal
+   * case; the 23505 catch covers two writers racing each other.
+   * Deliberately NOT processPaymentSuccess: a subscription has no deal,
+   * so there is no deal commission, no deal email and no deal link.
+   * Billing History renders Plan from the user's CURRENT plan, Date from
+   * createdAt, Amount from amountCents/currency and Status from status —
+   * all carried by this row (dealId is null for subscription payments).
+   */
+  async recordSubscriptionPayment(params: {
+    userId: string;
+    plan: SubscriptionPlan;
+    stripeCheckoutSessionId: string;
+    amountCents?: number;
+    currency?: string;
+    stripePaymentIntentId?: string | null;
+  }): Promise<Payment> {
+    const existing = await this.paymentsRepo.findOne({
+      where: { stripeCheckoutSessionId: params.stripeCheckoutSessionId },
+    });
+    if (existing) return existing;
+    const payment = this.paymentsRepo.create({
+      dealId: null,
+      payerId: params.userId,
+      amountCents: params.amountCents ?? params.plan.priceCentsMonthly,
+      currency: params.currency ?? params.plan.currency ?? 'usd',
+      stripeCheckoutSessionId: params.stripeCheckoutSessionId,
+      stripePaymentIntentId: params.stripePaymentIntentId ?? null,
+      status: PaymentStatus.SUCCEEDED,
+    });
+    try {
+      return await this.paymentsRepo.save(payment);
+    } catch (err: any) {
+      // Race: webhook + return-path sync settled the same session at once.
+      if (err?.code === '23505') {
+        const raced = await this.paymentsRepo.findOne({
+          where: {
+            stripeCheckoutSessionId: params.stripeCheckoutSessionId,
+          },
+        });
+        if (raced) return raced;
+      }
+      throw err;
+    }
+  }
+
+  /**
+   * Record the Payment row for a subscription RENEWAL
+   * (invoice.payment_succeeded).
+   *
+   * Renewal fix (staging, Nov 11 2026): renewals never created a Payment
+   * row, so Billing History showed the initial checkout and then nothing.
+   * Same dedup pattern as recordSubscriptionPayment, keyed by the Stripe
+   * invoice id instead of the checkout session id: the find-first check
+   * covers the normal case, the 23505 catch covers two writers racing
+   * each other. Deliberately NOT processPaymentSuccess (no deal, so no
+   * deal commission / deal email / deal link) — same as the initial
+   * subscription payment.
+   */
+  async recordRenewalPayment(params: {
+    userId: string;
+    plan: SubscriptionPlan;
+    stripeInvoiceId: string;
+    amountCents: number;
+    currency?: string;
+    stripePaymentIntentId?: string | null;
+  }): Promise<Payment> {
+    const existing = await this.paymentsRepo.findOne({
+      where: { stripeInvoiceId: params.stripeInvoiceId },
+    });
+    if (existing) return existing;
+    const payment = this.paymentsRepo.create({
+      dealId: null,
+      payerId: params.userId,
+      amountCents: params.amountCents,
+      currency: params.currency ?? params.plan.currency ?? 'usd',
+      stripeInvoiceId: params.stripeInvoiceId,
+      stripePaymentIntentId: params.stripePaymentIntentId ?? null,
+      status: PaymentStatus.SUCCEEDED,
+    });
+    try {
+      return await this.paymentsRepo.save(payment);
+    } catch (err: any) {
+      // Race: two deliveries of the same invoice settled at once.
+      if (err?.code === '23505') {
+        const raced = await this.paymentsRepo.findOne({
+          where: { stripeInvoiceId: params.stripeInvoiceId },
+        });
+        if (raced) return raced;
+      }
+      throw err;
+    }
   }
 
   async myPayments(userId: string): Promise<Payment[]> {

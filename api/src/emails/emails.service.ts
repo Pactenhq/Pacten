@@ -164,15 +164,26 @@ ${body}
     );
   }
 
-  sendPayoutDecided(to: string, amountCents: number, approved: boolean) {
+  sendPayoutDecided(
+    to: string,
+    amountCents: number,
+    approved: boolean,
+    stripeTransferId?: string | null,
+  ) {
     const amount = `$${(amountCents / 100).toFixed(2)}`;
+    // When the approval actually moved money via a Stripe Connect
+    // transfer, say so; record-only approvals (demo mode or unconnected
+    // payee) keep the manual/off-platform wording.
+    const approvedBody = stripeTransferId
+      ? `<p>Your referral payout of <strong>${amount}</strong> was approved by admin. The payout was transferred to your connected Stripe account.</p>`
+      : `<p>Your referral payout of <strong>${amount}</strong> was approved by admin. The cash transfer will be processed manually.</p>`;
     return this.send(
       to,
       approved ? 'Referral payout approved — Pacten' : 'Referral payout update — Pacten',
       this.layout(
         approved ? 'Payout approved' : 'Payout not approved',
         approved
-          ? `<p>Your referral payout of <strong>${amount}</strong> was approved by admin. The cash transfer will be processed manually.</p>`
+          ? approvedBody
           : `<p>Your referral payout request of <strong>${amount}</strong> was not approved. Your referral balance has been restored.</p>`,
       ),
     );
@@ -185,7 +196,7 @@ ${body}
       'Payout request received — Pacten',
       this.layout(
         'Payout request received',
-        `<p>Your referral payout request of <strong>${amount}</strong> was received and is pending admin review. Approved payouts are transferred manually.</p>`,
+        `<p>Your referral payout request of <strong>${amount}</strong> was received and is pending admin review. Once approved, your payout will be transferred to your connected Stripe account, or processed manually if no Stripe account is connected.</p>`,
       ),
     );
   }

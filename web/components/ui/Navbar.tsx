@@ -73,7 +73,14 @@ function NavDropdown({
         type="button"
         aria-haspopup="true"
         aria-expanded={open}
-        onClick={() => (open ? onClose() : onOpen())}
+        // Click ALWAYS opens this menu — never toggles it. A real click
+        // is preceded by a mouseenter on the same trigger, so by click
+        // time the hovered menu is already open; a toggle here would
+        // read that just-opened state and close it, which is why
+        // switching menus used to take two clicks (first click only
+        // closed the open menu). Closing still happens via mouseleave,
+        // outside-click, Escape, or a menu link click.
+        onClick={onOpen}
         className="inline-flex cursor-pointer items-center gap-1.5 whitespace-nowrap bg-transparent text-[15px] font-medium text-ink-700 dark:text-ink-200 hover:text-ink-900 dark:hover:text-ink-50 shrink-0"
       >
         {label}

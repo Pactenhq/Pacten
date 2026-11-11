@@ -576,7 +576,12 @@ export class ReferralsService implements OnModuleInit {
 
     const user = await this.usersRepo.findOne({ where: { id: payout.userId } });
     if (user) {
-      await this.emails.sendPayoutDecided(user.email, payout.amountCents, approved);
+      await this.emails.sendPayoutDecided(
+        user.email,
+        payout.amountCents,
+        approved,
+        payout.stripeTransferId,
+      );
     }
     // In-app notification for the requester (same trigger as the email).
     await this.notifications.create({

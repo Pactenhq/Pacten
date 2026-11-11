@@ -108,6 +108,14 @@ export const api = {
 
   creatorProfile: (id: string) => apiFetch<any>(`/profiles/creators/${id}`),
 
+  // Public profile looked up by USER id (messages threads only know the
+  // other participant's user id; /creators/[id] is keyed by profile id).
+  creatorProfileByUser: (userId: string) =>
+    apiFetch<any>(`/profiles/creators/by-user/${userId}`),
+
+  professionalProfileByUser: (userId: string) =>
+    apiFetch<any>(`/profiles/professionals/by-user/${userId}`),
+
   professionals: (params = "") =>
     apiFetch<any[]>(`/profiles/professionals${params}`),
 

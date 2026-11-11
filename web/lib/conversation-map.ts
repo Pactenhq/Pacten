@@ -28,6 +28,12 @@ export function mapConversation(c: any, myId?: string) {
     initials: initialsForName(fullName || other.email || "User"),
     handle: other.email ? `@${String(other.email).split("@")[0]}` : "",
     avatar: other.avatar ?? "",
+    // The other party's identity, for the thread header's "View Profile"
+    // button: the public profile routes are keyed by PROFILE id, so the
+    // panel resolves the profile via the by-user lookup. Without these
+    // fields the button had nothing to link to (defect #2).
+    otherUserId: other.id ?? null,
+    otherRole: other.role ?? null,
     preview: c.lastMessage?.content ?? "",
     lastMessage: c.lastMessage?.content ?? "",
     time: c.lastMessage?.createdAt ?? c.updatedAt ?? "",

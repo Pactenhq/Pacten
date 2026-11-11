@@ -3,6 +3,8 @@ import {
   ConflictException,
   UnauthorizedException,
   BadRequestException,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -21,6 +23,15 @@ import { EmailsService } from '../emails/emails.service';
 
 @Injectable()
 export class AuthService {
+  // PRD §10 reliability: login rate limit — max 10 failed logins per
+  // email per rolling 15 minutes (in-memory, per API instance), same
+  // pattern as the messaging send limit. Counts unknown-email attempts
+  // too, so the 429/401 boundary cannot be used as an enumeration
+  // oracle. Successful login clears the key.
+  private failedLogins = new Map<string, number[]>();
+  private readonly LOGIN_FAIL_LIMIT = 10;
+  private readonly LOGIN_FAIL_WINDOW_MS = 15 * 60_000;
+
   constructor(
     @InjectRepository(User)
     private usersRepo: Repository<User>,
@@ -125,8 +136,25 @@ export class AuthService {
   }
 
   async login(dto: LoginDto) {
+    const email = dto.email.toLowerCase();
+    const now = Date.now();
+    const windowStart = now - this.LOGIN_FAIL_WINDOW_MS;
+    const recentFails = (this.failedLogins.get(email) ?? []).filter(
+      (t) => t > windowStart,
+    );
+    if (recentFails.length >= this.LOGIN_FAIL_LIMIT) {
+      throw new HttpException(
+        'Too many login attempts — please try again later',
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
+    const recordFail = () => {
+      recentFails.push(now);
+      this.failedLogins.set(email, recentFails);
+    };
+
     const user = await this.usersRepo.findOne({
-      where: { email: dto.email.toLowerCase() },
+      where: { email },
     });
     // Manually select passwordHash since it's select: false
     const fullUser = await this.usersRepo
@@ -135,13 +163,18 @@ export class AuthService {
       .where('u.id = :id', { id: user?.id })
       .getOne();
     if (!user || !fullUser) {
+      recordFail();
       throw new UnauthorizedException('Invalid email or password');
     }
 
     const valid = await bcrypt.compare(dto.password, fullUser.passwordHash);
     if (!valid) {
+      recordFail();
       throw new UnauthorizedException('Invalid email or password');
     }
+
+    // Success clears the failure history for this email.
+    this.failedLogins.delete(email);
 
     if (user.status === UserStatus.SUSPENDED) {
       throw new UnauthorizedException('Account suspended');

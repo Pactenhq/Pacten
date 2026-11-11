@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { brandNav, creatorNav, professionalNav, dashboardUser } from "@/lib/mock";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { api } from "@/lib/api";
+import { formatBudgetDisplay } from "@/lib/budget";
 
 // NOTE: No Figma design exists for Deals — this is a basic functional page.
 // Pixel-perfect design needed from designer for final version.
@@ -130,11 +131,7 @@ export default function DealsPage() {
                       })()}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600 dark:text-ink-200">
-                      {deal.agreedBudget != null &&
-                      deal.agreedBudget !== "" &&
-                      Number.isFinite(Number(deal.agreedBudget))
-                        ? `$${Number(deal.agreedBudget).toLocaleString()}`
-                        : "-"}
+                      {formatBudgetDisplay(deal.agreedBudget)}
                     </td>
                     <td className="px-6 py-4">
                       <span

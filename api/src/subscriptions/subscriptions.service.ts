@@ -14,6 +14,7 @@ import {
 } from './subscription.entity';
 import { SubscriptionPlan } from './subscription-plan.entity';
 import { StripeService } from '../payments/stripe.service';
+import { PaymentsService } from '../payments/payments.service';
 import { ReferralsService } from '../referrals/referrals.service';
 import { User } from '../users/user.entity';
 import { EmailsService } from '../emails/emails.service';
@@ -128,6 +129,7 @@ export class SubscriptionsService implements OnModuleInit {
     @InjectRepository(User)
     private usersRepo: Repository<User>,
     private stripe: StripeService,
+    private payments: PaymentsService,
     private config: ConfigService,
     private referrals: ReferralsService,
     private emails: EmailsService,
@@ -227,6 +229,14 @@ export class SubscriptionsService implements OnModuleInit {
         plan.priceCentsMonthly,
         session.id,
       );
+      // Billing History (defect #1): record the Payment row — without
+      // it GET /payments/my is empty for a paying subscriber.
+      await this.payments.recordSubscriptionPayment({
+        userId,
+        plan,
+        stripeCheckoutSessionId: session.id,
+        amountCents: plan.priceCentsMonthly,
+      });
       return {
         subscription,
         checkoutUrl: session.url,
@@ -290,6 +300,16 @@ export class SubscriptionsService implements OnModuleInit {
       plan.priceCentsMonthly,
       sessionId,
     );
+    // Billing History (defect #1): record the Payment row — deduped by
+    // session id, so a webhook that already settled this checkout is a
+    // no-op here.
+    await this.payments.recordSubscriptionPayment({
+      userId,
+      plan,
+      stripeCheckoutSessionId: sessionId,
+      amountCents: plan.priceCentsMonthly,
+      stripePaymentIntentId: session.paymentIntentId,
+    });
     return this.mySubscription(userId);
   }
 

@@ -49,6 +49,19 @@ export class ProfilesController {
     return this.profilesService.searchProfessionals({ skill, platform, query, limit, offset });
   }
 
+  // Declared BEFORE the ':id' routes below: 'by-user' would otherwise
+  // be captured as a profile id. Used by the messages thread's
+  // "View Profile" button, which only knows the other party's user id.
+  @Get('creators/by-user/:userId')
+  getCreatorByUser(@Param('userId') userId: string) {
+    return this.profilesService.getPublicCreatorProfileByUserId(userId);
+  }
+
+  @Get('professionals/by-user/:userId')
+  getProfessionalByUser(@Param('userId') userId: string) {
+    return this.profilesService.getPublicProfessionalProfileByUserId(userId);
+  }
+
   @Get('creators/:id')
   getCreator(@Param('id') id: string) {
     return this.profilesService.getPublicCreatorProfile(id);

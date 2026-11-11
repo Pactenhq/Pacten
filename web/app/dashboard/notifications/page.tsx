@@ -75,7 +75,7 @@ export default function NotificationsPage() {
       <main className="mx-auto max-w-[1316px] px-6 py-12 lg:py-16">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <h1 className="text-3xl font-extrabold tracking-tight text-ink-900 dark:text-ink-50 lg:text-4xl">
-            Notification
+            Notifications
           </h1>
           {unread > 0 && (
             <button

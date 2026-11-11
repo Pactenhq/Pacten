@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/Button";
 import { brandNav, creatorNav, professionalNav, dashboardUser } from "@/lib/mock";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { api } from "@/lib/api";
+import { formatBudgetDisplay } from "@/lib/budget";
 
 // NOTE: No Figma design exists for Deal Detail — basic functional page.
 const NEXT_ACTIONS: Record<string, string[]> = {
@@ -267,10 +268,7 @@ export default function DealDetailPage() {
               <div>
                 <dt className="text-sm text-gray-500 dark:text-ink-300">Agreed Budget</dt>
                 <dd className="font-medium">
-                  {deal.agreedBudget != null &&
-                  Number.isFinite(Number(deal.agreedBudget))
-                    ? `$${Number(deal.agreedBudget).toLocaleString()}`
-                    : "-"}
+                  {formatBudgetDisplay(deal.agreedBudget)}
                 </dd>
               </div>
               <div>

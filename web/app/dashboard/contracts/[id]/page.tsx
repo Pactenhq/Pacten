@@ -65,7 +65,18 @@ export default function ContractDetailPage() {
               signatoryTitle: signatoryTitle.trim() || undefined,
             })
           : await api.declineContract(id);
+      // Re-read the contract from the server after signing (triage (a)):
+      // the signature rows must show the persisted state, not whatever
+      // the POST response happened to carry. The page previously trusted
+      // the POST body alone, so a stale-looking "Awaiting signature"
+      // could survive until a manual reload. If the refetch fails, fall
+      // back to the POST response instead of blanking the page.
       setContract(updated);
+      try {
+        setContract(await api.contractDetail(id));
+      } catch {
+        /* keep the POST response */
+      }
     } catch (e: any) {
       alert(e?.message || `Failed to ${kind} contract`);
     } finally {

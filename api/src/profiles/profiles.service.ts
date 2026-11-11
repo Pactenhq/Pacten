@@ -78,6 +78,28 @@ export class ProfilesService {
     return publicProfile;
   }
 
+  // Lookup by USER id (not profile id): the messages thread only knows
+  // the other participant's user id, while /creators/[id] and
+  // /professionals/[id] are keyed by profile id. Same privacy rule as
+  // the by-profile endpoints above: never include the linked user row.
+  async getPublicCreatorProfileByUserId(userId: string) {
+    const profile = await this.creatorRepo.findOne({
+      where: { userId },
+    });
+    if (!profile) throw new NotFoundException('Creator not found');
+    const { user: _user, ...publicProfile } = profile as any;
+    return publicProfile;
+  }
+
+  async getPublicProfessionalProfileByUserId(userId: string) {
+    const profile = await this.professionalRepo.findOne({
+      where: { userId },
+    });
+    if (!profile) throw new NotFoundException('Professional not found');
+    const { user: _user, ...publicProfile } = profile as any;
+    return publicProfile;
+  }
+
   async searchCreators(filters: { niche?: string; platform?: string; query?: string; limit?: number; offset?: number }) {
     const qb = this.creatorRepo.createQueryBuilder('c')
       .where('c.availableNow = :available', { available: true });

@@ -18,6 +18,12 @@ export interface ConversationPreview {
   time: string;
   unreadCount: number;
   active?: boolean;
+  // The other party's user id + role (set by mapConversation for real
+  // conversations). The thread header's "View Profile" button needs
+  // them to resolve the public profile; mock rows carry neither, so
+  // the button hides for them instead of linking nowhere.
+  otherUserId?: string | null;
+  otherRole?: string | null;
 }
 
 export const conversations: ConversationPreview[] = [

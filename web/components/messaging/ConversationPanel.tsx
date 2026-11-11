@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { io, type Socket } from "socket.io-client";
 import { Button } from "@/components/ui/Button";
 import type { ChatMessage, ConversationPreview } from "@/lib/mock-messages";
@@ -51,6 +52,8 @@ export function ConversationPanel({
   const [draft, setDraft] = useState("");
   const [sendError, setSendError] = useState("");
   const [socketOk, setSocketOk] = useState(false);
+  const [resolvingProfile, setResolvingProfile] = useState(false);
+  const router = useRouter();
   const convId = conversationId ?? (conversation as any)?.id;
   const isReal = !!convId && convId.length > 20;
   const { user } = useAuth();
@@ -139,6 +142,49 @@ export function ConversationPanel({
     return () => clearInterval(timer);
   }, [isReal, convId, socketOk, markRead]);
 
+  // "View Profile" (defect #2 fix): the button previously had no
+  // onClick at all, so it navigated nowhere. The other party's PUBLIC
+  // profile lives at /creators/[profileId] or /professionals/[profileId]
+  // — keyed by PROFILE id, while the conversation only carries the other
+  // party's USER id — so the profile id is resolved through the by-user
+  // lookup before navigating. There is NO public brand profile route
+  // (no /brands/[id] page exists), and mock conversations carry no
+  // other-party identity at all, so for a brand counterpart — or when
+  // the identity/role is unknown — the button is hidden instead of
+  // linking to a route that does not exist. A missing public profile
+  // (lookup 404, e.g. role without a completed profile) also hides the
+  // button rather than landing on a "not found" page.
+  const otherUserId = (conversation as any)?.otherUserId as string | null | undefined;
+  const otherRole = (conversation as any)?.otherRole as string | null | undefined;
+  const viewProfileKind =
+    otherUserId && otherRole === "creator"
+      ? "creator"
+      : otherUserId && otherRole === "professional"
+        ? "professional"
+        : null;
+  const viewProfile = async () => {
+    if (!viewProfileKind || !otherUserId || resolvingProfile) return;
+    setResolvingProfile(true);
+    try {
+      const profile =
+        viewProfileKind === "creator"
+          ? await api.creatorProfileByUser(otherUserId)
+          : await api.professionalProfileByUser(otherUserId);
+      if (profile?.id) {
+        router.push(
+          viewProfileKind === "creator"
+            ? `/creators/${profile.id}`
+            : `/professionals/${profile.id}`
+        );
+      }
+    } catch {
+      // No public profile for this user — stay on the thread; the
+      // button stays put and a retry is harmless.
+    } finally {
+      setResolvingProfile(false);
+    }
+  };
+
   const send = () => {
     const body = draft.trim();
     if (!body) return;
@@ -214,7 +260,11 @@ export function ConversationPanel({
           </span>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <Button size="md">View Profile</Button>
+          {viewProfileKind && (
+            <Button size="md" onClick={viewProfile} disabled={resolvingProfile}>
+              {resolvingProfile ? "Opening…" : "View Profile"}
+            </Button>
+          )}
           <button
             aria-label="Conversation options"
             className="inline-flex h-11 w-11 items-center justify-center rounded-xl text-ink-700 dark:text-ink-200 hover:bg-ink-50 dark:hover:bg-white/5"

@@ -332,9 +332,25 @@ export default function SubscriptionPage() {
                 Loading billing history...
               </p>
             ) : payments.length === 0 ? (
-              <p className="mt-4 text-[15px] text-ink-500 dark:text-ink-300">
-                No billing activity yet.
-              </p>
+              // Empty state still renders the Plan/Date/Amount/Status
+              // column headers, so the Figma columns are verifiable even
+              // before any payment exists (previously the headers only
+              // appeared once a payment row existed).
+              <div className="mt-4 overflow-x-auto">
+                <table className="w-full min-w-[560px] text-left text-[15px]">
+                  <thead>
+                    <tr className="border-b border-ink-100 dark:border-ink-800 text-sm text-ink-500 dark:text-ink-300">
+                      <th className="pb-3 pr-4 font-semibold">Plan</th>
+                      <th className="pb-3 pr-4 font-semibold">Date</th>
+                      <th className="pb-3 pr-4 font-semibold">Amount</th>
+                      <th className="pb-3 font-semibold">Status</th>
+                    </tr>
+                  </thead>
+                </table>
+                <p className="mt-4 text-[15px] text-ink-500 dark:text-ink-300">
+                  No billing activity yet.
+                </p>
+              </div>
             ) : (
               <div className="mt-4 overflow-x-auto">
                 <table className="w-full min-w-[560px] text-left text-[15px]">

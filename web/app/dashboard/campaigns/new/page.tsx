@@ -36,15 +36,28 @@ export default function CampaignRequestPage() {
       });
       setSent(true);
     } catch (err: any) {
-      // Free-plan cap: show the plan-limit message as-is.
-      if (err?.message?.includes("Free plan limit")) {
-        setError(err.message);
-      } else if (err?.message?.includes("401") || err?.message?.includes("403")) {
-        // If API unavailable (not logged in as brand), show local success
-        // to preserve the Figma-designed flow
+      // NEVER show the "Campaign published" success state after a failed
+      // request: a failed POST means no row was created, and showing
+      // success here made a failed first attempt look published (the
+      // campaign then "never appeared" in /campaigns). Every error
+      // surfaces as an error instead.
+      // NOTE: apiFetch throws err.message = the API's message string,
+      // NOT "Request failed (401/403)" — Nest returns "Unauthorized" /
+      // "Forbidden resource" — so match those messages (plus the
+      // status-code forms, for safety) rather than "401"/"403".
+      const msg = err?.message ?? "";
+      if (
+        msg === "Unauthorized" ||
+        msg === "Forbidden resource" ||
+        msg.includes("401") ||
+        msg.includes("403")
+      ) {
         setError("Please log in as a brand to post campaigns.");
       } else {
-        setSent(true);
+        setError(
+          msg ||
+            "Something went wrong — your campaign was not published. Please try again."
+        );
       }
     } finally {
       setLoading(false);

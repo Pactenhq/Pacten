@@ -152,7 +152,17 @@ export default function CampaignsPage() {
         />
         <div className="mt-10">
           <ResultCount
-            count={`Showing ${campaigns.length} campaign${campaigns.length === 1 ? "" : "s"}`}
+            // While the fetch is still in flight the list is empty, NOT
+            // loaded-empty: showing "Showing 0 campaigns" during a slow
+            // fetch reads as "no campaigns exist" (this is what made the
+            // first campaign look missing on slow staging). Say loading
+            // until the fetch resolves; the !loading empty-state below
+            // already handles the truly-empty case.
+            count={
+              loading
+                ? "Loading campaigns…"
+                : `Showing ${campaigns.length} campaign${campaigns.length === 1 ? "" : "s"}`
+            }
           />
         </div>
         <div className="mx-auto mt-8 max-w-[1380px] px-6 lg:px-12">
