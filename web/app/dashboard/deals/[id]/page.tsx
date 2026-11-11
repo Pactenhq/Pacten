@@ -14,13 +14,18 @@ import { api } from "@/lib/api";
 import { formatBudgetDisplay } from "@/lib/budget";
 
 // NOTE: No Figma design exists for Deal Detail — basic functional page.
+// NEXT_ACTIONS must mirror the backend VALID_TRANSITIONS exactly
+// (api/src/deals/deals.service.ts) — the backend 400s any transition
+// not in the map, so offering one is a dead button. In particular
+// SUBMITTED allows approved/active/disputed (NO cancelled) and APPROVED
+// allows completed/disputed (NO cancelled).
 const NEXT_ACTIONS: Record<string, string[]> = {
   proposed: ["negotiating", "cancelled"],
   negotiating: ["agreed", "cancelled"],
   agreed: ["active", "cancelled"],
   active: ["submitted", "completed", "disputed", "cancelled"],
-  submitted: ["approved", "disputed", "cancelled"],
-  approved: ["completed", "disputed", "cancelled"],
+  submitted: ["approved", "active", "disputed"],
+  approved: ["completed", "disputed"],
   completed: [],
   cancelled: [],
   disputed: ["active", "cancelled"],
@@ -148,8 +153,13 @@ export default function DealDetailPage() {
     setUpdating(true);
     try {
       const updated = await api.updateDealStatus(id, status);
+      // Re-read the deal from the server after the change (same pattern
+      // as the contract page's refetch-after-accept): the mutation
+      // response is applied first, then the fresh GET wins. If the
+      // refetch fails, the mutation response stands instead of the page
+      // going stale until a manual reload.
       setDeal(updated);
-      refreshM4();
+      await refreshDeal(updated);
     } catch {
       alert("Failed to update deal status");
     } finally {
@@ -157,13 +167,23 @@ export default function DealDetailPage() {
     }
   };
 
+  // Re-read the deal + its contract/payment/payout rows after any
+  // state-changing action. Falls back to the current deal state when
+  // the refetch fails (never blanks the page).
+  const refreshDeal = async (fallback?: any) => {
+    try {
+      setDeal(await api.dealDetail(id));
+    } catch {
+      if (fallback !== undefined) setDeal(fallback);
+    }
+    await refreshM4();
+  };
+
   const m4action = async (fn: () => Promise<any>, failMsg: string) => {
     setM4busy(true);
     try {
       await fn();
-      const updated = await api.dealDetail(id);
-      setDeal(updated);
-      await refreshM4();
+      await refreshDeal();
     } catch (e: any) {
       alert(e?.message || failMsg);
     } finally {
@@ -197,6 +217,37 @@ export default function DealDetailPage() {
 
   const isBrand = user?.role === "brand";
   const isCreator = user?.role === "creator" || user?.role === "professional";
+
+  // Payment terms come from the signed contract, not from a platform
+  // default. The standard agreement's §4 fields govern: a deposit
+  // amount means an upfront payment is part of the deal; a blank
+  // deposit (rendered "Not applicable" in the agreement) with
+  // milestones such as "100% after work" means NO upfront payment is
+  // due. The simple contract's placeholder wording (§2) requires
+  // upfront funding, so the upfront copy stays correct there — and
+  // with no contract yet there are no agreed terms to follow, so the
+  // platform's upfront flow still applies.
+  const contractFieldValues = (contract?.fieldValues ?? {}) as Record<
+    string,
+    string
+  >;
+  const isStandardContract = contract?.template === "standard";
+  const depositRaw = String(
+    contractFieldValues.DEPOSIT_AMOUNT ?? ""
+  ).trim();
+  const noUpfrontRequired =
+    isStandardContract &&
+    (depositRaw === "" ||
+      /^not applicable$/i.test(depositRaw) ||
+      /^n\/a$/i.test(depositRaw) ||
+      depositRaw === "$0" ||
+      depositRaw === "0");
+  const paymentMilestones = String(
+    contractFieldValues.PAYMENT_MILESTONES ?? ""
+  ).trim();
+  const paymentRelease = String(
+    contractFieldValues.PAYMENT_RELEASE_CONDITIONS ?? ""
+  ).trim();
 
   const fmtMoney = (cents: number, currency = "usd") =>
     Number.isFinite(cents)
@@ -361,7 +412,9 @@ export default function DealDetailPage() {
           )}
         </div>
 
-        {/* M4: Upfront payment (Stripe test mode) */}
+        {/* M4: Payment — wording follows the signed contract's §4 terms
+            (no upfront promise when the agreement requires none). The
+            payment flow itself (Stripe upfront payment) is unchanged. */}
         <div className="rounded-2xl border border-gray-200 dark:border-ink-700 bg-white dark:bg-ink-900 p-6">
           <h3 className="mb-4 text-lg font-semibold">Payment</h3>
           {payment ? (
@@ -390,6 +443,23 @@ export default function DealDetailPage() {
                 Stripe test mode — no real money moved.
               </p>
             </dl>
+          ) : noUpfrontRequired ? (
+            <div className="space-y-2">
+              <p className="text-[15px] text-gray-600 dark:text-ink-200">
+                No upfront payment is required — payment is due as set out
+                in the agreement.
+              </p>
+              {paymentMilestones && (
+                <p className="text-[15px] text-gray-600 dark:text-ink-200">
+                  Payment milestones: {paymentMilestones}
+                </p>
+              )}
+              {paymentRelease && (
+                <p className="text-[15px] text-gray-600 dark:text-ink-200">
+                  Release conditions: {paymentRelease}
+                </p>
+              )}
+            </div>
           ) : (
             <div className="flex flex-wrap items-center justify-between gap-4">
               <p className="text-[15px] text-gray-600 dark:text-ink-200">

@@ -100,12 +100,18 @@ export class ProfilesService {
     return publicProfile;
   }
 
-  async searchCreators(filters: { niche?: string; platform?: string; query?: string; limit?: number; offset?: number; sort?: string }) {
+  async searchCreators(filters: { niche?: string; skill?: string; platform?: string; query?: string; limit?: number; offset?: number; sort?: string }) {
     const qb = this.creatorRepo.createQueryBuilder('c')
       .where('c.availableNow = :available', { available: true });
 
     if (filters.niche) {
       qb.andWhere(':niche = ANY(c.niches)', { niche: filters.niche });
+    }
+    // Skill parity with searchProfessionals (Nov 2026): same
+    // `:skill = ANY(c.skills)` clause — the creators Skills filter
+    // already filters client-side, this is server-side parity only.
+    if (filters.skill) {
+      qb.andWhere(':skill = ANY(c.skills)', { skill: filters.skill });
     }
     if (filters.platform) {
       qb.andWhere(':platform = ANY(c.platforms)', { platform: filters.platform });

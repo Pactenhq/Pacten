@@ -30,13 +30,14 @@ export class ProfilesController {
   @Get('creators')
   searchCreators(
     @Query('niche') niche?: string,
+    @Query('skill') skill?: string,
     @Query('platform') platform?: string,
     @Query('q') query?: string,
     @Query('limit') limit?: number,
     @Query('offset') offset?: number,
     @Query('sort') sort?: string,
   ) {
-    return this.profilesService.searchCreators({ niche, platform, query, limit, offset, sort });
+    return this.profilesService.searchCreators({ niche, skill, platform, query, limit, offset, sort });
   }
 
   @Get('professionals')
