@@ -217,7 +217,7 @@ export default function DealDetailPage() {
         userName={dashboardUser.name}
         userInitials={dashboardUser.initials}
       >
-        <p className="text-gray-500">Loading deal...</p>
+        <p className="text-gray-500 dark:text-ink-300">Loading deal...</p>
       </DashboardShell>
     );
   }
@@ -229,7 +229,7 @@ export default function DealDetailPage() {
         userName={dashboardUser.name}
         userInitials={dashboardUser.initials}
       >
-        <p className="text-gray-500">Deal not found.</p>
+        <p className="text-gray-500 dark:text-ink-300">Deal not found.</p>
         <Link href="/dashboard/deals" className="text-blue-600 hover:underline">
           Back to deals
         </Link>
@@ -257,15 +257,15 @@ export default function DealDetailPage() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2">
-          <div className="rounded-2xl border border-gray-200 bg-white p-6">
+          <div className="rounded-2xl border border-gray-200 dark:border-ink-700 bg-white dark:bg-ink-900 p-6">
             <h3 className="mb-4 text-lg font-semibold">Deal Terms</h3>
             <dl className="space-y-3">
               <div>
-                <dt className="text-sm text-gray-500">Description</dt>
+                <dt className="text-sm text-gray-500 dark:text-ink-300">Description</dt>
                 <dd className="font-medium">{deal.description ?? "-"}</dd>
               </div>
               <div>
-                <dt className="text-sm text-gray-500">Agreed Budget</dt>
+                <dt className="text-sm text-gray-500 dark:text-ink-300">Agreed Budget</dt>
                 <dd className="font-medium">
                   {deal.agreedBudget != null &&
                   Number.isFinite(Number(deal.agreedBudget))
@@ -274,36 +274,36 @@ export default function DealDetailPage() {
                 </dd>
               </div>
               <div>
-                <dt className="text-sm text-gray-500">Deadline</dt>
+                <dt className="text-sm text-gray-500 dark:text-ink-300">Deadline</dt>
                 <dd className="font-medium">{deal.deadline ?? "-"}</dd>
               </div>
               <div>
-                <dt className="text-sm text-gray-500">Deliverables</dt>
+                <dt className="text-sm text-gray-500 dark:text-ink-300">Deliverables</dt>
                 <dd className="font-medium">{deal.deliverables ?? "-"}</dd>
               </div>
               <div>
-                <dt className="text-sm text-gray-500">Terms</dt>
+                <dt className="text-sm text-gray-500 dark:text-ink-300">Terms</dt>
                 <dd className="font-medium">{deal.terms ?? "-"}</dd>
               </div>
             </dl>
           </div>
 
-          <div className="rounded-2xl border border-gray-200 bg-white p-6">
+          <div className="rounded-2xl border border-gray-200 dark:border-ink-700 bg-white dark:bg-ink-900 p-6">
             <h3 className="mb-4 text-lg font-semibold">Parties</h3>
             <dl className="space-y-3">
               <div>
-                <dt className="text-sm text-gray-500">Brand</dt>
+                <dt className="text-sm text-gray-500 dark:text-ink-300">Brand</dt>
                 <dd className="font-medium">{personName(deal.brand)}</dd>
               </div>
               <div>
-                <dt className="text-sm text-gray-500">Creator</dt>
+                <dt className="text-sm text-gray-500 dark:text-ink-300">Creator</dt>
                 <dd className="font-medium">{personName(deal.creator)}</dd>
               </div>
             </dl>
 
             {actions.length > 0 && (
               <div className="mt-6">
-                <h4 className="mb-3 text-sm font-medium text-gray-700">
+                <h4 className="mb-3 text-sm font-medium text-gray-700 dark:text-ink-200">
                   Update Status
                 </h4>
                 <div className="flex flex-wrap gap-2">
@@ -326,14 +326,14 @@ export default function DealDetailPage() {
         </div>
 
         {/* M4: Contract */}
-        <div className="rounded-2xl border border-gray-200 bg-white p-6">
+        <div className="rounded-2xl border border-gray-200 dark:border-ink-700 bg-white dark:bg-ink-900 p-6">
           <h3 className="mb-4 text-lg font-semibold">Contract</h3>
           {contract ? (
             <div className="flex flex-wrap items-center justify-between gap-4">
               <p className="text-[15px]">
                 <span className="font-semibold">{contract.title}</span>
                 {" — "}
-                <span className="capitalize text-gray-600">{contract.status}</span>
+                <span className="capitalize text-gray-600 dark:text-ink-200">{contract.status}</span>
               </p>
               <Link href={`/dashboard/contracts/${contract.id}`}>
                 <Button size="sm" variant="outline">
@@ -343,37 +343,44 @@ export default function DealDetailPage() {
             </div>
           ) : (
             <div className="flex flex-wrap items-center justify-between gap-4">
-              <p className="text-[15px] text-gray-600">
+              <p className="text-[15px] text-gray-600 dark:text-ink-200">
                 No contract yet. Generate one automatically from the agreed
                 deal terms.
               </p>
               {(deal.status === "agreed" || deal.status === "active") && (
-                <Button size="sm" onClick={generateContract} disabled={m4busy}>
-                  Generate Contract
-                </Button>
+                <div className="flex flex-wrap gap-2">
+                  <Link href={`/dashboard/deals/${id}/new-contract`}>
+                    <Button size="sm" disabled={m4busy}>
+                      Use Standard Agreement
+                    </Button>
+                  </Link>
+                  <Button size="sm" onClick={generateContract} disabled={m4busy}>
+                    Generate Contract
+                  </Button>
+                </div>
               )}
             </div>
           )}
         </div>
 
         {/* M4: Upfront payment (Stripe test mode) */}
-        <div className="rounded-2xl border border-gray-200 bg-white p-6">
+        <div className="rounded-2xl border border-gray-200 dark:border-ink-700 bg-white dark:bg-ink-900 p-6">
           <h3 className="mb-4 text-lg font-semibold">Payment</h3>
           {payment ? (
             <dl className="space-y-2 text-[15px]">
               <div className="flex justify-between">
-                <dt className="text-gray-500">Amount paid</dt>
+                <dt className="text-gray-500 dark:text-ink-300">Amount paid</dt>
                 <dd className="font-semibold">
                   {fmtMoney(payment.amountCents, payment.currency)}
                 </dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-gray-500">Status</dt>
+                <dt className="text-gray-500 dark:text-ink-300">Status</dt>
                 <dd className="font-semibold capitalize">{payment.status}</dd>
               </div>
               {commission && (
                 <div className="flex justify-between">
-                  <dt className="text-gray-500">
+                  <dt className="text-gray-500 dark:text-ink-300">
                     Platform commission ({(commission.rateBasisPoints / 100).toFixed(1)}%)
                   </dt>
                   <dd className="font-semibold">
@@ -381,13 +388,13 @@ export default function DealDetailPage() {
                   </dd>
                 </div>
               )}
-              <p className="pt-2 text-sm text-gray-500">
+              <p className="pt-2 text-sm text-gray-500 dark:text-ink-300">
                 Stripe test mode — no real money moved.
               </p>
             </dl>
           ) : (
             <div className="flex flex-wrap items-center justify-between gap-4">
-              <p className="text-[15px] text-gray-600">
+              <p className="text-[15px] text-gray-600 dark:text-ink-200">
                 {isBrand
                   ? "Fund this deal upfront to get work started."
                   : "Awaiting upfront payment from the brand."}
@@ -407,7 +414,7 @@ export default function DealDetailPage() {
           deal.status === "submitted" ||
           deal.status === "approved" ||
           deal.status === "completed") && (
-          <div className="rounded-2xl border border-gray-200 bg-white p-6">
+          <div className="rounded-2xl border border-gray-200 dark:border-ink-700 bg-white dark:bg-ink-900 p-6">
             <h3 className="mb-4 text-lg font-semibold">Completion & Payout</h3>
             <div className="flex flex-wrap items-center gap-4">
               {isCreator && deal.status === "active" && (
@@ -421,24 +428,24 @@ export default function DealDetailPage() {
                 </Button>
               )}
               {deal.status === "approved" && (
-                <p className="text-[15px] text-gray-600">
+                <p className="text-[15px] text-gray-600 dark:text-ink-200">
                   Work approved — mark the deal completed to release the payout.
                 </p>
               )}
               {payout && (
                 <dl className="w-full space-y-2 pt-2 text-[15px]">
                   <div className="flex justify-between">
-                    <dt className="text-gray-500">Payout amount</dt>
+                    <dt className="text-gray-500 dark:text-ink-300">Payout amount</dt>
                     <dd className="font-semibold">
                       {fmtMoney(payout.amountCents, payout.currency)}
                     </dd>
                   </div>
                   <div className="flex justify-between">
-                    <dt className="text-gray-500">Payout status</dt>
+                    <dt className="text-gray-500 dark:text-ink-300">Payout status</dt>
                     <dd className="font-semibold capitalize">{payout.status}</dd>
                   </div>
                   {payout.failureReason && (
-                    <p className="text-sm text-gray-500">{payout.failureReason}</p>
+                    <p className="text-sm text-gray-500 dark:text-ink-300">{payout.failureReason}</p>
                   )}
                 </dl>
               )}
@@ -446,7 +453,7 @@ export default function DealDetailPage() {
           </div>
         )}
         {/* M5: Disputes */}
-        <div className="rounded-2xl border border-gray-200 bg-white p-6">
+        <div className="rounded-2xl border border-gray-200 dark:border-ink-700 bg-white dark:bg-ink-900 p-6">
           <h3 className="mb-4 text-lg font-semibold">Disputes</h3>
           {dealDisputes.length > 0 ? (
             <ul className="mb-6 divide-y divide-gray-100">
@@ -456,17 +463,17 @@ export default function DealDetailPage() {
                     <span className="font-semibold capitalize">
                       {d.reason.replace(/_/g, " ")}
                     </span>
-                    <span className="ml-2 text-gray-500">
+                    <span className="ml-2 text-gray-500 dark:text-ink-300">
                       {new Date(d.createdAt).toLocaleDateString()}
                     </span>
                   </span>
                   <span className="flex items-center gap-3">
-                    <span className="rounded-full bg-gray-100 px-3 py-1 text-[12px] font-semibold capitalize">
+                    <span className="rounded-full bg-gray-100 dark:bg-ink-900 px-3 py-1 text-[12px] font-semibold capitalize">
                       {d.status.replace(/_/g, " ")}
                     </span>
                     <Link
                       href={`/dashboard/disputes/${d.id}`}
-                      className="text-[14px] font-semibold text-brand hover:underline"
+                      className="text-[14px] font-semibold text-brand dark:text-brand-200 hover:underline"
                     >
                       View
                     </Link>
@@ -475,17 +482,17 @@ export default function DealDetailPage() {
               ))}
             </ul>
           ) : (
-            <p className="mb-6 text-[15px] text-gray-500">
+            <p className="mb-6 text-[15px] text-gray-500 dark:text-ink-300">
               No disputes on this deal.
             </p>
           )}
-          <div className="rounded-xl bg-gray-50 p-4">
+          <div className="rounded-xl bg-gray-50 dark:bg-ink-950 p-4">
             <p className="mb-3 text-[15px] font-semibold">File a dispute</p>
             <div className="flex flex-wrap gap-3">
               <select
                 value={disputeReason}
                 onChange={(e) => setDisputeReason(e.target.value)}
-                className="rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-[14px]"
+                className="rounded-xl border border-gray-200 dark:border-ink-700 bg-white dark:bg-ink-900 px-4 py-2.5 text-[14px]"
               >
                 <option value="quality">Quality issue</option>
                 <option value="late_delivery">Late delivery</option>
@@ -497,14 +504,14 @@ export default function DealDetailPage() {
                 value={disputeDesc}
                 onChange={(e) => setDisputeDesc(e.target.value)}
                 placeholder="Describe the issue (min 10 characters)"
-                className="min-w-[240px] flex-1 rounded-xl border border-gray-200 px-4 py-2.5 text-[14px]"
+                className="min-w-[240px] flex-1 rounded-xl border border-gray-200 dark:border-ink-700 px-4 py-2.5 text-[14px]"
               />
               <Button size="sm" onClick={fileDispute} disabled={disputeBusy}>
                 {disputeBusy ? "Filing…" : "File Dispute"}
               </Button>
             </div>
             {disputeMsg && (
-              <p className="mt-2 text-[14px] text-gray-600">{disputeMsg}</p>
+              <p className="mt-2 text-[14px] text-gray-600 dark:text-ink-200">{disputeMsg}</p>
             )}
           </div>
         </div>

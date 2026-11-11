@@ -11,7 +11,7 @@ export default function ContactPage() {
         <p>
           Write to us at{" "}
           <a
-            className="font-semibold text-brand hover:underline"
+            className="font-semibold text-brand dark:text-brand-200 hover:underline"
             href="mailto:hello@pacten.info"
           >
             hello@pacten.info

@@ -25,10 +25,10 @@ function ProfessionalForm() {
     useSignupForm("professional");
   return (
     <>
-      <h1 className="text-3xl font-extrabold tracking-tight text-ink-900 lg:text-4xl">
+      <h1 className="text-3xl font-extrabold tracking-tight text-ink-900 dark:text-ink-50 lg:text-4xl">
         Join Pacten Professional
       </h1>
-      <p className="mt-2 text-[15px] text-ink-500">
+      <p className="mt-2 text-[15px] text-ink-500 dark:text-ink-300">
         Create your profile and connect with creators and brands.
       </p>
       <form className="mt-8 flex flex-col gap-5" onSubmit={submit}>
@@ -89,9 +89,9 @@ function ProfessionalForm() {
           </>
         )}
       </form>
-      <p className="mt-4 text-sm text-ink-500">
+      <p className="mt-4 text-sm text-ink-500 dark:text-ink-300">
         Already have an account?{" "}
-        <Link href="/login" className="font-semibold text-brand hover:underline">
+        <Link href="/login" className="font-semibold text-brand dark:text-brand-200 hover:underline">
           Login
         </Link>
       </p>
@@ -101,7 +101,7 @@ function ProfessionalForm() {
 
 export default function ProfessionalSignupPage() {
   return (
-    <main className="bg-mist/50">
+    <main className="bg-mist/50 dark:bg-ink-950/50">
       <div className="mx-auto max-w-[1380px] px-6 py-14 lg:px-12 lg:py-20">
         <div className="hidden lg:block">
           <Stepper steps={STEPS} activeIndex={0} />

@@ -177,7 +177,7 @@ export function IconChip({ name }: { name: string }) {
   return (
     <span
       aria-hidden
-      className="flex h-[52px] w-[52px] items-center justify-center rounded-2xl bg-brand-50 text-brand"
+      className="flex h-[52px] w-[52px] items-center justify-center rounded-2xl bg-brand-50 dark:bg-white/10 text-brand dark:text-brand-200"
     >
       <WidgetIcon name={name} />
     </span>
@@ -200,10 +200,10 @@ export function WelcomeHeader({
   return (
     <div className="flex flex-wrap items-start justify-between gap-4">
       <div className="min-w-0 flex-1">
-        <h1 className="break-words text-[28px] font-extrabold tracking-tight text-ink-900">
+        <h1 className="break-words text-[28px] font-extrabold tracking-tight text-ink-900 dark:text-ink-50">
           {title}
         </h1>
-        <p className="mt-1 break-words text-[15px] text-ink-500">{subtitle}</p>
+        <p className="mt-1 break-words text-[15px] text-ink-500 dark:text-ink-300">{subtitle}</p>
       </div>
       {action}
     </div>
@@ -213,7 +213,7 @@ export function WelcomeHeader({
 /** Green "+x% ↗" pill used on dashboard stat cards. */
 export function DeltaPill({ delta }: { delta: string }) {
   return (
-    <span className="inline-flex items-center rounded-full bg-success-bg px-2.5 py-1 text-[12px] font-bold text-success">
+    <span className="inline-flex items-center rounded-full bg-success-bg dark:bg-success/15 px-2.5 py-1 text-[12px] font-bold text-success dark:text-success-bright">
       {delta}
     </span>
   );
@@ -232,13 +232,13 @@ export function StatCard({
       {icon && <IconChip name={icon} />}
       <p
         className={cn(
-          "font-extrabold tracking-tight text-ink-900",
+          "font-extrabold tracking-tight text-ink-900 dark:text-ink-50",
           icon ? "mt-3 text-[34px]" : "text-[30px]"
         )}
       >
         {value}
       </p>
-      <p className="mt-1 text-[14px] font-bold text-ink-900">
+      <p className="mt-1 text-[14px] font-bold text-ink-900 dark:text-ink-50">
         {mobileLabel ? (
           <>
             <span className="lg:hidden">{mobileLabel}</span>
@@ -248,7 +248,7 @@ export function StatCard({
           label
         )}
       </p>
-      {sub && <p className="mt-0.5 text-[13px] text-ink-400">{sub}</p>}
+      {sub && <p className="mt-0.5 text-[13px] text-ink-400 dark:text-ink-300">{sub}</p>}
       {delta ? (
         <p className="mt-2">
           <DeltaPill delta={delta} />
@@ -274,7 +274,7 @@ export function SectionCard({
   return (
     <Card className={cn("p-6", className)}>
       <div className="mb-5 flex items-center justify-between">
-        <h2 className={cn("text-[19px] font-bold text-ink-900", titleClassName)}>
+        <h2 className={cn("text-[19px] font-bold text-ink-900 dark:text-ink-50", titleClassName)}>
           {title}
         </h2>
         {action}
@@ -289,11 +289,11 @@ export function StatusPill({ status }: { status: string }) {
     <span
       className={cn(
         "inline-flex items-center rounded-full px-3 py-1 text-[13px] font-semibold",
-        status === "Active" && "bg-success-bg text-success",
-        status === "Submitted" && "bg-warning-bg text-warning",
-        status === "Completed" && "bg-ink-100 text-ink-700",
-        status === "Pending" && "bg-warning-bg text-warning",
-        status === "Successful" && "bg-success-bg text-success"
+        status === "Active" && "bg-success-bg dark:bg-success/15 text-success dark:text-success-bright",
+        status === "Submitted" && "bg-warning-bg dark:bg-warning/15 text-warning dark:text-warning-bright",
+        status === "Completed" && "bg-ink-100 dark:bg-ink-800 text-ink-700 dark:text-ink-200",
+        status === "Pending" && "bg-warning-bg dark:bg-warning/15 text-warning dark:text-warning-bright",
+        status === "Successful" && "bg-success-bg dark:bg-success/15 text-success dark:text-success-bright"
       )}
     >
       {status}
@@ -308,7 +308,7 @@ export function DotStatusPill({ status }: { status: string }) {
     <span
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[13px] font-semibold",
-        pending ? "bg-amber-100 text-amber-800" : "bg-brand-50 text-brand"
+        pending ? "bg-amber-100 text-amber-800" : "bg-brand-50 dark:bg-white/10 text-brand dark:text-brand-200"
       )}
     >
       <span
@@ -335,30 +335,30 @@ export function CampaignCard({ campaign }: { campaign: DashboardCampaign }) {
       <span className="flex min-w-0 flex-1 items-center gap-4">
         <IconChip name={completed ? "check" : "clock"} />
         <span className="min-w-0">
-          <span className="block truncate text-[16px] font-bold text-ink-900">
+          <span className="block truncate text-[16px] font-bold text-ink-900 dark:text-ink-50">
             {campaign.title}
           </span>
-          <span className="mt-0.5 block text-[13px] text-ink-500">
+          <span className="mt-0.5 block text-[13px] text-ink-500 dark:text-ink-300">
             {campaign.handle}
           </span>
         </span>
       </span>
       <dl className="flex items-center gap-6 text-[13px] sm:gap-8">
         <div className="text-center">
-          <dt className="text-ink-400">Budget</dt>
-          <dd className="mt-1 font-bold text-ink-900">{campaign.budget}</dd>
+          <dt className="text-ink-400 dark:text-ink-300">Budget</dt>
+          <dd className="mt-1 font-bold text-ink-900 dark:text-ink-50">{campaign.budget}</dd>
         </div>
         <div className="text-center">
-          <dt className="text-ink-400">Status</dt>
-          <dd className="mt-1 font-bold text-ink-900">{campaign.status}</dd>
+          <dt className="text-ink-400 dark:text-ink-300">Status</dt>
+          <dd className="mt-1 font-bold text-ink-900 dark:text-ink-50">{campaign.status}</dd>
         </div>
         <div className="text-center">
-          <dt className="text-ink-400">Deadline</dt>
-          <dd className="mt-1 font-bold text-ink-900">{campaign.deadline}</dd>
+          <dt className="text-ink-400 dark:text-ink-300">Deadline</dt>
+          <dd className="mt-1 font-bold text-ink-900 dark:text-ink-50">{campaign.deadline}</dd>
         </div>
         <div className="text-center">
-          <dt className="text-ink-400">Submitted</dt>
-          <dd className="mt-1 font-bold text-ink-900">{campaign.submitted}</dd>
+          <dt className="text-ink-400 dark:text-ink-300">Submitted</dt>
+          <dd className="mt-1 font-bold text-ink-900 dark:text-ink-50">{campaign.submitted}</dd>
         </div>
       </dl>
       {completed ? (
@@ -367,7 +367,7 @@ export function CampaignCard({ campaign }: { campaign: DashboardCampaign }) {
         <button
           type="button"
           aria-label="More options"
-          className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-300 hover:bg-ink-50 hover:text-ink-500"
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-300 dark:text-ink-200 hover:bg-ink-50 dark:hover:bg-white/5 hover:text-ink-500 dark:hover:text-ink-300"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
             <circle cx="12" cy="5" r="1.8" />
@@ -387,7 +387,7 @@ export function RequestsTable({ rows }: { rows: RequestRow[] }) {
     <div className="-mx-6 overflow-x-auto px-6">
       <table className="w-full min-w-[680px] text-left text-[14px]">
         <thead>
-          <tr className="border-b border-ink-100 text-[13px] text-ink-400">
+          <tr className="border-b border-ink-100 dark:border-ink-800 text-[13px] text-ink-400 dark:text-ink-300">
             <th className="pb-3 pr-4 font-medium" aria-label="Creator" />
             <th className="pb-3 pr-4 font-medium">Campaign</th>
             <th className="pb-3 pr-4 font-medium">Status</th>
@@ -399,40 +399,40 @@ export function RequestsTable({ rows }: { rows: RequestRow[] }) {
           {rows.map((row, i) => (
             <tr
               key={`${row.handle}-${i}`}
-              className="border-b border-ink-100 last:border-0"
+              className="border-b border-ink-100 dark:border-ink-800 last:border-0"
             >
               <td className="py-3.5 pr-4">
                 <span className="flex items-center gap-3">
                   <span
                     aria-hidden
-                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-100 text-sm font-bold text-brand"
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-100 dark:bg-brand/25 text-sm font-bold text-brand dark:text-brand-200"
                   >
                     {row.name.charAt(0)}
                   </span>
                   <span>
-                    <span className="block font-semibold text-ink-900">
+                    <span className="block font-semibold text-ink-900 dark:text-ink-50">
                       {row.name}
                     </span>
-                    <span className="block text-[13px] text-ink-400">
+                    <span className="block text-[13px] text-ink-400 dark:text-ink-300">
                       {row.handle}
                     </span>
                   </span>
                 </span>
               </td>
-              <td className="py-3.5 pr-4 font-semibold text-ink-900">
+              <td className="py-3.5 pr-4 font-semibold text-ink-900 dark:text-ink-50">
                 {row.campaign}
               </td>
-              <td className="py-3.5 pr-4 font-semibold text-ink-900">
+              <td className="py-3.5 pr-4 font-semibold text-ink-900 dark:text-ink-50">
                 {row.status}
               </td>
-              <td className="py-3.5 pr-4 font-semibold text-ink-900">
+              <td className="py-3.5 pr-4 font-semibold text-ink-900 dark:text-ink-50">
                 {row.date}
               </td>
               <td className="py-3.5 text-right">
                 <Button
                   variant="outline"
                   size="md"
-                  className="border-brand-300 text-ink-900 hover:border-brand"
+                  className="border-brand-300 text-ink-900 dark:text-ink-50 hover:border-brand"
                   onClick={() => router.push("/dashboard/applications/received")}
                 >
                   View Details
@@ -479,32 +479,32 @@ export function RequestRowCard({
           </svg>
         </span>
         <span className="min-w-0">
-          <span className="block text-[16px] font-bold text-ink-900">
+          <span className="block text-[16px] font-bold text-ink-900 dark:text-ink-50">
             {name}
           </span>
-          <span className="mt-0.5 block text-[13px] text-ink-500">
+          <span className="mt-0.5 block text-[13px] text-ink-500 dark:text-ink-300">
             {location}
           </span>
         </span>
       </span>
       <dl className="flex items-center gap-6 text-[13px] sm:gap-8">
         <div className="text-center">
-          <dt className="text-ink-400">Budget</dt>
-          <dd className="mt-1 font-bold text-ink-900">{budget}</dd>
+          <dt className="text-ink-400 dark:text-ink-300">Budget</dt>
+          <dd className="mt-1 font-bold text-ink-900 dark:text-ink-50">{budget}</dd>
         </div>
         <div className="text-center">
-          <dt className="text-ink-400">Status</dt>
-          <dd className="mt-1 font-bold text-ink-900">{status}</dd>
+          <dt className="text-ink-400 dark:text-ink-300">Status</dt>
+          <dd className="mt-1 font-bold text-ink-900 dark:text-ink-50">{status}</dd>
         </div>
         <div className="text-center">
-          <dt className="text-ink-400">Date</dt>
-          <dd className="mt-1 font-bold text-ink-900">{date}</dd>
+          <dt className="text-ink-400 dark:text-ink-300">Date</dt>
+          <dd className="mt-1 font-bold text-ink-900 dark:text-ink-50">{date}</dd>
         </div>
       </dl>
       <Button
         variant="outline"
         size="md"
-        className="border-brand-300 text-ink-900 hover:border-brand"
+        className="border-brand-300 text-ink-900 dark:text-ink-50 hover:border-brand"
         onClick={() => router.push("/dashboard/applications")}
       >
         View Details
@@ -521,15 +521,15 @@ export function EmptyState({
   body: string;
 }) {
   return (
-    <div className="flex flex-col items-center rounded-2xl border border-dashed border-ink-200 bg-ink-50/60 px-6 py-10 text-center">
+    <div className="flex flex-col items-center rounded-2xl border border-dashed border-ink-200 dark:border-ink-700 bg-ink-50/60 dark:bg-ink-900/60 px-6 py-10 text-center">
       <span
         aria-hidden
-        className="flex h-12 w-12 items-center justify-center rounded-full bg-ink-100 text-ink-400"
+        className="flex h-12 w-12 items-center justify-center rounded-full bg-ink-100 dark:bg-ink-800 text-ink-400 dark:text-ink-300"
       >
         <WidgetIcon name="clipboard" />
       </span>
-      <p className="mt-4 text-[15px] font-bold text-ink-900">{title}</p>
-      <p className="mt-1 max-w-[380px] text-[14px] text-ink-500">{body}</p>
+      <p className="mt-4 text-[15px] font-bold text-ink-900 dark:text-ink-50">{title}</p>
+      <p className="mt-1 max-w-[380px] text-[14px] text-ink-500 dark:text-ink-300">{body}</p>
     </div>
   );
 }
@@ -544,10 +544,10 @@ export function AIAssistant({ questions }: { questions: string[] }) {
     <section>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h2 className="text-[22px] font-extrabold text-brand">
+          <h2 className="text-[22px] font-extrabold text-brand dark:text-brand-200">
             AI Business Assistant
           </h2>
-          <p className="mt-1 text-[15px] text-ink-500">
+          <p className="mt-1 text-[15px] text-ink-500 dark:text-ink-300">
             Ask me anything about your business.
           </p>
         </div>
@@ -559,14 +559,14 @@ export function AIAssistant({ questions }: { questions: string[] }) {
             key={q}
             type="button"
             onClick={() => setDraft(q)}
-            className="rounded-full border border-ink-200 bg-white px-4 py-2 text-[13px] font-medium text-ink-700 transition-colors hover:border-brand-200 hover:bg-brand-50 hover:text-brand"
+            className="rounded-full border border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900 px-4 py-2 text-[13px] font-medium text-ink-700 dark:text-ink-200 transition-colors hover:border-brand-200 hover:bg-brand-50 dark:hover:bg-white/10 hover:text-brand dark:hover:text-brand-200"
           >
             {q}
           </button>
         ))}
       </div>
       <form
-        className="mt-4 flex items-end gap-2 rounded-2xl border border-ink-200 bg-white p-3"
+        className="mt-4 flex items-end gap-2 rounded-2xl border border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900 p-3"
         onSubmit={(e) => e.preventDefault()}
       >
         <textarea
@@ -575,9 +575,9 @@ export function AIAssistant({ questions }: { questions: string[] }) {
           placeholder="Ask a business question..."
           aria-label="Ask a business question"
           rows={3}
-          className="min-h-[88px] flex-1 resize-none bg-transparent px-2 pt-1 text-[14px] text-ink-900 placeholder:text-ink-400 focus:outline-none"
+          className="min-h-[88px] flex-1 resize-none bg-transparent px-2 pt-1 text-[14px] text-ink-900 dark:text-ink-50 placeholder:text-ink-400 dark:placeholder:text-ink-300 focus:outline-none"
         />
-        <span aria-hidden className="pb-2 text-ink-300">
+        <span aria-hidden className="pb-2 text-ink-300 dark:text-ink-200">
           <WidgetIcon name="paperclip" />
         </span>
         <Button type="submit" className="shrink-0">
@@ -597,10 +597,10 @@ export function PerformanceInsights({
     <section>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h2 className="text-[22px] font-extrabold text-brand">
+          <h2 className="text-[22px] font-extrabold text-brand dark:text-brand-200">
             AI Performance Insights
           </h2>
-          <p className="mt-1 text-[15px] text-ink-500">
+          <p className="mt-1 text-[15px] text-ink-500 dark:text-ink-300">
             Weekly analysis powered by AI
           </p>
         </div>
@@ -618,13 +618,13 @@ export function PerformanceInsights({
         ].map((label) => (
           <div
             key={label}
-            className="rounded-2xl border border-brand-100 bg-brand-50/50 p-4"
+            className="rounded-2xl border border-brand-100 bg-brand-50/50 dark:bg-white/10 p-4"
           >
             <p className="text-[22px] font-extrabold tracking-tight">
-              <span className="text-brand">0</span>
-              <span className="text-ink-900">/100</span>
+              <span className="text-brand dark:text-brand-200">0</span>
+              <span className="text-ink-900 dark:text-ink-50">/100</span>
             </p>
-            <p className="mt-1 text-[13px] font-medium text-ink-700">
+            <p className="mt-1 text-[13px] font-medium text-ink-700 dark:text-ink-200">
               {label}
             </p>
           </div>
@@ -633,12 +633,12 @@ export function PerformanceInsights({
 
       <Card className="mt-5 p-6">
         <div className="flex items-center justify-between">
-          <h3 className="text-[19px] font-bold text-ink-900">
+          <h3 className="text-[19px] font-bold text-ink-900 dark:text-ink-50">
             Latest
             <br />
             Recommendations
           </h3>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-[12px] font-semibold text-brand">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 dark:bg-white/10 px-3 py-1 text-[12px] font-semibold text-brand dark:text-brand-200">
             Powered by AI
           </span>
         </div>
@@ -647,14 +647,14 @@ export function PerformanceInsights({
             <li key={i} className="flex items-center gap-4">
               <IconChip name="lightbulb" />
               <span className="min-w-0 flex-1">
-                <span className="block text-[15px] font-bold text-ink-900">
+                <span className="block text-[15px] font-bold text-ink-900 dark:text-ink-50">
                   {rec.title}
                 </span>
-                <span className="mt-0.5 block text-[13px] text-ink-500">
+                <span className="mt-0.5 block text-[13px] text-ink-500 dark:text-ink-300">
                   {rec.detail}
                 </span>
               </span>
-              <span className="shrink-0 text-[13px] text-ink-400">
+              <span className="shrink-0 text-[13px] text-ink-400 dark:text-ink-300">
                 {rec.date}
               </span>
             </li>
@@ -672,10 +672,10 @@ export function PerformanceInsights({
 export function ProfileCompleteness({ pct }: { pct: number }) {
   return (
     <div>
-      <p className="text-[15px] font-bold text-ink-900">Profile Completeness</p>
+      <p className="text-[15px] font-bold text-ink-900 dark:text-ink-50">Profile Completeness</p>
       <div className="mt-3 flex items-center gap-4">
         <div
-          className="h-2.5 flex-1 overflow-hidden rounded-full bg-ink-100"
+          className="h-2.5 flex-1 overflow-hidden rounded-full bg-ink-100 dark:bg-ink-800"
           role="progressbar"
           aria-valuenow={pct}
           aria-valuemin={0}
@@ -687,7 +687,7 @@ export function ProfileCompleteness({ pct }: { pct: number }) {
             style={{ width: `${pct}%` }}
           />
         </div>
-        <span className="text-[14px] font-semibold text-ink-500">{pct}%</span>
+        <span className="text-[14px] font-semibold text-ink-500 dark:text-ink-300">{pct}%</span>
       </div>
     </div>
   );
@@ -706,34 +706,34 @@ export function TrustScore({
     <section>
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="text-[22px] font-extrabold text-ink-900">
+          <h2 className="text-[22px] font-extrabold text-ink-900 dark:text-ink-50">
             Trust Score
           </h2>
-          <p className="mt-1 text-[15px] text-ink-500">
+          <p className="mt-1 text-[15px] text-ink-500 dark:text-ink-300">
             How brands perceive your reliability
           </p>
         </div>
         <div className="text-right">
-          <span className="mb-1 inline-flex items-center rounded-full bg-brand-50 px-3 py-1 text-[12px] font-semibold text-brand">
+          <span className="mb-1 inline-flex items-center rounded-full bg-brand-50 dark:bg-white/10 px-3 py-1 text-[12px] font-semibold text-brand dark:text-brand-200">
             {tier}
           </span>
           <p className="text-[32px] font-extrabold tracking-tight">
-            <span className="text-brand">{Math.min(score, 100)}</span>
-            <span className="text-ink-900">/100</span>
+            <span className="text-brand dark:text-brand-200">{Math.min(score, 100)}</span>
+            <span className="text-ink-900 dark:text-ink-50">/100</span>
           </p>
         </div>
       </div>
-      <p className="mt-6 text-[15px] font-bold text-ink-900">Score Breakdown</p>
+      <p className="mt-6 text-[15px] font-bold text-ink-900 dark:text-ink-50">Score Breakdown</p>
       <ul className="mt-3 grid gap-3 sm:grid-cols-2">
         {breakdown.map((row) => {
           const [got, total] = row.value.split("/").map(Number);
           const pct = total > 0 ? Math.round((got / total) * 100) : 0;
           return (
-            <li key={row.label} className="rounded-2xl border border-ink-100 bg-white p-4">
-              <p className="text-[14px] font-medium text-ink-900">{row.label}</p>
+            <li key={row.label} className="rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 p-4">
+              <p className="text-[14px] font-medium text-ink-900 dark:text-ink-50">{row.label}</p>
               <div className="mt-2.5 flex items-center gap-3">
                 <div
-                  className="h-1.5 flex-1 overflow-hidden rounded-full bg-ink-100"
+                  className="h-1.5 flex-1 overflow-hidden rounded-full bg-ink-100 dark:bg-ink-800"
                   role="progressbar"
                   aria-valuenow={pct}
                   aria-valuemin={0}
@@ -745,7 +745,7 @@ export function TrustScore({
                     style={{ width: `${pct}%` }}
                   />
                 </div>
-                <span className="text-[13px] font-semibold text-ink-500">
+                <span className="text-[13px] font-semibold text-ink-500 dark:text-ink-300">
                   {row.value}
                 </span>
               </div>
@@ -788,7 +788,7 @@ export function AvailabilityCalendar() {
     });
   return (
     <section>
-      <h2 className="text-[22px] font-extrabold text-ink-900">
+      <h2 className="text-[22px] font-extrabold text-ink-900 dark:text-ink-50">
         Availability & Calendar
       </h2>
       <Card className="mt-4 p-6">
@@ -797,21 +797,21 @@ export function AvailabilityCalendar() {
             type="button"
             aria-label="Previous month"
             onClick={() => shiftMonth(-1)}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-ink-400 hover:bg-ink-50"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-ink-400 dark:text-ink-300 hover:bg-ink-50 dark:hover:bg-white/5"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
               <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth={1.6} />
               <path d="m14 9-3 3 3 3" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
-          <p className="text-[16px] font-extrabold text-ink-900">
+          <p className="text-[16px] font-extrabold text-ink-900 dark:text-ink-50">
             {view.month + 1} / {view.year}
           </p>
           <button
             type="button"
             aria-label="Next month"
             onClick={() => shiftMonth(1)}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-ink-400 hover:bg-ink-50"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-ink-400 dark:text-ink-300 hover:bg-ink-50 dark:hover:bg-white/5"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
               <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth={1.6} />
@@ -819,25 +819,25 @@ export function AvailabilityCalendar() {
             </svg>
           </button>
         </div>
-        <div className="mt-4 grid grid-cols-7 text-center text-[13px] font-medium text-ink-500">
+        <div className="mt-4 grid grid-cols-7 text-center text-[13px] font-medium text-ink-500 dark:text-ink-300">
           {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
             <span key={d} className="py-2">
               {d}
             </span>
           ))}
         </div>
-        <div className="grid grid-cols-7 border-t border-l border-ink-100">
+        <div className="grid grid-cols-7 border-t border-l border-ink-100 dark:border-ink-800">
           {weeks.flat().map((day, i) => {
             const status = day !== null ? marked[day] : undefined;
             return (
               <div
                 key={i}
-                className="min-h-[92px] border-b border-r border-ink-100 p-2"
+                className="min-h-[92px] border-b border-r border-ink-100 dark:border-ink-800 p-2"
               >
                 {day !== null && (
                   <>
                     <p
-                      className={`text-right text-[13px] ${isToday(day) ? "font-extrabold text-brand" : "text-ink-700"}`}
+                      className={`text-right text-[13px] ${isToday(day) ? "font-extrabold text-brand dark:text-brand-200" : "text-ink-700 dark:text-ink-200"}`}
                     >
                       {day}
                       {isToday(day) ? " · Today" : ""}
@@ -847,8 +847,8 @@ export function AvailabilityCalendar() {
                         <span
                           className={cn(
                             "inline-block rounded-full px-2.5 py-1 text-[11px] font-semibold",
-                            status === "Active" && "bg-brand-50 text-brand",
-                            status === "Available" && "bg-success-bg text-success",
+                            status === "Active" && "bg-brand-50 dark:bg-white/10 text-brand dark:text-brand-200",
+                            status === "Available" && "bg-success-bg dark:bg-success/15 text-success dark:text-success-bright",
                             status === "Blocked" && "bg-red-50 text-red-500"
                           )}
                         >
@@ -871,14 +871,14 @@ export function ServicesCard({ filledAdd = false }: { filledAdd?: boolean }) {
   return (
     <section>
       <div className="flex items-center justify-between">
-        <h2 className="text-[22px] font-extrabold text-ink-900">My Services</h2>
+        <h2 className="text-[22px] font-extrabold text-ink-900 dark:text-ink-50">My Services</h2>
         <Button
           variant={filledAdd ? "primary" : "outline"}
           size="md"
           className={
             filledAdd
               ? undefined
-              : "border-brand-300 text-brand hover:border-brand hover:text-brand"
+              : "border-brand-300 text-brand dark:text-brand-200 hover:border-brand hover:text-brand dark:hover:text-brand-200"
           }
         >
           {filledAdd ? "+ Add Service" : "Add Service"}
@@ -902,7 +902,7 @@ export function QuickActions({
 }) {
   return (
     <section>
-      <h2 className="text-[22px] font-extrabold text-ink-900">Quick Actions</h2>
+      <h2 className="text-[22px] font-extrabold text-ink-900 dark:text-ink-50">Quick Actions</h2>
       <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
         {buttons.map((b) => {
           const label = typeof b === "string" ? b : b.label;
@@ -911,7 +911,7 @@ export function QuickActions({
             <Button
               variant="outline"
               size="lg"
-              className="w-full border-brand-300 text-brand hover:border-brand hover:text-brand"
+              className="w-full border-brand-300 text-brand dark:text-brand-200 hover:border-brand hover:text-brand dark:hover:text-brand-200"
             >
               {label}
             </Button>
@@ -929,8 +929,8 @@ export function QuickActions({
       </div>
       <Card className="mt-4 flex items-start gap-4 p-5">
         <IconChip name="lightbulb" />
-        <p className="text-[14px] leading-relaxed text-ink-700">
-          <span className="font-bold text-ink-900">Tip:</span>{" "}
+        <p className="text-[14px] leading-relaxed text-ink-700 dark:text-ink-200">
+          <span className="font-bold text-ink-900 dark:text-ink-50">Tip:</span>{" "}
           Creators with complete profiles get 3× more campaign requests.
         </p>
       </Card>
@@ -942,10 +942,10 @@ export function VisibilityBoost() {
   return (
     <Card className="p-6">
       <IconChip name="bolt" />
-      <h2 className="mt-4 text-[19px] font-bold text-ink-900">
+      <h2 className="mt-4 text-[19px] font-bold text-ink-900 dark:text-ink-50">
         Visibility Boost
       </h2>
-      <p className="mt-2 max-w-[560px] text-[14px] leading-relaxed text-ink-500">
+      <p className="mt-2 max-w-[560px] text-[14px] leading-relaxed text-ink-500 dark:text-ink-300">
         You don&apos;t have an active visibility boost.
         <br />
         Boost your profile to appear higher in search results and get
@@ -987,10 +987,10 @@ export function ReferralHero({
   };
   return (
     <div>
-      <h1 className="text-[28px] font-extrabold tracking-tight text-ink-900">
+      <h1 className="text-[28px] font-extrabold tracking-tight text-ink-900 dark:text-ink-50">
         {info.title}
       </h1>
-      <p className="mt-1 text-[15px] text-ink-500">{info.subtitle}</p>
+      <p className="mt-1 text-[15px] text-ink-500 dark:text-ink-300">{info.subtitle}</p>
       <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
         {["Copy Link", "Share", "Invite Friends", "View Rewards"].map(
           (label) => (
@@ -998,7 +998,7 @@ export function ReferralHero({
               key={label}
               variant="outline"
               size="lg"
-              className="border-brand-300 text-brand hover:border-brand hover:text-brand"
+              className="border-brand-300 text-brand dark:text-brand-200 hover:border-brand hover:text-brand dark:hover:text-brand-200"
               onClick={label === "Copy Link" ? copyLink : undefined}
             >
               {label === "Copy Link" && copied ? "Copied" : label}
@@ -1008,15 +1008,15 @@ export function ReferralHero({
       </div>
       <div className="mt-6 grid gap-5 lg:grid-cols-2">
         <Card className="p-6">
-          <p className="text-[19px] font-bold text-ink-900">{info.linkLabel}</p>
+          <p className="text-[19px] font-bold text-ink-900 dark:text-ink-50">{info.linkLabel}</p>
           <div className="mt-4 flex items-center gap-3">
-            <span className="flex h-12 min-w-0 flex-1 items-center justify-between gap-2 rounded-xl bg-brand-50/60 px-4 text-[14px] font-medium text-brand">
+            <span className="flex h-12 min-w-0 flex-1 items-center justify-between gap-2 rounded-xl bg-brand-50/60 dark:bg-white/10 px-4 text-[14px] font-medium text-brand dark:text-brand-200">
               <span className="truncate">{info.link}</span>
               <button
                 type="button"
                 onClick={copyLink}
                 aria-label="Copy referral link"
-                className="shrink-0 text-brand hover:text-brand-dark"
+                className="shrink-0 text-brand dark:text-brand-200 hover:text-brand-dark"
               >
                 <WidgetIcon name="copy" className="h-[18px] w-[18px]" />
               </button>
@@ -1025,15 +1025,15 @@ export function ReferralHero({
               {copied ? "Copied" : "Copy Link"}
             </Button>
           </div>
-          <p className="mt-3 text-[13px] text-ink-500">{info.linkHint}</p>
-          <p className="mt-4 flex items-center gap-3 text-[13px] font-semibold text-ink-700">
+          <p className="mt-3 text-[13px] text-ink-500 dark:text-ink-300">{info.linkHint}</p>
+          <p className="mt-4 flex items-center gap-3 text-[13px] font-semibold text-ink-700 dark:text-ink-200">
             Share
             <span className="flex items-center gap-2" aria-label="Share options">
               {["in", "link", "ig", "x"].map((s) => (
                 <span
                   key={s}
                   aria-hidden
-                  className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-50 text-[12px] font-extrabold text-brand"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-50 dark:bg-white/10 text-[12px] font-extrabold text-brand dark:text-brand-200"
                 >
                   {s === "in" ? "in" : s === "ig" ? "ig" : s === "x" ? "𝕏" : "🔗"}
                 </span>
@@ -1043,17 +1043,17 @@ export function ReferralHero({
         </Card>
         <Card className="p-6">
           <div className="flex items-start justify-between">
-            <p className="text-[19px] font-bold text-ink-900">
+            <p className="text-[19px] font-bold text-ink-900 dark:text-ink-50">
               {info.codeLabel}
             </p>
-            <span className="inline-flex items-center rounded-full bg-brand-50 px-3 py-1 text-[12px] font-semibold text-brand">
+            <span className="inline-flex items-center rounded-full bg-brand-50 dark:bg-white/10 px-3 py-1 text-[12px] font-semibold text-brand dark:text-brand-200">
               {info.codeStatus}
             </span>
           </div>
-          <p className="mt-4 inline-block rounded-xl bg-brand-50/60 px-5 py-3 text-[16px] font-extrabold tracking-[0.15em] text-ink-900">
+          <p className="mt-4 inline-block rounded-xl bg-brand-50/60 dark:bg-white/10 px-5 py-3 text-[16px] font-extrabold tracking-[0.15em] text-ink-900 dark:text-ink-50">
             {info.code}
           </p>
-          <p className="mt-3 text-[13px] text-ink-500">{info.codeHint}</p>
+          <p className="mt-3 text-[13px] text-ink-500 dark:text-ink-300">{info.codeHint}</p>
         </Card>
       </div>
     </div>
@@ -1070,11 +1070,11 @@ export function AnalyticsGrid({
       {items.map((item) => (
         <Card key={item.label} className="flex flex-col items-center p-5 text-center">
           <IconChip name={item.icon} />
-          <p className="mt-3 text-[30px] font-extrabold text-ink-900">
+          <p className="mt-3 text-[30px] font-extrabold text-ink-900 dark:text-ink-50">
             {item.value}
           </p>
-          <p className="mt-1 text-[14px] font-bold text-ink-900">{item.label}</p>
-          <p className="text-[13px] text-ink-400">{item.hint}</p>
+          <p className="mt-1 text-[14px] font-bold text-ink-900 dark:text-ink-50">{item.label}</p>
+          <p className="text-[13px] text-ink-400 dark:text-ink-300">{item.hint}</p>
         </Card>
       ))}
     </div>
@@ -1093,9 +1093,9 @@ export function RewardsCards() {
     {
       title: "Paid Rewards",
       icon: "check",
-      headerClass: "bg-brand-50 text-brand",
+      headerClass: "bg-brand-50 dark:bg-white/10 text-brand dark:text-brand-200",
       badge: "Paid",
-      badgeClass: "bg-brand-50 text-brand",
+      badgeClass: "bg-brand-50 dark:bg-white/10 text-brand dark:text-brand-200",
     },
   ];
   return (
@@ -1111,13 +1111,13 @@ export function RewardsCards() {
             <WidgetIcon name={g.icon} className="h-5 w-5" />
             {g.title}
           </p>
-          <ul className="mt-2 divide-y divide-ink-100">
+          <ul className="mt-2 divide-y divide-ink-100 dark:divide-ink-800">
             {[0, 1].map((i) => (
               <li
                 key={i}
                 className="flex items-center justify-between py-3.5 text-[14px]"
               >
-                <span className="text-ink-700">Referral Bonus</span>
+                <span className="text-ink-700 dark:text-ink-200">Referral Bonus</span>
                 <span
                   className={cn(
                     "rounded-full px-3 py-1 text-[12px] font-semibold",
@@ -1126,7 +1126,7 @@ export function RewardsCards() {
                 >
                   {g.badge}
                 </span>
-                <span className="font-bold text-ink-900">$0</span>
+                <span className="font-bold text-ink-900 dark:text-ink-50">$0</span>
               </li>
             ))}
           </ul>
@@ -1143,23 +1143,23 @@ export function RewardMilestones({
 }) {
   return (
     <Card className="p-6">
-      <h3 className="text-[19px] font-bold text-ink-900">Reward Milestones</h3>
-      <p className="mt-1 text-[14px] text-ink-500">
+      <h3 className="text-[19px] font-bold text-ink-900 dark:text-ink-50">Reward Milestones</h3>
+      <p className="mt-1 text-[14px] text-ink-500 dark:text-ink-300">
         Unlock rewards as you refer more friends
       </p>
       <div className="mt-8 px-1">
-        <div className="relative h-1.5 rounded-full bg-ink-100">
+        <div className="relative h-1.5 rounded-full bg-ink-100 dark:bg-ink-800">
           <div className="absolute inset-y-0 left-0 w-[30%] rounded-full bg-brand" />
-          <span className="absolute -top-[7px] left-0 h-[20px] w-[20px] rounded-full border-[3px] border-brand bg-white" />
-          <span className="absolute -top-[7px] left-[30%] h-[20px] w-[20px] rounded-full border-[3px] border-brand bg-white" />
-          <span className="absolute -top-[7px] left-[62%] h-[20px] w-[20px] rounded-full border-[3px] border-ink-200 bg-white" />
-          <span className="absolute -top-[7px] right-0 h-[20px] w-[20px] rounded-full border-[3px] border-ink-200 bg-white" />
+          <span className="absolute -top-[7px] left-0 h-[20px] w-[20px] rounded-full border-[3px] border-brand bg-white dark:bg-ink-900" />
+          <span className="absolute -top-[7px] left-[30%] h-[20px] w-[20px] rounded-full border-[3px] border-brand bg-white dark:bg-ink-900" />
+          <span className="absolute -top-[7px] left-[62%] h-[20px] w-[20px] rounded-full border-[3px] border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900" />
+          <span className="absolute -top-[7px] right-0 h-[20px] w-[20px] rounded-full border-[3px] border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900" />
         </div>
         <ol className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
           {milestones.map((m) => (
             <li key={m.count}>
-              <p className="text-[14px] font-bold text-ink-900">{m.count}</p>
-              <p className="mt-1 text-[13px] text-ink-500">{m.reward}</p>
+              <p className="text-[14px] font-bold text-ink-900 dark:text-ink-50">{m.count}</p>
+              <p className="mt-1 text-[13px] text-ink-500 dark:text-ink-300">{m.reward}</p>
             </li>
           ))}
         </ol>
@@ -1175,32 +1175,32 @@ export function Leaderboard({
 }) {
   return (
     <Card className="p-6">
-      <ol className="divide-y divide-ink-100">
+      <ol className="divide-y divide-ink-100 dark:divide-ink-800">
         {entries.map((e) => (
           <li key={e.rank} className="flex items-center gap-4 py-4">
-            <span className="w-4 text-[15px] font-bold text-brand">
+            <span className="w-4 text-[15px] font-bold text-brand dark:text-brand-200">
               {e.rank}
             </span>
             <span
               aria-hidden
-              className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand"
+              className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 dark:bg-white/10 text-brand dark:text-brand-200"
             >
               <WidgetIcon name="trophy" />
             </span>
-            <span className="min-w-0 flex-1 text-[15px] font-bold text-ink-900">
+            <span className="min-w-0 flex-1 text-[15px] font-bold text-ink-900 dark:text-ink-50">
               {e.name}
             </span>
             <span className="text-center">
-              <span className="block text-[15px] font-bold text-ink-900">
+              <span className="block text-[15px] font-bold text-ink-900 dark:text-ink-50">
                 {e.referrals}
               </span>
-              <span className="block text-[12px] text-ink-400">Referrals</span>
+              <span className="block text-[12px] text-ink-400 dark:text-ink-300">Referrals</span>
             </span>
             <span className="w-16 text-right">
-              <span className="block text-[15px] font-bold text-ink-900">
+              <span className="block text-[15px] font-bold text-ink-900 dark:text-ink-50">
                 {e.earnings}
               </span>
-              <span className="block text-[12px] text-ink-400">Earnings</span>
+              <span className="block text-[12px] text-ink-400 dark:text-ink-300">Earnings</span>
             </span>
           </li>
         ))}
@@ -1228,25 +1228,25 @@ export function CommissionHistory({
   }
   return (
     <div>
-      <div className="overflow-hidden rounded-2xl border border-ink-100 bg-white">
-        <ul className="divide-y divide-ink-100">
+      <div className="overflow-hidden rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900">
+        <ul className="divide-y divide-ink-100 dark:divide-ink-800">
           {entries.map((e, i) => (
             <li
               key={i}
               className="flex items-center justify-between gap-4 px-5 py-4"
             >
-              <p className="text-[15px] font-bold text-ink-900">{e.campaign}</p>
+              <p className="text-[15px] font-bold text-ink-900 dark:text-ink-50">{e.campaign}</p>
               <p className="text-center">
-                <span className="block text-[14px] font-medium text-ink-900">
+                <span className="block text-[14px] font-medium text-ink-900 dark:text-ink-50">
                   {e.date}
                 </span>
-                <span className="block text-[12px] text-ink-400">Date</span>
+                <span className="block text-[12px] text-ink-400 dark:text-ink-300">Date</span>
               </p>
               <p className="text-right">
-                <span className="block text-[14px] font-medium text-ink-900">
+                <span className="block text-[14px] font-medium text-ink-900 dark:text-ink-50">
                   {e.amount}
                 </span>
-                <span className="block text-[12px] text-ink-400">Amount</span>
+                <span className="block text-[12px] text-ink-400 dark:text-ink-300">Amount</span>
               </p>
             </li>
           ))}
@@ -1273,25 +1273,25 @@ export function DiscountHistory({
   }
   return (
     <div>
-      <div className="overflow-hidden rounded-2xl border border-ink-100 bg-white">
-        <ul className="divide-y divide-ink-100">
+      <div className="overflow-hidden rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900">
+        <ul className="divide-y divide-ink-100 dark:divide-ink-800">
           {entries.map((e, i) => (
             <li
               key={i}
               className="flex items-center justify-between gap-4 px-5 py-4"
             >
-              <p className="text-[15px] font-bold text-ink-900">{e.campaign}</p>
+              <p className="text-[15px] font-bold text-ink-900 dark:text-ink-50">{e.campaign}</p>
               <p className="text-center">
-                <span className="block text-[14px] font-medium text-ink-900">
+                <span className="block text-[14px] font-medium text-ink-900 dark:text-ink-50">
                   {e.date}
                 </span>
-                <span className="block text-[12px] text-ink-400">Date</span>
+                <span className="block text-[12px] text-ink-400 dark:text-ink-300">Date</span>
               </p>
               <p className="text-right">
-                <span className="block text-[14px] font-medium text-ink-900">
+                <span className="block text-[14px] font-medium text-ink-900 dark:text-ink-50">
                   {e.amount}
                 </span>
-                <span className="block text-[12px] text-ink-400">Amount</span>
+                <span className="block text-[12px] text-ink-400 dark:text-ink-300">Amount</span>
               </p>
             </li>
           ))}
@@ -1321,8 +1321,8 @@ export function RecentReferrals({
   }
   return (
     <div>
-      <div className="overflow-hidden rounded-2xl border border-ink-100 bg-white">
-        <ul className="divide-y divide-ink-100">
+      <div className="overflow-hidden rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900">
+        <ul className="divide-y divide-ink-100 dark:divide-ink-800">
           {rows.map((r, i) => (
             <li
               key={i}
@@ -1331,27 +1331,27 @@ export function RecentReferrals({
               <span className="flex min-w-0 flex-1 items-center gap-3">
                 <span
                   aria-hidden
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-100 text-sm font-bold text-brand"
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-100 dark:bg-brand/25 text-sm font-bold text-brand dark:text-brand-200"
                 >
                   {r.name.charAt(0)}
                 </span>
-                <span className="text-[15px] font-bold text-ink-900">
+                <span className="text-[15px] font-bold text-ink-900 dark:text-ink-50">
                   {r.name}
                 </span>
               </span>
               <span className="text-center">
-                <span className="block text-[14px] font-medium text-ink-900">
+                <span className="block text-[14px] font-medium text-ink-900 dark:text-ink-50">
                   {r.joined}
                 </span>
-                <span className="block text-[12px] text-ink-400">
+                <span className="block text-[12px] text-ink-400 dark:text-ink-300">
                   Date Joined
                 </span>
               </span>
               <span className="text-center">
-                <span className="block text-[14px] font-medium text-ink-900">
+                <span className="block text-[14px] font-medium text-ink-900 dark:text-ink-50">
                   {r.earnings}
                 </span>
-                <span className="block text-[12px] text-ink-400">Earnings</span>
+                <span className="block text-[12px] text-ink-400 dark:text-ink-300">Earnings</span>
               </span>
               <DotStatusPill status={r.status} />
             </li>
@@ -1365,7 +1365,7 @@ export function RecentReferrals({
 /** "View All →" pill link used on referral section headers. */
 export function ViewAllPill() {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3.5 py-1.5 text-[13px] font-semibold text-brand">
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 dark:bg-white/10 px-3.5 py-1.5 text-[13px] font-semibold text-brand dark:text-brand-200">
       View All
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
         <path

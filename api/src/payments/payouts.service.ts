@@ -10,6 +10,7 @@ import { Payout, PayoutStatus } from './payout.entity';
 import { Payment, PaymentStatus } from './payment.entity';
 import { PlatformCommission } from './platform-commission.entity';
 import { Deal } from '../deals/deal.entity';
+import { User } from '../users/user.entity';
 import { StripeService } from './stripe.service';
 import { ReferralsService } from '../referrals/referrals.service';
 
@@ -32,6 +33,8 @@ export class PayoutsService {
     private commissionsRepo: Repository<PlatformCommission>,
     @InjectRepository(Deal)
     private dealsRepo: Repository<Deal>,
+    @InjectRepository(User)
+    private usersRepo: Repository<User>,
     private stripe: StripeService,
     private referrals: ReferralsService,
   ) {}
@@ -104,8 +107,16 @@ export class PayoutsService {
   }
 
   /**
-   * Release a pending payout via Stripe transfer. In demo mode this only
-   * marks PROCESSING (simulated) — real transfers need Connect keys.
+   * Release a pending payout via Stripe transfer.
+   *
+   * Demo mode: unchanged — marks PROCESSING (simulated); real transfers
+   * need Connect keys. Live mode: if the recipient has a connected
+   * Stripe account, initiate the real transfer and mark PAID with the
+   * transfer id (a transfer failure marks FAILED with the reason, so
+   * the payout stays visible instead of silently stalling). If the
+   * recipient has no connected account, the previous behaviour is kept
+   * (PROCESSING) — the transfer then happens off-platform.
+   * Idempotent: non-PENDING payouts are returned untouched.
    */
   async release(payoutId: string): Promise<Payout> {
     const payout = await this.payoutsRepo.findOne({
@@ -121,9 +132,28 @@ export class PayoutsService {
       return this.payoutsRepo.save(payout);
     }
 
-    // Live path: recipient must have a connected Stripe account.
-    // (stripeAccountId lands on the user record when Connect onboarding ships.)
-    payout.status = PayoutStatus.PROCESSING;
+    // Live path: transfer only to a connected Stripe account.
+    const recipient = await this.usersRepo.findOne({
+      where: { id: payout.recipientId },
+    });
+    if (!recipient?.stripeAccountId) {
+      payout.status = PayoutStatus.PROCESSING;
+      return this.payoutsRepo.save(payout);
+    }
+    try {
+      const tr = await this.stripe.createTransfer({
+        amountCents: payout.amountCents,
+        currency: payout.currency || 'usd',
+        destination: recipient.stripeAccountId,
+        metadata: { payoutId: payout.id, dealId: payout.dealId },
+      });
+      payout.stripeTransferId = tr.id;
+      payout.status = PayoutStatus.PAID;
+      payout.failureReason = null;
+    } catch (e: any) {
+      payout.status = PayoutStatus.FAILED;
+      payout.failureReason = e?.message || 'Transfer failed';
+    }
     return this.payoutsRepo.save(payout);
   }
 

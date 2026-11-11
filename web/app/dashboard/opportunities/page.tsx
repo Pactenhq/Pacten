@@ -16,7 +16,7 @@ import { api } from "@/lib/api";
 const STATUS_STYLE: Record<string, string> = {
   pending: "bg-amber-100 text-amber-800",
   accepted: "bg-green-100 text-green-700",
-  declined: "bg-ink-100 text-ink-500",
+  declined: "bg-ink-100 dark:bg-ink-800 text-ink-500 dark:text-ink-300",
 };
 
 export default function OpportunitiesPage() {
@@ -78,11 +78,11 @@ export default function OpportunitiesPage() {
         }
       />
       {loading ? (
-        <p className="mt-8 text-ink-500">Loading…</p>
+        <p className="mt-8 text-ink-500 dark:text-ink-300">Loading…</p>
       ) : items.length === 0 ? (
         <Card className="mt-8 p-10 text-center">
-          <p className="text-lg font-bold text-ink-900">Nothing here yet</p>
-          <p className="mt-2 text-ink-500">
+          <p className="text-lg font-bold text-ink-900 dark:text-ink-50">Nothing here yet</p>
+          <p className="mt-2 text-ink-500 dark:text-ink-300">
             {isBrand
               ? "Open a creator or professional profile and send them a direct opportunity."
               : "When a brand sends you a direct opportunity, it will appear here."}
@@ -114,7 +114,7 @@ export default function OpportunitiesPage() {
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="text-[17px] font-bold text-ink-900">
+                      <h3 className="text-[17px] font-bold text-ink-900 dark:text-ink-50">
                         {o.title}
                       </h3>
                       <span
@@ -123,15 +123,15 @@ export default function OpportunitiesPage() {
                         {o.status}
                       </span>
                     </div>
-                    <p className="mt-1 text-[14px] text-ink-500">
+                    <p className="mt-1 text-[14px] text-ink-500 dark:text-ink-300">
                       {isBrand ? "To: " : "From: "}
-                      <span className="font-semibold text-ink-700">
+                      <span className="font-semibold text-ink-700 dark:text-ink-200">
                         {otherName}
                       </span>
                       {o.budget ? ` · Budget: ${budgetLabel}` : ""}
                     </p>
                     {o.description && (
-                      <p className="mt-2 whitespace-pre-line text-[15px] text-ink-700">
+                      <p className="mt-2 whitespace-pre-line text-[15px] text-ink-700 dark:text-ink-200">
                         {o.description}
                       </p>
                     )}

@@ -15,7 +15,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 
 function Pill({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-flex rounded-full bg-brand-50 px-3 py-1 text-[13px] font-medium text-brand">
+    <span className="inline-flex rounded-full bg-brand-50 dark:bg-white/10 px-3 py-1 text-[13px] font-medium text-brand dark:text-brand-200">
       {children}
     </span>
   );
@@ -60,15 +60,15 @@ export default function CreatorDetailPage() {
     <>
       <Navbar />
       <main className="mx-auto max-w-[1100px] px-6 pb-20 pt-10 lg:px-12">
-        <Link href="/creators" className="text-[14px] font-medium text-brand hover:underline">
+        <Link href="/creators" className="text-[14px] font-medium text-brand dark:text-brand-200 hover:underline">
           ← Back to creators
         </Link>
         {loading ? (
-          <p className="mt-10 text-ink-500">Loading profile…</p>
+          <p className="mt-10 text-ink-500 dark:text-ink-300">Loading profile…</p>
         ) : notFound || !profile ? (
           <Card className="mt-10 p-10 text-center">
-            <p className="text-lg font-bold text-ink-900">Creator not found</p>
-            <p className="mt-2 text-ink-500">This profile may have been removed.</p>
+            <p className="text-lg font-bold text-ink-900 dark:text-ink-50">Creator not found</p>
+            <p className="mt-2 text-ink-500 dark:text-ink-300">This profile may have been removed.</p>
           </Card>
         ) : (
           <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_360px]">
@@ -83,7 +83,7 @@ export default function CreatorDetailPage() {
                   />
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h1 className="text-2xl font-extrabold text-ink-900">
+                      <h1 className="text-2xl font-extrabold text-ink-900 dark:text-ink-50">
                         {profile.displayName}
                       </h1>
                       {profile.isVerified && (
@@ -97,7 +97,7 @@ export default function CreatorDetailPage() {
                         </span>
                       )}
                     </div>
-                    <p className="mt-1 text-[15px] text-ink-500">
+                    <p className="mt-1 text-[15px] text-ink-500 dark:text-ink-300">
                       {profile.followers ? `${profile.followers} followers` : ""}
                       {profile.rating
                         ? ` · ${Number(profile.rating).toFixed(1)}★ (${profile.reviewsCount ?? 0} reviews)`
@@ -113,7 +113,7 @@ export default function CreatorDetailPage() {
                       {(profile.platforms ?? []).map((p: string) => (
                         <span
                           key={p}
-                          className="inline-flex rounded-full border border-ink-200 px-3 py-1 text-[13px] font-medium text-ink-700"
+                          className="inline-flex rounded-full border border-ink-200 dark:border-ink-700 px-3 py-1 text-[13px] font-medium text-ink-700 dark:text-ink-200"
                         >
                           {p}
                         </span>
@@ -123,8 +123,8 @@ export default function CreatorDetailPage() {
                 </div>
                 {profile.bio && (
                   <div className="mt-6">
-                    <h2 className="text-lg font-bold text-ink-900">About</h2>
-                    <p className="mt-2 whitespace-pre-line text-[15px] leading-relaxed text-ink-700">
+                    <h2 className="text-lg font-bold text-ink-900 dark:text-ink-50">About</h2>
+                    <p className="mt-2 whitespace-pre-line text-[15px] leading-relaxed text-ink-700 dark:text-ink-200">
                       {profile.bio}
                     </p>
                   </div>
@@ -133,10 +133,10 @@ export default function CreatorDetailPage() {
             </div>
             <div>
               <Card className="p-6">
-                <h2 className="text-lg font-bold text-ink-900">Work with {profile.displayName}</h2>
+                <h2 className="text-lg font-bold text-ink-900 dark:text-ink-50">Work with {profile.displayName}</h2>
                 {profile.rate && (
-                  <p className="mt-2 text-[15px] text-ink-700">
-                    Typical rate: <span className="font-bold text-ink-900">\${profile.rate}</span>
+                  <p className="mt-2 text-[15px] text-ink-700 dark:text-ink-200">
+                    Typical rate: <span className="font-bold text-ink-900 dark:text-ink-50">\${profile.rate}</span>
                   </p>
                 )}
                 {user?.role === "brand" && profile.userId && (
@@ -165,8 +165,8 @@ export default function CreatorDetailPage() {
                     </Link>
                   )}
                   {!user && (
-                    <p className="text-[13px] text-ink-500">
-                      <Link href="/login" className="font-medium text-brand hover:underline">
+                    <p className="text-[13px] text-ink-500 dark:text-ink-300">
+                      <Link href="/login" className="font-medium text-brand dark:text-brand-200 hover:underline">
                         Log in
                       </Link>{" "}
                       as a brand to create a deal with this creator.

@@ -107,17 +107,17 @@ export default function AdminSettingsPage() {
       )}
       <SectionCard title="Free-plan limits" className="mt-6">
         {loading ? (
-          <p className="mt-3 text-[14px] text-ink-500">Loading…</p>
+          <p className="mt-3 text-[14px] text-ink-500 dark:text-ink-300">Loading…</p>
         ) : (
           <>
             <div className="mt-4 space-y-4">
               {settings.map((s: any) => (
                 <div key={s.key} className="flex flex-wrap items-center gap-4">
                   <div className="min-w-64 flex-1">
-                    <p className="text-[14px] font-semibold text-ink-900">
+                    <p className="text-[14px] font-semibold text-ink-900 dark:text-ink-50">
                       {s.label}
                     </p>
-                    <p className="text-[13px] text-ink-500">{s.description}</p>
+                    <p className="text-[13px] text-ink-500 dark:text-ink-300">{s.description}</p>
                   </div>
                   <input
                     type="number"
@@ -127,7 +127,7 @@ export default function AdminSettingsPage() {
                     onChange={(e) =>
                       setValues({ ...values, [s.key]: e.target.value })
                     }
-                    className="w-28 rounded-xl border border-ink-200 px-4 py-2.5 text-[14px] outline-none focus:border-brand"
+                    className="w-28 rounded-xl border border-ink-200 dark:border-ink-700 px-4 py-2.5 text-[14px] outline-none focus:border-brand"
                   />
                 </div>
               ))}
@@ -139,32 +139,32 @@ export default function AdminSettingsPage() {
         )}
       </SectionCard>
       <SectionCard title="Commission rates" className="mt-6">
-        <p className="mt-1 text-[13px] text-ink-500">
+        <p className="mt-1 text-[13px] text-ink-500 dark:text-ink-300">
           Share of each payment kept by the platform, by payee role and
           subscription tier. Brands are never charged.
         </p>
         {loading ? (
-          <p className="mt-3 text-[14px] text-ink-500">Loading…</p>
+          <p className="mt-3 text-[14px] text-ink-500 dark:text-ink-300">Loading…</p>
         ) : (
           <div className="mt-4 overflow-x-auto">
             <table className="w-full text-left text-[14px]">
               <thead>
-                <tr className="border-b border-ink-100 text-[12px] uppercase text-ink-400">
+                <tr className="border-b border-ink-100 dark:border-ink-800 text-[12px] uppercase text-ink-400 dark:text-ink-300">
                   <th className="py-3 pr-4">Role</th>
                   <th className="py-3 pr-4">Tier</th>
                   <th className="py-3 pr-4">Rate (%)</th>
                   <th className="py-3">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-ink-100">
+              <tbody className="divide-y divide-ink-100 dark:divide-ink-800">
                 {rules.map((r: any) => {
                   const isBrand = r.role === "brand";
                   return (
                     <tr key={r.id}>
-                      <td className="py-3 pr-4 capitalize text-ink-700">
+                      <td className="py-3 pr-4 capitalize text-ink-700 dark:text-ink-200">
                         {r.role}
                       </td>
-                      <td className="py-3 pr-4 capitalize text-ink-700">
+                      <td className="py-3 pr-4 capitalize text-ink-700 dark:text-ink-200">
                         {r.tier}
                       </td>
                       <td className="py-3 pr-4">
@@ -178,12 +178,12 @@ export default function AdminSettingsPage() {
                           onChange={(e) =>
                             setRates({ ...rates, [r.id]: e.target.value })
                           }
-                          className="w-28 rounded-xl border border-ink-200 px-4 py-2.5 text-[14px] outline-none focus:border-brand disabled:bg-ink-50"
+                          className="w-28 rounded-xl border border-ink-200 dark:border-ink-700 px-4 py-2.5 text-[14px] outline-none focus:border-brand disabled:bg-ink-50 dark:disabled:bg-ink-900"
                         />
                       </td>
                       <td className="py-3">
                         {isBrand ? (
-                          <span className="text-[13px] text-ink-500">
+                          <span className="text-[13px] text-ink-500 dark:text-ink-300">
                             Fixed at 0%
                           </span>
                         ) : (

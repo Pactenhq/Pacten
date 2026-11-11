@@ -31,8 +31,8 @@ export class ProfilesService {
   async updateMyProfile(userId: string, role: UserRole, data: any) {
     const allowedFields: Record<string, string[]> = {
       [UserRole.BRAND]: ['companyName', 'website', 'industry', 'description', 'logoUrl', 'location'],
-      [UserRole.CREATOR]: ['displayName', 'bio', 'avatarUrl', 'niches', 'platforms', 'followers', 'location', 'availableNow', 'rate'],
-      [UserRole.PROFESSIONAL]: ['displayName', 'title', 'bio', 'avatarUrl', 'skills', 'platforms', 'hourlyRate', 'location', 'availableNow', 'openToProjects', 'yearsExperience'],
+      [UserRole.CREATOR]: ['displayName', 'bio', 'avatarUrl', 'niches', 'languages', 'industries', 'platforms', 'followers', 'location', 'availableNow', 'rate'],
+      [UserRole.PROFESSIONAL]: ['displayName', 'title', 'bio', 'avatarUrl', 'skills', 'languages', 'industries', 'platforms', 'hourlyRate', 'location', 'availableNow', 'openToProjects', 'yearsExperience'],
     };
 
     const fields = allowedFields[role];
@@ -58,19 +58,24 @@ export class ProfilesService {
   async getPublicCreatorProfile(id: string) {
     const profile = await this.creatorRepo.findOne({
       where: { id },
-      relations: { user: true } as any,
     });
     if (!profile) throw new NotFoundException('Creator not found');
-    return profile;
+    // Public endpoint: never include the linked user row. Loading the
+    // relation exposed the user's email, name, status and account
+    // metadata to unauthenticated callers. The frontend uses only
+    // profile.userId, which stays on the profile row itself.
+    const { user: _user, ...publicProfile } = profile as any;
+    return publicProfile;
   }
 
   async getPublicProfessionalProfile(id: string) {
     const profile = await this.professionalRepo.findOne({
       where: { id },
-      relations: { user: true } as any,
     });
     if (!profile) throw new NotFoundException('Professional not found');
-    return profile;
+    // Same privacy rule as the creator endpoint: no user row.
+    const { user: _user, ...publicProfile } = profile as any;
+    return publicProfile;
   }
 
   async searchCreators(filters: { niche?: string; platform?: string; query?: string; limit?: number; offset?: number }) {

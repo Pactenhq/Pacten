@@ -8,6 +8,7 @@ import { Drawer } from "@/components/ui/Drawer";
 import { Footer } from "@/components/ui/Footer";
 import { PactenLogo } from "@/components/ui/PactenLogo";
 import { NotificationBell } from "./NotificationBell";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { Sidebar, SidebarNav } from "./Sidebar";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
@@ -55,12 +56,12 @@ export function DashboardShell({
 
   return (
     <ProtectedRoute>
-    <div className="flex min-h-screen flex-col bg-white">
-      <header className="sticky top-0 z-40 border-b border-ink-100 bg-white/95 backdrop-blur">
+    <div className="flex min-h-screen flex-col bg-white dark:bg-ink-900">
+      <header className="sticky top-0 z-40 border-b border-ink-100 dark:border-ink-800 bg-white/95 dark:bg-ink-900/95 backdrop-blur">
         <div className="mx-auto flex h-[76px] max-w-[1380px] items-center justify-between px-6 lg:px-12">
           <div className="flex items-center gap-4">
             <button
-              className="inline-flex h-10 w-10 items-center justify-center rounded-xl text-ink-700 hover:bg-ink-50 lg:hidden"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-xl text-ink-700 dark:text-ink-200 hover:bg-ink-50 dark:hover:bg-white/5 lg:hidden"
               onClick={() => setMenuOpen(true)}
               aria-label="Open dashboard menu"
             >
@@ -78,6 +79,7 @@ export function DashboardShell({
             </Link>
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
+            <ThemeToggle />
             <NotificationBell />
             <span className="hidden items-center gap-2.5 sm:flex">
               <span className="relative h-[33px] w-[33px] shrink-0 overflow-hidden rounded-full">
@@ -89,7 +91,7 @@ export function DashboardShell({
                   sizes="33px"
                 />
               </span>
-              <span className="text-[15px] font-semibold text-ink-900">
+              <span className="text-[15px] font-semibold text-ink-900 dark:text-ink-50">
                 {shownName}
               </span>
               <svg
@@ -98,7 +100,7 @@ export function DashboardShell({
                 viewBox="0 0 24 24"
                 fill="none"
                 aria-hidden
-                className="text-ink-500"
+                className="text-ink-500 dark:text-ink-300"
               >
                 <path
                   d="m6 9 6 6 6-6"
@@ -112,7 +114,7 @@ export function DashboardShell({
             <Button
               size="md"
               variant="outline"
-              className="hidden border-brand-300 text-brand hover:border-brand hover:text-brand sm:inline-flex"
+              className="hidden border-brand-300 text-brand dark:text-brand-200 hover:border-brand hover:text-brand dark:hover:text-brand-200 sm:inline-flex"
               onClick={handleLogout}
             >
               Log Out
@@ -137,7 +139,7 @@ export function DashboardShell({
         <div className="mt-6">
           <Button
             variant="outline"
-            className="w-full border-brand-300 text-brand"
+            className="w-full border-brand-300 text-brand dark:text-brand-200"
             onClick={handleLogout}
           >
             Log Out

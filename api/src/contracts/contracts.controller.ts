@@ -8,7 +8,10 @@ import {
   Request,
 } from '@nestjs/common';
 import { ContractsService } from './contracts.service';
-import { GenerateContractDto } from './dto/contracts.dto';
+import {
+  AcceptContractDto,
+  GenerateContractDto,
+} from './dto/contracts.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('contracts')
@@ -25,8 +28,15 @@ export class ContractsController {
     return this.contractsService.generateFromDeal(
       dealId,
       req.user.id,
-      dto.title,
+      dto,
     );
+  }
+
+  // Declared BEFORE @Get(':id') so 'from-deal/:dealId/prefill' is not
+  // captured as a contract id.
+  @Get('from-deal/:dealId/prefill')
+  prefillFromDeal(@Request() req: any, @Param('dealId') dealId: string) {
+    return this.contractsService.prefillFromDeal(dealId, req.user.id);
   }
 
   @Get()
@@ -40,8 +50,12 @@ export class ContractsController {
   }
 
   @Post(':id/accept')
-  accept(@Request() req: any, @Param('id') id: string) {
-    return this.contractsService.accept(id, req.user.id);
+  accept(
+    @Request() req: any,
+    @Param('id') id: string,
+    @Body() dto: AcceptContractDto,
+  ) {
+    return this.contractsService.accept(id, req.user.id, dto);
   }
 
   @Post(':id/decline')

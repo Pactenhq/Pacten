@@ -23,12 +23,12 @@ export function Button({
         size === "md" && "h-11 px-5 text-sm",
         size === "lg" && "h-[53px] px-7 text-base",
         variant === "primary" && "bg-brand text-white hover:bg-brand-dark",
-        variant === "secondary" && "bg-brand-50 text-brand hover:bg-brand-100",
+        variant === "secondary" && "bg-brand-50 dark:bg-white/10 text-brand dark:text-brand-200 hover:bg-brand-100 dark:hover:bg-brand/25",
         variant === "outline" &&
-          "border border-ink-300 bg-white text-ink-900 hover:border-ink-400 hover:bg-ink-50",
-        variant === "ghost" && "bg-transparent text-ink-700 hover:bg-ink-50",
+          "border border-ink-300 dark:border-ink-700 bg-white dark:bg-ink-900 text-ink-900 dark:text-ink-50 hover:border-ink-400 hover:bg-ink-50 dark:hover:bg-white/5",
+        variant === "ghost" && "bg-transparent text-ink-700 dark:text-ink-200 hover:bg-ink-50 dark:hover:bg-white/5",
         variant === "danger-outline" &&
-          "border border-danger bg-white text-danger hover:bg-danger-bg",
+          "border border-danger bg-white dark:bg-ink-900 text-danger dark:text-danger-bright hover:bg-danger-bg dark:hover:bg-danger/15",
         className
       )}
       {...props}

@@ -10,7 +10,7 @@ export function AuthError({ message }: { message: string | null }) {
   return (
     <div
       role="alert"
-      className="rounded-xl border border-danger/30 bg-danger-bg px-4 py-3 text-sm font-medium text-danger"
+      className="rounded-xl border border-danger/30 bg-danger-bg dark:bg-danger/15 px-4 py-3 text-sm font-medium text-danger dark:text-danger-bright"
     >
       {message}
     </div>
@@ -35,7 +35,7 @@ export function CheckEmailNotice({ email }: { email: string }) {
     <div className="flex flex-col items-start gap-4">
       <div
         role="status"
-        className="w-full rounded-xl border border-brand/25 bg-brand-50 px-4 py-3 text-sm font-medium text-ink-900"
+        className="w-full rounded-xl border border-brand/25 bg-brand-50 dark:bg-white/10 px-4 py-3 text-sm font-medium text-ink-900 dark:text-ink-50"
       >
         Account created for <span className="font-bold">{email}</span>. Please
         check your inbox and click the verification link, then log in.

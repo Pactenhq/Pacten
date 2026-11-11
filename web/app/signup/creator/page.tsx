@@ -83,23 +83,23 @@ function CreatorSignupForm() {
 
 export default function CreatorSignupPage() {
   return (
-    <main className="bg-mist/50">
+    <main className="bg-mist/50 dark:bg-ink-950/50">
       <div className="mx-auto max-w-[1380px] px-6 py-14 lg:px-12 lg:py-20">
         <Stepper steps={STEPS} activeIndex={0} />
         <div className="mt-10 flex justify-center">
           <Card className="fade-up fade-up-2 w-full max-w-[662px] p-6 shadow-pop sm:p-10">
-            <h1 className="text-3xl font-extrabold tracking-tight text-ink-900 lg:text-4xl">
+            <h1 className="text-3xl font-extrabold tracking-tight text-ink-900 dark:text-ink-50 lg:text-4xl">
               Create your account
             </h1>
-            <p className="mt-2 text-[15px] text-ink-500">
+            <p className="mt-2 text-[15px] text-ink-500 dark:text-ink-300">
               Let&apos;s start with the basics
             </p>
             <CreatorSignupForm />
-            <p className="mt-4 text-sm text-ink-500">
+            <p className="mt-4 text-sm text-ink-500 dark:text-ink-300">
               Already have an account?{" "}
               <Link
                 href="/login"
-                className="font-semibold text-brand hover:underline"
+                className="font-semibold text-brand dark:text-brand-200 hover:underline"
               >
                 Login
               </Link>

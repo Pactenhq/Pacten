@@ -143,7 +143,7 @@ export default function CreatorDashboardPage() {
         </div>
 
         <section>
-          <h2 className="text-[22px] font-extrabold text-ink-900">
+          <h2 className="text-[22px] font-extrabold text-ink-900 dark:text-ink-50">
             Recent Requests
           </h2>
           <div className="mt-4 flex flex-col gap-4">

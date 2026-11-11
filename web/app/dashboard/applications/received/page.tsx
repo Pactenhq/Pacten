@@ -97,11 +97,11 @@ export default function BrandApplicationsPage() {
         </div>
 
         <Card className="overflow-hidden">
-          <div className="border-b border-ink-100 p-6">
-            <h2 className="text-[18px] font-bold text-ink-900">Applications</h2>
+          <div className="border-b border-ink-100 dark:border-ink-800 p-6">
+            <h2 className="text-[18px] font-bold text-ink-900 dark:text-ink-50">Applications</h2>
             <div className="mt-4">
-              <label className="flex h-[50px] flex-1 items-center gap-2.5 rounded-xl border border-ink-300 px-4">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden className="text-ink-400">
+              <label className="flex h-[50px] flex-1 items-center gap-2.5 rounded-xl border border-ink-300 dark:border-ink-700 px-4">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden className="text-ink-400 dark:text-ink-300">
                   <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
                   <path d="m20 20-3.5-3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 </svg>
@@ -109,36 +109,36 @@ export default function BrandApplicationsPage() {
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Search applications..."
-                  className="h-full flex-1 bg-transparent text-[15px] text-ink-900 placeholder:text-ink-400 focus:outline-none"
+                  className="h-full flex-1 bg-transparent text-[15px] text-ink-900 dark:text-ink-50 placeholder:text-ink-400 dark:placeholder:text-ink-300 focus:outline-none"
                 />
               </label>
             </div>
           </div>
           {loading ? (
-            <p className="p-6 text-ink-500">Loading applications...</p>
+            <p className="p-6 text-ink-500 dark:text-ink-300">Loading applications...</p>
           ) : filtered.length === 0 ? (
-            <p className="p-6 text-ink-500">
+            <p className="p-6 text-ink-500 dark:text-ink-300">
               No applications yet. Share your campaigns to receive applications.
             </p>
           ) : (
-            <ul className="divide-y divide-ink-100">
+            <ul className="divide-y divide-ink-100 dark:divide-ink-800">
               {filtered.map((a: any) => (
                 <li key={a.id} className="p-6">
                   <div className="flex flex-wrap items-start justify-between gap-4">
                     <div>
-                      <p className="text-[15px] font-bold text-ink-900">
+                      <p className="text-[15px] font-bold text-ink-900 dark:text-ink-50">
                         {a.creator?.email ?? "Creator"}
                       </p>
-                      <p className="mt-1 text-[13px] text-ink-500">
+                      <p className="mt-1 text-[13px] text-ink-500 dark:text-ink-300">
                         {a.campaign?.title ?? "Campaign"}
                       </p>
                       {a.coverLetter && (
-                        <p className="mt-2 max-w-xl text-[14px] text-ink-700">
+                        <p className="mt-2 max-w-xl text-[14px] text-ink-700 dark:text-ink-200">
                           {a.coverLetter}
                         </p>
                       )}
                       {a.proposedBudget && (
-                        <p className="mt-1 text-[14px] font-semibold text-ink-900">
+                        <p className="mt-1 text-[14px] font-semibold text-ink-900 dark:text-ink-50">
                           Proposed: {a.proposedBudget}
                         </p>
                       )}

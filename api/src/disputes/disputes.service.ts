@@ -14,6 +14,8 @@ import {
 import { Deal } from '../deals/deal.entity';
 import { User, UserRole } from '../users/user.entity';
 import { EmailsService } from '../emails/emails.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationType } from '../notifications/notification.entity';
 
 @Injectable()
 export class DisputesService {
@@ -25,6 +27,7 @@ export class DisputesService {
     @InjectRepository(User)
     private readonly usersRepo: Repository<User>,
     private readonly emails: EmailsService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   private async getDealOrThrow(dealId: string): Promise<Deal> {
@@ -79,6 +82,15 @@ export class DisputesService {
     );
     const filer = await this.usersRepo.findOne({ where: { id: userId } });
     if (filer) await this.emails.sendDisputeFiled(filer.email, dispute.id, dealId);
+    // In-app notification for the filer (same trigger as the email).
+    await this.notifications.create({
+      userId,
+      type: NotificationType.DISPUTE_FILED,
+      title: 'Dispute filed',
+      body: `Your dispute for deal ${dealId.slice(0, 8)} was filed and is now open.`,
+      link: `/dashboard/disputes/${dispute.id}`,
+      relatedId: dispute.id,
+    });
     return dispute;
   }
 
@@ -144,6 +156,15 @@ export class DisputesService {
         outcome === 'resolved',
       );
     }
+    // In-app notification for the filer (same trigger as the email).
+    await this.notifications.create({
+      userId: dispute.filedById,
+      type: NotificationType.DISPUTE_RESOLVED,
+      title: outcome === 'resolved' ? 'Dispute resolved' : 'Dispute closed',
+      body: `Your dispute (ref ${dispute.id.slice(0, 8)}) has been ${outcome === 'resolved' ? 'resolved' : 'closed'} by our team.`,
+      link: `/dashboard/disputes/${dispute.id}`,
+      relatedId: dispute.id,
+    });
     return dispute;
   }
 }

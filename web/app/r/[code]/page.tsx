@@ -20,7 +20,7 @@ export default function ReferralRedirectPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center">
-      <p className="text-[14px] text-ink-500">Taking you to Pacten…</p>
+      <p className="text-[14px] text-ink-500 dark:text-ink-300">Taking you to Pacten…</p>
     </div>
   );
 }

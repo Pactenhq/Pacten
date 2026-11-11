@@ -43,18 +43,18 @@ export function Drawer({
       />
       <aside
         className={cn(
-          "absolute top-0 right-0 flex h-full w-[340px] max-w-[92vw] flex-col bg-white shadow-pop transition-transform duration-300",
+          "absolute top-0 right-0 flex h-full w-[340px] max-w-[92vw] flex-col bg-white dark:bg-ink-900 shadow-pop transition-transform duration-300",
           open ? "translate-x-0" : "translate-x-full"
         )}
         role="dialog"
         aria-label={title}
       >
-        <div className="flex items-center justify-between border-b border-ink-100 px-5 py-4">
-          <p className="text-lg font-bold text-ink-900">{title}</p>
+        <div className="flex items-center justify-between border-b border-ink-100 dark:border-ink-800 px-5 py-4">
+          <p className="text-lg font-bold text-ink-900 dark:text-ink-50">{title}</p>
           <button
             onClick={onClose}
             aria-label="Close filters"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full text-ink-500 hover:bg-ink-50 hover:text-ink-900"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full text-ink-500 dark:text-ink-300 hover:bg-ink-50 dark:hover:bg-white/5 hover:text-ink-900 dark:hover:text-ink-50"
           >
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden>
               <path

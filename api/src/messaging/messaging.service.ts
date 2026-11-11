@@ -6,12 +6,14 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { Conversation } from './conversation.entity';
 import { Message } from './message.entity';
 import { CreateConversationDto, SendMessageDto } from './dto/messaging.dto';
 import { PlanLimitsService } from '../common/plan-limits/plan-limits.service';
 import { EmailsService } from '../emails/emails.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationType } from '../notifications/notification.entity';
 
 @Injectable()
 export class MessagingService {
@@ -25,6 +27,7 @@ export class MessagingService {
     private messagesRepo: Repository<Message>,
     private planLimits: PlanLimitsService,
     private emails: EmailsService,
+    private notifications: NotificationsService,
   ) {}
 
   async createConversation(
@@ -70,6 +73,7 @@ export class MessagingService {
         where: {
           conversationId: conv.id,
           isRead: false,
+          senderId: Not(userId),
         },
       });
       (conv as any).lastMessage = lastMessage;
@@ -101,6 +105,7 @@ export class MessagingService {
   async getMessages(
     conversationId: string,
     userId: string,
+    markRead = true,
   ): Promise<Message[]> {
     await this.findOne(conversationId, userId);
 
@@ -109,11 +114,17 @@ export class MessagingService {
       order: { createdAt: 'ASC' },
     });
 
-    // Mark messages as read
-    await this.messagesRepo.update(
-      { conversationId, isRead: false },
-      { isRead: true },
-    );
+    // Mark messages as read — only when the caller actually opened the
+    // thread (markRead=false is the list-page preview prefetch: merely
+    // visiting /dashboard/messages must not clear the unread badge), and
+    // only the OTHER party's messages (fetching the thread must not claim
+    // the other side read messages you sent).
+    if (markRead) {
+      await this.messagesRepo.update(
+        { conversationId, isRead: false, senderId: Not(userId) },
+        { isRead: true },
+      );
+    }
 
     // Frontend har message ko isMine se pehchanta hai (apna = right,
     // doosre ka = left). Ye field pehle missing tha — is liye saare
@@ -148,8 +159,9 @@ export class MessagingService {
 
     const conversation = await this.findOne(conversationId, userId);
 
-    // Free-plan cap: monthly message allowance for free users.
-    await this.planLimits.assertCanSendMessage(userId);
+    // Free-plan cap: new conversations per month for free users;
+    // replies inside an existing conversation are unlimited.
+    await this.planLimits.assertCanSendMessage(userId, conversationId);
 
     const message = this.messagesRepo.create({
       conversationId,
@@ -190,6 +202,38 @@ export class MessagingService {
       }
     } catch {
       // Email is best-effort.
+    }
+
+    // In-app notification for the other participant (same trigger as
+    // the email). The realtime feed stays the primary channel; the
+    // notification is the persistent record the bell shows.
+    const recipientUser =
+      conversation.participant1Id === userId
+        ? conversation.participant2
+        : conversation.participant1;
+    const senderUser =
+      conversation.participant1Id === userId
+        ? conversation.participant1
+        : conversation.participant2;
+    if (recipientUser?.id && recipientUser.id !== userId) {
+      const senderName =
+        [senderUser?.firstName, senderUser?.lastName]
+          .filter(Boolean)
+          .join(' ') ||
+        senderUser?.email ||
+        'Someone';
+      const excerpt =
+        dto.content.length > 120
+          ? `${dto.content.slice(0, 120)}…`
+          : dto.content;
+      await this.notifications.create({
+        userId: recipientUser.id,
+        type: NotificationType.NEW_MESSAGE,
+        title: `New message from ${senderName}`,
+        body: excerpt,
+        link: `/dashboard/messages/${conversationId}`,
+        relatedId: saved.id,
+      });
     }
 
     return saved;

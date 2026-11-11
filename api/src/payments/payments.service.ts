@@ -16,6 +16,8 @@ import { PlatformCommission } from './platform-commission.entity';
 import { Deal, DealStatus } from '../deals/deal.entity';
 import { User, UserRole } from '../users/user.entity';
 import { EmailsService } from '../emails/emails.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationType } from '../notifications/notification.entity';
 import {
   Subscription,
   SubscriptionStatus,
@@ -70,6 +72,7 @@ export class PaymentsService implements OnModuleInit {
     private emails: EmailsService,
     private referrals: ReferralsService,
     private config: ConfigService,
+    private notifications: NotificationsService,
   ) {}
 
   async onModuleInit() {
@@ -406,6 +409,18 @@ export class PaymentsService implements OnModuleInit {
     } catch {
       // Email is best-effort.
     }
+
+    // In-app notification for the payer (same trigger as the email).
+    // processPaymentSuccess is idempotent (early return above when
+    // already SUCCEEDED), so this fires exactly once per payment.
+    await this.notifications.create({
+      userId: payment.payerId,
+      type: NotificationType.PAYMENT_RECEIVED,
+      title: 'Payment received',
+      body: `A payment of $${(payment.amountCents / 100).toFixed(2)} for "${deal?.title || 'your deal'}" was received via Stripe.`,
+      link: `/dashboard/deals/${payment.dealId}`,
+      relatedId: payment.id,
+    });
 
     return saved;
   }

@@ -219,13 +219,41 @@ export const api = {
   createConversation: (d: Record<string, unknown>) =>
     apiFetch<any>("/conversations", { method: "POST", body: d, auth: true }),
 
-  conversationMessages: (id: string) =>
-    apiFetch<any[]>(`/conversations/${id}/messages`, { auth: true }),
+  conversationMessages: (id: string, opts?: { markRead?: boolean }) =>
+    apiFetch<any[]>(
+      `/conversations/${id}/messages${opts?.markRead === false ? '?markRead=false' : ''}`,
+      { auth: true },
+    ),
 
   sendMessage: (id: string, content: string) =>
     apiFetch<any>(`/conversations/${id}/messages`, {
       method: "POST",
       body: { content },
+      auth: true,
+    }),
+
+  // Notifications (in-app bell feed — real rows, no mock data)
+  notifications: (limit = 20, offset = 0) =>
+    apiFetch<{
+      items: any[];
+      total: number;
+      unreadCount: number;
+    }>(`/notifications/me?limit=${limit}&offset=${offset}`, { auth: true }),
+
+  notificationUnreadCount: () =>
+    apiFetch<{ unreadCount: number }>("/notifications/me/unread-count", {
+      auth: true,
+    }),
+
+  notificationMarkRead: (id: string) =>
+    apiFetch<any>(`/notifications/me/${id}/read`, {
+      method: "PATCH",
+      auth: true,
+    }),
+
+  notificationMarkAllRead: () =>
+    apiFetch<any>("/notifications/me/read-all", {
+      method: "PATCH",
       auth: true,
     }),
 
@@ -260,16 +288,26 @@ export const api = {
   contractDetail: (id: string) =>
     apiFetch<any>(`/contracts/${id}`, { auth: true }),
 
-  generateContract: (dealId: string, title?: string) =>
+  contractPrefill: (dealId: string) =>
+    apiFetch<any>(`/contracts/from-deal/${dealId}/prefill`, { auth: true }),
+
+  generateContract: (
+    dealId: string,
+    opts?: { title?: string; template?: "simple" | "standard"; fieldValues?: Record<string, string> } | string,
+  ) =>
     apiFetch<any>(`/contracts/from-deal/${dealId}`, {
       method: "POST",
-      body: title ? { title } : {},
+      body: typeof opts === "string" ? { title: opts } : (opts ?? {}),
       auth: true,
     }),
 
-  acceptContract: (id: string) =>
+  acceptContract: (
+    id: string,
+    opts?: { signatoryName?: string; signatoryTitle?: string },
+  ) =>
     apiFetch<any>(`/contracts/${id}/accept`, {
       method: "POST",
+      body: opts ?? {},
       auth: true,
     }),
 
@@ -379,6 +417,16 @@ export const api = {
       body: { approved, notes },
       auth: true,
     }),
+
+  // Stripe Connect (M5): onboarding + status for the caller's own account.
+  connectOnboarding: (country?: string) =>
+    apiFetch<any>("/connect/onboarding", {
+      method: "POST",
+      body: country ? { country } : {},
+      auth: true,
+    }),
+
+  connectStatus: () => apiFetch<any>("/connect/status", { auth: true }),
 
   // Disputes (M5)
   fileDispute: (dealId: string, reason: string, description: string) =>

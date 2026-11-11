@@ -34,6 +34,12 @@ export class CreatorProfile {
   niches: string[];
 
   @Column('text', { array: true, default: '{}' })
+  languages: string[];
+
+  @Column('text', { array: true, default: '{}' })
+  industries: string[];
+
+  @Column('text', { array: true, default: '{}' })
   platforms: string[];
 
   @Column({ nullable: true })

@@ -82,12 +82,12 @@ export default function AdminCampaignsPage() {
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && load()}
             placeholder="Search title or description"
-            className="w-64 rounded-xl border border-ink-200 px-4 py-2.5 text-[14px] outline-none focus:border-brand"
+            className="w-64 rounded-xl border border-ink-200 dark:border-ink-700 px-4 py-2.5 text-[14px] outline-none focus:border-brand"
           />
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="rounded-xl border border-ink-200 bg-white px-4 py-2.5 text-[14px]"
+            className="rounded-xl border border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900 px-4 py-2.5 text-[14px]"
           >
             <option value="">All statuses</option>
             {STATUSES.map((s) => (
@@ -104,14 +104,14 @@ export default function AdminCampaignsPage() {
           <p className="mb-4 text-[14px] font-medium text-red-700">{error}</p>
         )}
         {loading ? (
-          <p className="text-[14px] text-ink-500">Loading…</p>
+          <p className="text-[14px] text-ink-500 dark:text-ink-300">Loading…</p>
         ) : campaigns.length === 0 ? (
-          <p className="text-[14px] text-ink-500">No campaigns found.</p>
+          <p className="text-[14px] text-ink-500 dark:text-ink-300">No campaigns found.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-[14px]">
               <thead>
-                <tr className="border-b border-ink-100 text-[12px] uppercase text-ink-400">
+                <tr className="border-b border-ink-100 dark:border-ink-800 text-[12px] uppercase text-ink-400 dark:text-ink-300">
                   <th className="py-3 pr-4">Title</th>
                   <th className="py-3 pr-4">Brand</th>
                   <th className="py-3 pr-4">Status</th>
@@ -120,13 +120,13 @@ export default function AdminCampaignsPage() {
                   <th className="py-3">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-ink-100">
+              <tbody className="divide-y divide-ink-100 dark:divide-ink-800">
                 {campaigns.map((c: any) => (
                   <tr key={c.id}>
-                    <td className="py-3 pr-4 font-medium text-ink-900">
+                    <td className="py-3 pr-4 font-medium text-ink-900 dark:text-ink-50">
                       {c.title}
                     </td>
-                    <td className="py-3 pr-4 text-ink-700">
+                    <td className="py-3 pr-4 text-ink-700 dark:text-ink-200">
                       {c.brand?.email || "–"}
                     </td>
                     <td className="py-3 pr-4">
@@ -136,7 +136,7 @@ export default function AdminCampaignsPage() {
                         onChange={(e) =>
                           setCampaignStatus(c.id, e.target.value)
                         }
-                        className="rounded-xl border border-ink-200 bg-white px-3 py-2 text-[14px] capitalize"
+                        className="rounded-xl border border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900 px-3 py-2 text-[14px] capitalize"
                       >
                         {STATUSES.map((s) => (
                           <option key={s} value={s}>
@@ -145,10 +145,10 @@ export default function AdminCampaignsPage() {
                         ))}
                       </select>
                     </td>
-                    <td className="py-3 pr-4 text-ink-700">
+                    <td className="py-3 pr-4 text-ink-700 dark:text-ink-200">
                       {c.applicationCount ?? 0}
                     </td>
-                    <td className="py-3 pr-4 text-ink-700">
+                    <td className="py-3 pr-4 text-ink-700 dark:text-ink-200">
                       {new Date(c.createdAt).toLocaleDateString("en-GB")}
                     </td>
                     <td className="py-3">

@@ -45,7 +45,7 @@ export default function AdminLayout({
   if (loading || !user || user.role !== "admin") {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-[14px] text-ink-500">
+        <p className="text-[14px] text-ink-500 dark:text-ink-300">
           {user && user.role !== "admin"
             ? "This area is for platform admins — taking you to your dashboard…"
             : "Checking access…"}

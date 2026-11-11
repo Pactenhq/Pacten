@@ -51,15 +51,20 @@ export default function AdminDisputesPage() {
         title="Disputes"
         subtitle="Review and resolve disputes filed on deals."
       />
-      <div className="mt-4 flex gap-2">
+      {/* scroll-mt: the dashboard header is sticky (76px). Controls
+          scrolled into view must stop below it instead of sliding
+          underneath it where they cannot be clicked. flex-wrap: the
+          five filter pills are wider than a phone screen — they wrap
+          instead of overflowing off the right edge. */}
+      <div className="mt-4 flex flex-wrap gap-2">
         {["", "open", "under_review", "resolved", "rejected"].map((f) => (
           <button
             key={f || "all"}
             onClick={() => setFilter(f)}
-            className={`rounded-full px-4 py-2 text-[13px] font-semibold capitalize ${
+            className={`scroll-mt-[92px] rounded-full px-4 py-2 text-[13px] font-semibold capitalize ${
               filter === f
                 ? "bg-brand text-white"
-                : "bg-white text-ink-600 border border-ink-200"
+                : "bg-white dark:bg-ink-900 text-ink-600 dark:text-ink-300 border border-ink-200 dark:border-ink-700"
             }`}
           >
             {f === "" ? "All" : f.replace(/_/g, " ")}
@@ -71,32 +76,32 @@ export default function AdminDisputesPage() {
       )}
       <Card className="mt-6 p-6">
         {loading ? (
-          <p className="text-[14px] text-ink-500">Loading…</p>
+          <p className="text-[14px] text-ink-500 dark:text-ink-300">Loading…</p>
         ) : disputes.length === 0 ? (
-          <p className="text-[14px] text-ink-500">No disputes in this state.</p>
+          <p className="text-[14px] text-ink-500 dark:text-ink-300">No disputes in this state.</p>
         ) : (
-          <ul className="divide-y divide-ink-100">
+          <ul className="divide-y divide-ink-100 dark:divide-ink-800">
             {disputes.map((d: any) => (
-              <li key={d.id} className="py-4">
+              <li key={d.id} className="scroll-mt-[92px] py-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <p className="text-[15px] font-bold capitalize text-ink-900">
+                    <p className="text-[15px] font-bold capitalize text-ink-900 dark:text-ink-50">
                       {d.reason.replace(/_/g, " ")}
                     </p>
-                    <p className="mt-1 text-[13px] text-ink-500">
+                    <p className="mt-1 text-[13px] text-ink-500 dark:text-ink-300">
                       Filed {new Date(d.createdAt).toLocaleDateString()} · Deal{" "}
                       {d.dealId.slice(0, 8)}
                     </p>
-                    <p className="mt-2 max-w-2xl text-[14px] text-ink-700">
+                    <p className="mt-2 max-w-2xl text-[14px] text-ink-700 dark:text-ink-200">
                       {d.description}
                     </p>
                   </div>
-                  <span className="rounded-full bg-ink-100 px-3 py-1 text-[12px] font-semibold capitalize text-ink-700">
+                  <span className="rounded-full bg-ink-100 dark:bg-ink-800 px-3 py-1 text-[12px] font-semibold capitalize text-ink-700 dark:text-ink-200">
                     {d.status.replace(/_/g, " ")}
                   </span>
                 </div>
                 {d.resolution && (
-                  <p className="mt-2 rounded-xl bg-brand-50/60 p-3 text-[14px] text-ink-900">
+                  <p className="mt-2 rounded-xl bg-brand-50/60 dark:bg-white/10 p-3 text-[14px] text-ink-900 dark:text-ink-50">
                     Resolution: {d.resolution}
                   </p>
                 )}
@@ -110,7 +115,7 @@ export default function AdminDisputesPage() {
                           [d.id]: e.target.value as "resolved" | "rejected",
                         })
                       }
-                      className="rounded-xl border border-ink-200 bg-white px-4 py-2 text-[14px]"
+                      className="rounded-xl border border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900 px-4 py-2 text-[14px]"
                     >
                       <option value="resolved">Resolved</option>
                       <option value="rejected">Rejected</option>
@@ -121,7 +126,7 @@ export default function AdminDisputesPage() {
                         setResolution({ ...resolution, [d.id]: e.target.value })
                       }
                       placeholder="Resolution notes"
-                      className="min-w-[200px] flex-1 rounded-xl border border-ink-200 px-4 py-2 text-[14px] outline-none focus:border-brand"
+                      className="min-w-[200px] flex-1 rounded-xl border border-ink-200 dark:border-ink-700 px-4 py-2 text-[14px] outline-none focus:border-brand"
                     />
                     <Button
                       size="sm"

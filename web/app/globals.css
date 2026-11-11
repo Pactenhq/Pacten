@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Dark mode is class-based: the `dark` class on <html> (set by the
+ * blocking theme script in app/layout.tsx, toggled by ThemeToggle).
+ * Verified against Tailwind v4.3.3's @custom-variant parser. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /*
  * Pacten design tokens.
  * Geometry, section order, and copy come from the Figma file
@@ -27,6 +32,7 @@
   /* Neutrals */
   --color-ink-950: #0b1220;
   --color-ink-900: #101828;
+  --color-ink-800: #1d2939;
   --color-ink-700: #344054;
   --color-ink-500: #667085;
   --color-ink-400: #98a2b3;
@@ -38,10 +44,13 @@
   /* Status */
   --color-success: #12805c;
   --color-success-bg: #e7f6ef;
+  --color-success-bright: #34d399;
   --color-warning: #b54708;
   --color-warning-bg: #fef3e6;
+  --color-warning-bright: #fbbf24;
   --color-danger: #d92d20;
   --color-danger-bg: #feeeea;
+  --color-danger-bright: #f87171;
 
   /* Radii */
   --radius-sm: 8px;
@@ -58,11 +67,25 @@
 
 html {
   scroll-behavior: smooth;
+  /* Both sticky headers (public nav 72px, dashboard shell 76px) overlay
+     the top of the viewport when content scrolls beneath them. Without
+     scroll padding, scroll-into-view (and anchor jumps) can park a
+     control under the header where it cannot be clicked. */
+  scroll-padding-top: 92px;
+}
+
+/* Dark theme: native form controls, scrollbars and autofill follow it. */
+html.dark {
+  color-scheme: dark;
 }
 
 body {
-  background: #ffffff;
-  color: var(--color-ink-900);
+  /* NOTE: no background/color here on purpose. This rule is unlayered,
+     and unlayered author CSS beats every @layer rule — including the
+     Tailwind utilities — so a background/color here would defeat the
+     body's own dark:bg-ink-950 / dark:text-ink-50 classes (that was the
+     round-1 failure: body stayed white in dark mode). The <body>
+     className in app/layout.tsx owns the colors instead. */
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -80,6 +103,12 @@ body {
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
+}
+/* Dark: lighten both stops so the gradient stays readable on ink-950. */
+html.dark .text-gradient-blue {
+  background: linear-gradient(90deg, #60a5fa 0%, #93c5fd 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
 }
 
 /* ------------------------- animation system ------------------------- */
@@ -257,6 +286,10 @@ body {
   backdrop-filter: blur(12px);
   background: rgba(255, 255, 255, 0.92);
 }
+html.dark .navbar-scrolled {
+  box-shadow: 0 4px 24px rgb(0 0 0 / 0.4);
+  background: rgba(11, 18, 32, 0.92);
+}
 
 /* Footer link hover slide */
 .footer-link {
@@ -287,6 +320,9 @@ body {
   background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
   background-size: 800px 100%;
   animation: shimmer 1.5s infinite;
+}
+html.dark .animate-shimmer {
+  background: linear-gradient(90deg, #1d2939 25%, #101828 50%, #1d2939 75%);
 }
 
 /* Bounce-in for badges */
@@ -337,5 +373,28 @@ body {
     opacity: 1 !important;
     transform: none !important;
     transition: none !important;
+  }
+}
+
+/* Contract download/print (M5): printing a contract detail page prints
+ * only the agreement itself, so either party can save it as PDF. */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #agreement-print-area,
+  #agreement-print-area * {
+    visibility: visible;
+  }
+  #agreement-print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+  #agreement-print-area > div {
+    border: 0 !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
   }
 }

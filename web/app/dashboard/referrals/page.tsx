@@ -40,16 +40,24 @@ export default function ReferralsDashboardPage() {
   const [amount, setAmount] = useState("");
   const [requesting, setRequesting] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  // Stripe Connect (M5): onboarding state for the caller's own account.
+  const [connect, setConnect] = useState<any>(null);
+  const [connectBusy, setConnectBusy] = useState(false);
+  const [connectMsg, setConnectMsg] = useState<string | null>(null);
 
   const load = () => {
     setLoading(true);
     Promise.all([
       api.referralDashboard().catch(() => null),
       api.myReferralPayouts().catch(() => []),
+      // Returning from Stripe-hosted onboarding lands back here
+      // (?connect=return / ?connect=refresh) — status is re-read on mount.
+      api.connectStatus().catch(() => null),
     ])
-      .then(([d, p]) => {
+      .then(([d, p, c]) => {
         setDash(d);
         setPayouts(Array.isArray(p) ? p : []);
+        setConnect(c);
       })
       .finally(() => setLoading(false));
   };
@@ -74,6 +82,38 @@ export default function ReferralsDashboardPage() {
     } finally {
       setRequesting(false);
     }
+  };
+
+  // Stripe Connect onboarding: opens the Stripe-hosted flow. In demo mode
+  // the API reports demoMode and there is no link to open.
+  const connectStart = async () => {
+    setConnectBusy(true);
+    setConnectMsg(null);
+    try {
+      const res = await api.connectOnboarding();
+      if (res?.url) {
+        window.location.href = res.url;
+      } else {
+        setConnectMsg(
+          "Stripe Connect is available once live Stripe keys are configured."
+        );
+      }
+    } catch (e: any) {
+      setConnectMsg(e?.message || "Could not start Stripe onboarding.");
+    } finally {
+      setConnectBusy(false);
+    }
+  };
+
+  const connectStatusText = () => {
+    if (!connect) return "Checking Stripe Connect status…";
+    if (connect.demoMode)
+      return "Stripe Connect is available once live Stripe keys are configured. Payouts are currently recorded manually by an admin.";
+    if (connect.connected)
+      return "Connected — approved payouts will transfer to your connected Stripe account.";
+    if (connect.accountId)
+      return "Onboarding started but not finished — continue to enable payouts.";
+    return "Connect your Stripe account to receive payouts by transfer.";
   };
 
   const info = {
@@ -189,7 +229,7 @@ export default function ReferralsDashboardPage() {
 
         <section>
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-[22px] font-extrabold text-ink-900">
+            <h2 className="text-[22px] font-extrabold text-ink-900 dark:text-ink-50">
               Recent Referrals
             </h2>
             <ViewAllPill />
@@ -198,10 +238,10 @@ export default function ReferralsDashboardPage() {
         </section>
 
         <section>
-          <h2 className="text-[22px] font-extrabold text-ink-900">
+          <h2 className="text-[22px] font-extrabold text-ink-900 dark:text-ink-50">
             Referral Analytics
           </h2>
-          <p className="mt-1 text-[15px] text-ink-500">
+          <p className="mt-1 text-[15px] text-ink-500 dark:text-ink-300">
             Track your referral performance
           </p>
           <div className="mt-4">
@@ -211,7 +251,7 @@ export default function ReferralsDashboardPage() {
 
         <section>
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-[22px] font-extrabold text-ink-900">Rewards</h2>
+            <h2 className="text-[22px] font-extrabold text-ink-900 dark:text-ink-50">Rewards</h2>
             <ViewAllPill />
           </div>
           <RewardsCards />
@@ -220,10 +260,10 @@ export default function ReferralsDashboardPage() {
         {/* Cash payouts — requested by the user, approved manually by admin (Sania). */}
         <section>
           <div className="mb-4">
-            <h2 className="text-[22px] font-extrabold text-ink-900">
+            <h2 className="text-[22px] font-extrabold text-ink-900 dark:text-ink-50">
               Cash Payouts
             </h2>
-            <p className="mt-1 text-[15px] text-ink-500">
+            <p className="mt-1 text-[15px] text-ink-500 dark:text-ink-300">
               Request a payout of your available balance. An admin approves
               each request manually. Minimum withdrawal is{" "}
               {fmt$(dash?.minWithdrawalCents ?? 2500)} — payouts are processed
@@ -233,16 +273,16 @@ export default function ReferralsDashboardPage() {
           <Card className="p-6">
             <div className="flex flex-wrap items-end gap-4">
               <div>
-                <p className="text-[13px] font-semibold text-ink-500">
+                <p className="text-[13px] font-semibold text-ink-500 dark:text-ink-300">
                   Available balance
                 </p>
-                <p className="text-[28px] font-extrabold text-ink-900">
+                <p className="text-[28px] font-extrabold text-ink-900 dark:text-ink-50">
                   {fmt$(s.availableCents ?? 0)}
                 </p>
               </div>
               <div className="ml-auto flex items-end gap-3">
                 <label className="block">
-                  <span className="mb-1 block text-[13px] font-semibold text-ink-500">
+                  <span className="mb-1 block text-[13px] font-semibold text-ink-500 dark:text-ink-300">
                     Amount (USD)
                   </span>
                   <input
@@ -252,7 +292,7 @@ export default function ReferralsDashboardPage() {
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                     placeholder="25.00"
-                    className="w-36 rounded-xl border border-ink-200 px-4 py-2.5 text-[14px] outline-none focus:border-brand"
+                    className="w-36 rounded-xl border border-ink-200 dark:border-ink-700 px-4 py-2.5 text-[14px] outline-none focus:border-brand"
                   />
                 </label>
                 <Button
@@ -265,27 +305,27 @@ export default function ReferralsDashboardPage() {
               </div>
             </div>
             {msg && (
-              <p className="mt-3 text-[14px] font-medium text-ink-700">{msg}</p>
+              <p className="mt-3 text-[14px] font-medium text-ink-700 dark:text-ink-200">{msg}</p>
             )}
             <div className="mt-6">
-              <p className="mb-3 text-[15px] font-bold text-ink-900">
+              <p className="mb-3 text-[15px] font-bold text-ink-900 dark:text-ink-50">
                 Payout history
               </p>
               {payouts.length === 0 ? (
-                <p className="text-[14px] text-ink-500">
+                <p className="text-[14px] text-ink-500 dark:text-ink-300">
                   No payout requests yet.
                 </p>
               ) : (
-                <ul className="divide-y divide-ink-100">
+                <ul className="divide-y divide-ink-100 dark:divide-ink-800">
                   {payouts.map((p: any) => (
                     <li
                       key={p.id}
                       className="flex items-center justify-between py-3 text-[14px]"
                     >
-                      <span className="font-semibold text-ink-900">
+                      <span className="font-semibold text-ink-900 dark:text-ink-50">
                         {fmt$(p.amountCents)}
                       </span>
-                      <span className="text-ink-500">
+                      <span className="text-ink-500 dark:text-ink-300">
                         {fmtDate(p.requestedAt)}
                       </span>
                       <span
@@ -295,7 +335,7 @@ export default function ReferralsDashboardPage() {
                             : p.status === "rejected"
                               ? "bg-red-100 text-red-800"
                               : p.status === "approved"
-                                ? "bg-brand-50 text-brand"
+                                ? "bg-brand-50 dark:bg-white/10 text-brand dark:text-brand-200"
                                 : "bg-amber-100 text-amber-800"
                         }`}
                       >
@@ -307,12 +347,48 @@ export default function ReferralsDashboardPage() {
               )}
             </div>
           </Card>
+
+          {/* Stripe Connect — payouts by transfer once the account is
+              connected; otherwise payouts stay manual/record-only. */}
+          <Card className="mt-6 p-6">
+            <p className="text-[15px] font-bold text-ink-900 dark:text-ink-50">
+              Stripe Connect
+            </p>
+            <p className="mt-1 text-[14px] text-ink-500 dark:text-ink-300">
+              {connectStatusText()}
+            </p>
+            {connect?.accountId && (
+              <p className="mt-2 text-[13px] text-ink-500 dark:text-ink-300">
+                Connected account: •••{String(connect.accountId).slice(-4)}
+              </p>
+            )}
+            {connectMsg && (
+              <p className="mt-2 text-[14px] font-medium text-ink-700 dark:text-ink-200">
+                {connectMsg}
+              </p>
+            )}
+            {!connect?.connected && !connect?.demoMode && (
+              <div className="mt-4">
+                <Button
+                  size="md"
+                  onClick={connectStart}
+                  disabled={connectBusy || loading}
+                >
+                  {connectBusy
+                    ? "Starting…"
+                    : connect?.accountId
+                      ? "Continue onboarding"
+                      : "Connect Stripe account"}
+                </Button>
+              </div>
+            )}
+          </Card>
         </section>
 
         <div className="grid gap-8 lg:grid-cols-2">
           <section>
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-[22px] font-extrabold text-ink-900">
+              <h2 className="text-[22px] font-extrabold text-ink-900 dark:text-ink-50">
                 Commission History
               </h2>
               <ViewAllPill />
@@ -321,7 +397,7 @@ export default function ReferralsDashboardPage() {
           </section>
           <section>
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-[22px] font-extrabold text-ink-900">
+              <h2 className="text-[22px] font-extrabold text-ink-900 dark:text-ink-50">
                 Discount History
               </h2>
               <ViewAllPill />

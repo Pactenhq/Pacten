@@ -17,6 +17,8 @@ import { StripeService } from '../payments/stripe.service';
 import { ReferralsService } from '../referrals/referrals.service';
 import { User } from '../users/user.entity';
 import { EmailsService } from '../emails/emails.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationType } from '../notifications/notification.entity';
 
 // Seed plans — the client's FINAL pricing (Oct 2026). Configurable via
 // the subscription_plans table afterwards. Tiers: brands free/pro/business;
@@ -129,6 +131,7 @@ export class SubscriptionsService implements OnModuleInit {
     private config: ConfigService,
     private referrals: ReferralsService,
     private emails: EmailsService,
+    private notifications: NotificationsService,
   ) {}
 
   async onModuleInit() {
@@ -296,6 +299,14 @@ export class SubscriptionsService implements OnModuleInit {
     stripeSubscriptionId: string | null,
   ): Promise<Subscription> {
     let sub = await this.subsRepo.findOne({ where: { userId } });
+    // Capture the pre-activation state: activate() is an upsert called
+    // from checkout, demo sync and the live return-path sync, so the
+    // "subscription created" notification must fire only on a genuine
+    // activation (new row, plan change, or re-activation) — never on an
+    // idempotent re-sync of the same active plan.
+    const wasNew = !sub;
+    const prevPlanId = sub?.planId;
+    const prevStatus = sub?.status;
     if (!sub) {
       sub = this.subsRepo.create({ userId, planId });
     }
@@ -306,7 +317,23 @@ export class SubscriptionsService implements OnModuleInit {
     const periodEnd = new Date();
     periodEnd.setMonth(periodEnd.getMonth() + 1);
     sub.currentPeriodEnd = periodEnd;
-    return this.subsRepo.save(sub);
+    const saved = await this.subsRepo.save(sub);
+    if (
+      wasNew ||
+      prevPlanId !== planId ||
+      prevStatus !== SubscriptionStatus.ACTIVE
+    ) {
+      const plan = await this.plansRepo.findOne({ where: { id: planId } });
+      await this.notifications.create({
+        userId,
+        type: NotificationType.SUBSCRIPTION_CREATED,
+        title: 'Subscription activated',
+        body: `Your ${plan?.name ?? 'Pacten'} subscription is now active.`,
+        link: '/dashboard/subscription',
+        relatedId: saved.id,
+      });
+    }
+    return saved;
   }
 
   async cancel(userId: string): Promise<Subscription> {
@@ -337,6 +364,21 @@ export class SubscriptionsService implements OnModuleInit {
     } catch {
       // Email is best-effort.
     }
+    // In-app notification for the subscriber (same trigger as the email).
+    const cancelPlan = await this.plansRepo.findOne({
+      where: { id: sub.planId },
+    });
+    const cancelAccessUntil = saved.currentPeriodEnd
+      ? new Date(saved.currentPeriodEnd).toISOString().slice(0, 10)
+      : undefined;
+    await this.notifications.create({
+      userId,
+      type: NotificationType.SUBSCRIPTION_CANCELLED,
+      title: 'Subscription cancelled',
+      body: `Your ${cancelPlan?.name ?? 'Pacten'} subscription has been cancelled.${cancelAccessUntil ? ` You will keep access until ${cancelAccessUntil}.` : ''}`,
+      link: '/dashboard/subscription',
+      relatedId: saved.id,
+    });
     return saved;
   }
 

@@ -17,7 +17,7 @@ export default function SubscriptionCancelledPage() {
       <div className="mx-auto flex max-w-[568px] flex-col items-center py-16 text-center lg:py-24">
         <span
           aria-hidden
-          className="flex h-[70px] w-[70px] items-center justify-center rounded-full border-2 border-brand text-brand"
+          className="flex h-[70px] w-[70px] items-center justify-center rounded-full border-2 border-brand text-brand dark:text-brand-200"
         >
           <svg
             width="32"
@@ -32,10 +32,10 @@ export default function SubscriptionCancelledPage() {
             <path d="m4.5 12.5 5 5 10-11" />
           </svg>
         </span>
-        <h1 className="mt-8 text-3xl font-extrabold tracking-tight text-ink-900">
+        <h1 className="mt-8 text-3xl font-extrabold tracking-tight text-ink-900 dark:text-ink-50">
           We&rsquo;d love to have you back
         </h1>
-        <p className="mt-4 text-[15px] leading-relaxed text-ink-500">
+        <p className="mt-4 text-[15px] leading-relaxed text-ink-500 dark:text-ink-300">
           If you change your mind, you can resubscribe at any time.
         </p>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">

@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { io, type Socket } from "socket.io-client";
 import { Button } from "@/components/ui/Button";
 import type { ChatMessage, ConversationPreview } from "@/lib/mock-messages";
 import { api, getToken } from "@/lib/api";
+import { initialsForName } from "@/lib/conversation-map";
 import { useAuth } from "@/components/auth/AuthProvider";
 
 // Open-conversation panel, rebuilt from the design "inbox" (411:59061)
@@ -37,11 +37,15 @@ export function ConversationPanel({
   initialMessages,
   conversationId,
   backHref,
+  markRead = true,
 }: {
   conversation: ConversationPreview;
   initialMessages: ChatMessage[];
   conversationId?: string;
   backHref?: string;
+  // List-page preview panel: false — polling must not mark the thread
+  // read while the user is only looking at the list. Thread page: true.
+  markRead?: boolean;
 }) {
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [draft, setDraft] = useState("");
@@ -116,7 +120,7 @@ export function ConversationPanel({
     if (!isReal || !convId || socketOk) return;
     const poll = () => {
       api
-        .conversationMessages(convId)
+        .conversationMessages(convId, { markRead })
         .then((msgs: any[]) => {
           if (Array.isArray(msgs) && msgs.length > 0) {
             setMessages(
@@ -133,7 +137,7 @@ export function ConversationPanel({
     };
     const timer = setInterval(poll, 5000);
     return () => clearInterval(timer);
-  }, [isReal, convId, socketOk]);
+  }, [isReal, convId, socketOk, markRead]);
 
   const send = () => {
     const body = draft.trim();
@@ -183,15 +187,15 @@ export function ConversationPanel({
   };
 
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-ink-100 bg-white">
+    <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900">
       {/* Header */}
-      <div className="flex items-center justify-between gap-3 border-b border-ink-100 p-4">
+      <div className="flex items-center justify-between gap-3 border-b border-ink-100 dark:border-ink-800 p-4">
         <div className="flex min-w-0 items-center gap-3">
           {backHref && (
             <Link
               href={backHref}
               aria-label="Back to conversations"
-              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-ink-700 hover:bg-ink-50 lg:hidden"
+              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-ink-700 dark:text-ink-200 hover:bg-ink-50 dark:hover:bg-white/5 lg:hidden"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
                 <path d="M15 5l-7 7 7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -200,26 +204,20 @@ export function ConversationPanel({
           )}
           <span
             aria-hidden
-            className="relative h-[52px] w-[52px] shrink-0 overflow-hidden rounded-full bg-brand-100"
+            className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-full bg-brand-100 dark:bg-brand/25 text-[15px] font-bold text-brand dark:text-brand-200"
           >
-            <Image
-              src="/assets/messages/jane-smith.png"
-              alt=""
-              fill
-              sizes="52px"
-              className="object-cover"
-            />
+            {initialsForName(conversation.name)}
           </span>
           <span className="min-w-0">
-            <span className="block truncate text-[15px] font-bold text-ink-900">{conversation.name}</span>
-            <span className="block truncate text-[13px] text-ink-500">{conversation.handle}</span>
+            <span className="block truncate text-[15px] font-bold text-ink-900 dark:text-ink-50">{conversation.name}</span>
+            <span className="block truncate text-[13px] text-ink-500 dark:text-ink-300">{conversation.handle}</span>
           </span>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <Button size="md">View Profile</Button>
           <button
             aria-label="Conversation options"
-            className="inline-flex h-11 w-11 items-center justify-center rounded-xl text-ink-700 hover:bg-ink-50"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-xl text-ink-700 dark:text-ink-200 hover:bg-ink-50 dark:hover:bg-white/5"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
               <circle cx="12" cy="5" r="1.8" />
@@ -233,24 +231,24 @@ export function ConversationPanel({
       {/* Thread */}
       <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-5">
         <div className="flex items-center gap-3">
-          <hr className="flex-1 border-ink-100" />
-          <span className="text-[13px] font-medium text-ink-500">Sep 2</span>
-          <hr className="flex-1 border-ink-100" />
+          <hr className="flex-1 border-ink-100 dark:border-ink-800" />
+          <span className="text-[13px] font-medium text-ink-500 dark:text-ink-300">Sep 2</span>
+          <hr className="flex-1 border-ink-100 dark:border-ink-800" />
         </div>
         {messages.map((m) =>
           m.from === "them" ? (
             <div key={m.id} className="flex max-w-[75%] flex-col gap-1 self-start">
-              <div className="rounded-2xl rounded-tl-md bg-[#ebf3ff] px-4 py-3 text-[15px] text-ink-900">
+              <div className="rounded-2xl rounded-tl-md bg-[#ebf3ff] dark:bg-ink-800 px-4 py-3 text-[15px] text-ink-900 dark:text-ink-50">
                 {m.body}
               </div>
-              <span className="text-xs text-ink-500">{fmtTime(m.time)}</span>
+              <span className="text-xs text-ink-500 dark:text-ink-300">{fmtTime(m.time)}</span>
             </div>
           ) : (
             <div key={m.id} className="flex max-w-[75%] flex-col items-end gap-1 self-end">
-              <div className="rounded-2xl rounded-tr-md bg-[#d3d8f0] px-4 py-3 text-[15px] text-ink-900">
+              <div className="rounded-2xl rounded-tr-md bg-[#d3d8f0] dark:bg-brand/25 px-4 py-3 text-[15px] text-ink-900 dark:text-ink-50">
                 {m.body}
               </div>
-              <span className="text-xs text-ink-500">{fmtTime(m.time)}</span>
+              <span className="text-xs text-ink-500 dark:text-ink-300">{fmtTime(m.time)}</span>
             </div>
           )
         )}
@@ -263,7 +261,7 @@ export function ConversationPanel({
       )}
       {/* Composer — bordered box with textarea, paperclip, Send Message */}
       <div className="p-4">
-        <div className="rounded-2xl border border-ink-100 bg-white p-4">
+        <div className="rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 p-4">
           <textarea
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
@@ -271,13 +269,13 @@ export function ConversationPanel({
             placeholder="Type your message..."
             aria-label="Type your message"
             rows={3}
-            className="w-full resize-none bg-transparent text-[15px] text-ink-900 outline-none placeholder:text-ink-400"
+            className="w-full resize-none bg-transparent text-[15px] text-ink-900 dark:text-ink-50 outline-none placeholder:text-ink-400 dark:placeholder:text-ink-300"
           />
           <div className="mt-2 flex items-center justify-end gap-3">
             <button
               type="button"
               aria-label="Attach a file"
-              className="inline-flex h-11 w-11 items-center justify-center rounded-xl text-ink-400 hover:bg-ink-50"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-xl text-ink-400 dark:text-ink-300 hover:bg-ink-50 dark:hover:bg-white/5"
             >
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
                 <path

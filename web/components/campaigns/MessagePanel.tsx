@@ -42,7 +42,7 @@ export function MessagePanel({
   return (
     <Card className="p-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-[20px] font-bold text-brand">{title}</h2>
+        <h2 className="text-[20px] font-bold text-brand dark:text-brand-200">{title}</h2>
         <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand text-[14px] font-bold text-white">
           {count + messages.length - initialMessages.length}
         </span>
@@ -71,11 +71,13 @@ export function MessagePanel({
         </div>
       )}
 
-      <div className="mt-5 flex items-center gap-4">
-        <span className="h-px flex-1 bg-ink-100" />
-        <span className="text-[13px] font-medium text-ink-400">{dateLabel}</span>
-        <span className="h-px flex-1 bg-ink-100" />
-      </div>
+      {messages.length > 0 && (
+        <div className="mt-5 flex items-center gap-4">
+          <span className="h-px flex-1 bg-ink-100 dark:bg-ink-800" />
+          <span className="text-[13px] font-medium text-ink-400 dark:text-ink-300">{dateLabel}</span>
+          <span className="h-px flex-1 bg-ink-100 dark:bg-ink-800" />
+        </div>
+      )}
 
       <div className="mt-5 flex flex-col gap-5">
         {messages.map((m, i) => (
@@ -86,29 +88,29 @@ export function MessagePanel({
             <div
               className={
                 m.mine
-                  ? "max-w-[75%] rounded-2xl bg-brand-100 px-4 py-3"
-                  : "max-w-[75%] rounded-2xl bg-brand-50 px-4 py-3"
+                  ? "max-w-[75%] rounded-2xl bg-brand-100 dark:bg-brand/25 px-4 py-3"
+                  : "max-w-[75%] rounded-2xl bg-brand-50 dark:bg-white/10 px-4 py-3"
               }
             >
-              <p className="text-[14px] text-ink-900">{m.body}</p>
+              <p className="text-[14px] text-ink-900 dark:text-ink-50">{m.body}</p>
             </div>
-            <p className="mt-1 text-xs text-ink-400">{m.time}</p>
+            <p className="mt-1 text-xs text-ink-400 dark:text-ink-300">{m.time}</p>
           </div>
         ))}
       </div>
 
-      <div className="mt-5 rounded-xl border border-ink-200 p-4">
+      <div className="mt-5 rounded-xl border border-ink-200 dark:border-ink-700 p-4">
         <textarea
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           placeholder="Type your message..."
           rows={3}
-          className="w-full resize-none bg-transparent text-[15px] text-ink-900 placeholder:text-ink-400 focus:outline-none"
+          className="w-full resize-none bg-transparent text-[15px] text-ink-900 dark:text-ink-50 placeholder:text-ink-400 dark:placeholder:text-ink-300 focus:outline-none"
         />
         <div className="mt-3 flex items-center justify-end gap-3">
           <button
             aria-label="Attach file"
-            className="cursor-pointer rounded-lg p-2 text-ink-400 hover:bg-ink-50 hover:text-ink-700"
+            className="cursor-pointer rounded-lg p-2 text-ink-400 dark:text-ink-300 hover:bg-ink-50 dark:hover:bg-white/5 hover:text-ink-700 dark:hover:text-ink-200"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
               <path

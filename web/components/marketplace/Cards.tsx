@@ -63,7 +63,7 @@ function PhotoTags({ tags }: { tags: string[] }) {
 export function CreatorCard({ creator }: { creator: CreatorCardData }) {
   return (
     <Card className="card-lift zoom-on-hover overflow-hidden p-0">
-      <div className="relative h-[200px] w-full overflow-hidden bg-ink-50 sm:h-[300px]">
+      <div className="relative h-[200px] w-full overflow-hidden bg-ink-50 dark:bg-ink-900 sm:h-[300px]">
         <Image
           src={creator.photo}
           alt={creator.name}
@@ -75,12 +75,17 @@ export function CreatorCard({ creator }: { creator: CreatorCardData }) {
       </div>
       <div className="p-3 sm:p-5">
         <div className="flex items-center gap-1.5">
-          <p className="truncate text-base font-bold text-ink-900 sm:text-xl">{creator.name}</p>
+          <p className="truncate text-base font-bold text-ink-900 dark:text-ink-50 sm:text-xl">{creator.name}</p>
           <VerifiedBadge />
         </div>
         <div className="mt-1 flex items-center justify-between gap-1">
-          <p className="truncate text-xs text-ink-600 sm:text-[15px]">{creator.followers}</p>
-          <p className="shrink-0 text-xs font-medium text-ink-900 sm:text-[15px]">{creator.rating}</p>
+          <p className="truncate text-xs text-ink-600 dark:text-ink-300 sm:text-[15px]">
+            {/* Missing followers (the mapper yields "— followers" for an
+                empty profile) shows the same "New" label the rating
+                fallback already uses — never a bare dash. */}
+            {/\d/.test(creator.followers ?? "") ? creator.followers : "New"}
+          </p>
+          <p className="shrink-0 text-xs font-medium text-ink-900 dark:text-ink-50 sm:text-[15px]">{creator.rating}</p>
         </div>
         <div className="mt-3 flex items-center justify-between gap-2 sm:mt-4">
           <Link
@@ -115,7 +120,7 @@ export function ProfessionalCard({
 }) {
   return (
     <Card className="card-lift zoom-on-hover overflow-hidden p-0">
-      <div className="relative h-[300px] w-full overflow-hidden bg-ink-50">
+      <div className="relative h-[300px] w-full overflow-hidden bg-ink-50 dark:bg-ink-900">
         <Image
           src={professional.photo}
           alt={professional.name}
@@ -141,14 +146,22 @@ export function ProfessionalCard({
       </div>
       <div className="p-5">
         <div className="flex items-center gap-2">
-          <p className="truncate text-xl font-bold text-ink-900">{professional.name}</p>
+          <p className="truncate text-xl font-bold text-ink-900 dark:text-ink-50">{professional.name}</p>
           <VerifiedBadge />
         </div>
         <div className="mt-1.5 flex items-center justify-between">
-          <p className="text-[15px] text-ink-600">
-            {professional.experience} of experience
+          <p className="text-[15px] text-ink-600 dark:text-ink-300">
+            {/* Rate and experience are separate stats: the rate renders
+                as "$X/hr", the experience as "N years of experience",
+                "New" when neither is set (the label the rating fallback
+                already uses). Never concatenated. */}
+            {professional.rate
+              ? professional.rate
+              : professional.experience?.trim()
+                ? `${professional.experience} of experience`
+                : "New"}
           </p>
-          <p className="text-[15px] font-medium text-ink-900">{professional.rating}</p>
+          <p className="text-[15px] font-medium text-ink-900 dark:text-ink-50">{professional.rating}</p>
         </div>
         <div className="mt-4 flex items-center justify-between gap-2">
           <Link
@@ -163,7 +176,7 @@ export function ProfessionalCard({
           <button
             type="button"
             aria-label="Message"
-            className="inline-flex h-10 w-10 items-center justify-center text-ink-700 hover:text-brand"
+            className="inline-flex h-10 w-10 items-center justify-center text-ink-700 dark:text-ink-200 hover:text-brand dark:hover:text-brand-200"
           >
             <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden>
               <rect x="2" y="4.5" width="18" height="13" rx="2.5" stroke="currentColor" strokeWidth="1.7" />
@@ -184,7 +197,7 @@ export function CampaignCard({ job }: { job: CampaignListing }) {
   return (
     <Card className="p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-lift">
       <div className="flex items-start gap-3">
-        <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand">
+        <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-50 dark:bg-white/10 text-brand dark:text-brand-200">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden>
             <circle cx="12" cy="12" r="2.2" fill="currentColor" />
             <ellipse cx="12" cy="12" rx="9.5" ry="3.8" stroke="currentColor" strokeWidth="1.6" />
@@ -193,11 +206,11 @@ export function CampaignCard({ job }: { job: CampaignListing }) {
           </svg>
         </span>
         <div className="min-w-0">
-          <p className="text-lg font-bold text-ink-900">{job.title}</p>
-          <p className="text-[15px] text-ink-600">{job.brand}</p>
+          <p className="text-lg font-bold text-ink-900 dark:text-ink-50">{job.title}</p>
+          <p className="text-[15px] text-ink-600 dark:text-ink-300">{job.brand}</p>
         </div>
       </div>
-      <p className="mt-3 flex items-center gap-1.5 text-[15px] text-ink-600">
+      <p className="mt-3 flex items-center gap-1.5 text-[15px] text-ink-600 dark:text-ink-300">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
           <path
             d="M8 14.5S3.5 10 3.5 6.5a4.5 4.5 0 1 1 9 0C12.5 10 8 14.5 8 14.5Z"
@@ -208,14 +221,14 @@ export function CampaignCard({ job }: { job: CampaignListing }) {
         </svg>
         {job.location}
       </p>
-      <p className="mt-3 text-[15px] leading-relaxed text-ink-900">
+      <p className="mt-3 text-[15px] leading-relaxed text-ink-900 dark:text-ink-50">
         {job.description}
       </p>
       <div className="mt-4 flex flex-wrap gap-2">
         {[job.budget, job.timeline, job.type].map((m) => (
           <span
             key={m}
-            className="inline-flex h-9 items-center rounded-full border border-ink-300 bg-white px-4 text-[13px] font-medium text-ink-700"
+            className="inline-flex h-9 items-center rounded-full border border-ink-300 dark:border-ink-700 bg-white dark:bg-ink-900 px-4 text-[13px] font-medium text-ink-700 dark:text-ink-200"
           >
             {m}
           </span>
@@ -225,7 +238,7 @@ export function CampaignCard({ job }: { job: CampaignListing }) {
         <Button onClick={() => router.push(`/campaigns/${job.id}`)}>
           View Details
         </Button>
-        <span className="text-sm text-ink-400">{job.postedAt}</span>
+        <span className="text-sm text-ink-400 dark:text-ink-300">{job.postedAt}</span>
       </div>
     </Card>
   );

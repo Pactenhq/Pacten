@@ -11,7 +11,7 @@ import { cn } from "@/lib/cn";
 export type FilterKind = "creators" | "professionals" | "campaigns";
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
-  return <p className="text-[15px] text-ink-900">{children}</p>;
+  return <p className="text-[15px] text-ink-900 dark:text-ink-50">{children}</p>;
 }
 
 function CategoryPills({
@@ -41,7 +41,7 @@ function CategoryPills({
               "inline-flex h-10 items-center justify-center rounded-full border px-2 text-[13px] font-medium transition-colors",
               active === o
                 ? "border-brand bg-brand text-white"
-                : "border-brand/60 bg-white text-brand hover:bg-brand-50"
+                : "border-brand/60 bg-white dark:bg-ink-900 text-brand dark:text-brand-200 hover:bg-brand-50 dark:hover:bg-white/10"
             )}
           >
             {o}
@@ -109,14 +109,14 @@ function RangeSlider({
   }, [lo, hi]);
 
   const thumb =
-    "absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 cursor-grab rounded-full border-2 border-brand bg-white shadow active:cursor-grabbing touch-none";
+    "absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 cursor-grab rounded-full border-2 border-brand bg-white dark:bg-ink-900 shadow active:cursor-grabbing touch-none";
 
   return (
     <div>
       <SectionLabel>{label}</SectionLabel>
       <div className="mt-3 px-1">
         <div ref={trackRef} className="relative h-[15px] touch-none select-none">
-          <div className="absolute top-1/2 h-1.5 w-full -translate-y-1/2 rounded-full bg-ink-100" />
+          <div className="absolute top-1/2 h-1.5 w-full -translate-y-1/2 rounded-full bg-ink-100 dark:bg-ink-800" />
           <div
             className="absolute top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-brand"
             style={{ left: `${lo}%`, width: `${hi - lo}%` }}
@@ -170,7 +170,7 @@ function RangeSlider({
             }}
           />
         </div>
-        <div className="mt-1.5 flex items-center justify-between text-xs text-ink-500">
+        <div className="mt-1.5 flex items-center justify-between text-xs text-ink-500 dark:text-ink-300">
           <span>{min}</span>
           <span>{max}</span>
         </div>
@@ -200,16 +200,16 @@ function ToggleRow({
       onClick={toggle}
       className="flex w-full cursor-pointer items-center justify-between py-1.5 text-left"
     >
-      <span className="text-[15px] text-ink-900">{label}</span>
+      <span className="text-[15px] text-ink-900 dark:text-ink-50">{label}</span>
       <span
         className={cn(
           "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors",
-          on ? "bg-brand" : "bg-ink-200"
+          on ? "bg-brand" : "bg-ink-200 dark:bg-ink-700"
         )}
       >
         <span
           className={cn(
-            "inline-block h-5 w-5 rounded-full bg-white shadow transition-transform",
+            "inline-block h-5 w-5 rounded-full bg-white dark:bg-ink-900 shadow transition-transform",
             on ? "translate-x-[22px]" : "translate-x-[2px]"
           )}
         />
@@ -242,13 +242,13 @@ function CheckGroup({
         {options.map((o) => (
           <label
             key={o}
-            className="flex cursor-pointer items-center gap-3 py-1.5 text-[15px] text-ink-700"
+            className="flex cursor-pointer items-center gap-3 py-1.5 text-[15px] text-ink-700 dark:text-ink-200"
           >
             <input
               type="checkbox"
               checked={checked.includes(o)}
               onChange={() => toggle(o)}
-              className="h-[18px] w-[18px] shrink-0 cursor-pointer rounded border-ink-300 accent-[#0c29ab]"
+              className="h-[18px] w-[18px] shrink-0 cursor-pointer rounded border-ink-300 dark:border-ink-700 accent-[#0c29ab]"
             />
             {o}
           </label>
@@ -258,17 +258,38 @@ function CheckGroup({
   );
 }
 
-function SelectRow({ label }: { label: string }) {
+function SelectRow({
+  label,
+  options,
+  onChange,
+}: {
+  label: string;
+  /** Real options; when omitted the select stays decorative (single "Choose" option, as before). */
+  options?: string[];
+  /** Emits the selected value, or "" when "Choose" is selected again. */
+  onChange?: (value: string) => void;
+}) {
+  const [value, setValue] = useState("Choose");
   return (
     <label className="block">
       <SectionLabel>{label}</SectionLabel>
       <span className="relative mt-2 block">
         <select
-          className="h-[52px] w-full cursor-pointer appearance-none rounded-xl border border-ink-200 bg-white px-4 pr-10 text-[15px] text-ink-400 focus:border-brand focus:outline-none"
-          defaultValue="Choose"
+          className="h-[52px] w-full cursor-pointer appearance-none rounded-xl border border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900 px-4 pr-10 text-[15px] text-ink-400 dark:text-ink-300 focus:border-brand focus:outline-none"
+          value={value}
+          onChange={(e) => {
+            const next = e.target.value;
+            setValue(next);
+            onChange?.(next === "Choose" ? "" : next);
+          }}
           aria-label={label}
         >
           <option>Choose</option>
+          {(options ?? []).map((o) => (
+            <option key={o} value={o}>
+              {o}
+            </option>
+          ))}
         </select>
         <svg
           width="16"
@@ -276,7 +297,7 @@ function SelectRow({ label }: { label: string }) {
           viewBox="0 0 16 16"
           fill="none"
           aria-hidden
-          className="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-ink-500"
+          className="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-ink-500 dark:text-ink-300"
         >
           <path
             d="m4 6 4 4 4-4"
@@ -310,6 +331,10 @@ export interface CreatorFilters {
   price: [number, number] | null;
   verifiedOnly: boolean;
   availableNow: boolean;
+  /** Selected language from the Language dropdown; "" = no filter. */
+  language: string;
+  /** Selected industry from the Industry Experience dropdown; "" = no filter. */
+  industry: string;
 }
 
 export interface ProfessionalFilters {
@@ -322,6 +347,12 @@ export interface ProfessionalFilters {
   openToProjects: boolean;
   /** Selected experience levels ("Entry" | "Mid" | "Expert"); empty = no filter. */
   experience: string[];
+  /** Selected skill from the Skills dropdown; "" = no skill filter. */
+  skill: string;
+  /** Selected language from the Language dropdown; "" = no filter. */
+  language: string;
+  /** Selected industry from the Industry Experience dropdown; "" = no filter. */
+  industry: string;
 }
 
 const DEFAULT_CREATOR_FILTERS: CreatorFilters = {
@@ -330,6 +361,8 @@ const DEFAULT_CREATOR_FILTERS: CreatorFilters = {
   price: null,
   verifiedOnly: false,
   availableNow: false,
+  language: "",
+  industry: "",
 };
 
 const DEFAULT_PROFESSIONAL_FILTERS: ProfessionalFilters = {
@@ -339,15 +372,27 @@ const DEFAULT_PROFESSIONAL_FILTERS: ProfessionalFilters = {
   availableNow: false,
   openToProjects: false,
   experience: [],
+  skill: "",
+  language: "",
+  industry: "",
 };
 
 export function FilterPanel({
   kind,
+  skillOptions,
+  languageOptions,
+  industryOptions,
   onFilterChange,
   onCreatorFilterChange,
   onProfessionalFilterChange,
 }: {
   kind: FilterKind;
+  /** Distinct real skills across the loaded professionals; feeds the Skills dropdown. */
+  skillOptions?: string[];
+  /** Distinct real languages across the loaded rows; feeds the Language dropdown. */
+  languageOptions?: string[];
+  /** Distinct real industries across the loaded rows; feeds the Industry Experience dropdown. */
+  industryOptions?: string[];
   onFilterChange?: (filters: CampaignFilters) => void;
   onCreatorFilterChange?: (filters: CreatorFilters) => void;
   onProfessionalFilterChange?: (filters: ProfessionalFilters) => void;
@@ -397,16 +442,16 @@ export function FilterPanel({
   return (
     <div>
       <div className="flex items-center justify-between">
-        <p className="text-xl font-bold text-ink-900">Filters</p>
+        <p className="text-xl font-bold text-ink-900 dark:text-ink-50">Filters</p>
         <button
           type="button"
           onClick={clearAll}
-          className="text-[15px] text-ink-900 hover:text-brand"
+          className="text-[15px] text-ink-900 dark:text-ink-50 hover:text-brand dark:hover:text-brand-200"
         >
           Clear all
         </button>
       </div>
-      <div className="my-4 border-t border-ink-100" />
+      <div className="my-4 border-t border-ink-100 dark:border-ink-800" />
 
       {kind === "creators" && (
         <div className="space-y-6" key={resetKey}>
@@ -437,7 +482,16 @@ export function FilterPanel({
           <CheckGroup label="Audience Gender" options={["Male", "Female", "Other"]} />
           <SelectRow label="Country" />
           <SelectRow label="City" />
-          <SelectRow label="Language" />
+          <SelectRow
+            label="Language"
+            options={languageOptions}
+            onChange={(language) => emitCreator({ language })}
+          />
+          <SelectRow
+            label="Industry Experience"
+            options={industryOptions}
+            onChange={(industry) => emitCreator({ industry })}
+          />
           <SelectRow label="Engagement Rate" />
           <SelectRow label="Avg Views" />
           <SelectRow label="Featured" />
@@ -478,9 +532,21 @@ export function FilterPanel({
             onChange={(experience) => emitProfessional({ experience })}
           />
           <SelectRow label="Country" />
-          <SelectRow label="Language" />
-          <SelectRow label="Skills" />
-          <SelectRow label="Industry Experience" />
+          <SelectRow
+            label="Language"
+            options={languageOptions}
+            onChange={(language) => emitProfessional({ language })}
+          />
+          <SelectRow
+            label="Skills"
+            options={skillOptions}
+            onChange={(skill) => emitProfessional({ skill })}
+          />
+          <SelectRow
+            label="Industry Experience"
+            options={industryOptions}
+            onChange={(industry) => emitProfessional({ industry })}
+          />
         </div>
       )}
 

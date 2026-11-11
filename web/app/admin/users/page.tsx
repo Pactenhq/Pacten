@@ -59,12 +59,12 @@ export default function AdminUsersPage() {
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && load()}
             placeholder="Search email or name"
-            className="w-64 rounded-xl border border-ink-200 px-4 py-2.5 text-[14px] outline-none focus:border-brand"
+            className="w-64 rounded-xl border border-ink-200 dark:border-ink-700 px-4 py-2.5 text-[14px] outline-none focus:border-brand"
           />
           <select
             value={role}
             onChange={(e) => setRole(e.target.value)}
-            className="rounded-xl border border-ink-200 bg-white px-4 py-2.5 text-[14px]"
+            className="rounded-xl border border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900 px-4 py-2.5 text-[14px]"
           >
             <option value="">All roles</option>
             <option value="brand">Brand</option>
@@ -76,14 +76,14 @@ export default function AdminUsersPage() {
           </Button>
         </div>
         {loading ? (
-          <p className="text-[14px] text-ink-500">Loading…</p>
+          <p className="text-[14px] text-ink-500 dark:text-ink-300">Loading…</p>
         ) : users.length === 0 ? (
-          <p className="text-[14px] text-ink-500">No users found.</p>
+          <p className="text-[14px] text-ink-500 dark:text-ink-300">No users found.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-[14px]">
               <thead>
-                <tr className="border-b border-ink-100 text-[12px] uppercase text-ink-400">
+                <tr className="border-b border-ink-100 dark:border-ink-800 text-[12px] uppercase text-ink-400 dark:text-ink-300">
                   <th className="py-3 pr-4">Email</th>
                   <th className="py-3 pr-4">Name</th>
                   <th className="py-3 pr-4">Role</th>
@@ -91,16 +91,16 @@ export default function AdminUsersPage() {
                   <th className="py-3">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-ink-100">
+              <tbody className="divide-y divide-ink-100 dark:divide-ink-800">
                 {users.map((u: any) => (
                   <tr key={u.id}>
-                    <td className="py-3 pr-4 font-medium text-ink-900">
+                    <td className="py-3 pr-4 font-medium text-ink-900 dark:text-ink-50">
                       {u.email}
                     </td>
-                    <td className="py-3 pr-4 text-ink-700">
+                    <td className="py-3 pr-4 text-ink-700 dark:text-ink-200">
                       {[u.firstName, u.lastName].filter(Boolean).join(" ") || "–"}
                     </td>
-                    <td className="py-3 pr-4 capitalize text-ink-700">
+                    <td className="py-3 pr-4 capitalize text-ink-700 dark:text-ink-200">
                       {u.role}
                     </td>
                     <td className="py-3 pr-4">

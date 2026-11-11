@@ -46,8 +46,8 @@ function ResetForm() {
   if (status === "done") {
     return (
       <Card className="w-full max-w-[480px] p-8 text-center shadow-pop sm:p-10">
-        <h1 className="text-3xl font-extrabold text-ink-900">Password reset!</h1>
-        <p className="mt-3 text-ink-500">You can now log in with your new password.</p>
+        <h1 className="text-3xl font-extrabold text-ink-900 dark:text-ink-50">Password reset!</h1>
+        <p className="mt-3 text-ink-500 dark:text-ink-300">You can now log in with your new password.</p>
         <Link href="/login" className="mt-6 block">
           <Button size="lg" className="w-full">Go to login</Button>
         </Link>
@@ -57,15 +57,15 @@ function ResetForm() {
 
   return (
     <Card className="fade-up fade-up-2 w-full max-w-[480px] p-8 shadow-pop sm:p-10">
-      <h1 className="text-3xl font-extrabold tracking-tight text-ink-900">
+      <h1 className="text-3xl font-extrabold tracking-tight text-ink-900 dark:text-ink-50">
         Reset password
       </h1>
-      <p className="mt-3 text-[15px] text-ink-500">
+      <p className="mt-3 text-[15px] text-ink-500 dark:text-ink-300">
         Choose a new password for your account.
       </p>
       <form onSubmit={submit} className="mt-6 space-y-4">
         <div>
-          <label className="mb-1.5 block text-sm font-semibold text-ink-900">
+          <label className="mb-1.5 block text-sm font-semibold text-ink-900 dark:text-ink-50">
             New password
           </label>
           <input
@@ -75,11 +75,11 @@ function ResetForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="At least 8 characters"
-            className="h-12 w-full rounded-xl border border-ink-200 px-4 text-[15px] focus:border-brand focus:outline-none"
+            className="h-12 w-full rounded-xl border border-ink-200 dark:border-ink-700 px-4 text-[15px] focus:border-brand focus:outline-none"
           />
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-semibold text-ink-900">
+          <label className="mb-1.5 block text-sm font-semibold text-ink-900 dark:text-ink-50">
             Confirm new password
           </label>
           <input
@@ -88,7 +88,7 @@ function ResetForm() {
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
             placeholder="Repeat your password"
-            className="h-12 w-full rounded-xl border border-ink-200 px-4 text-[15px] focus:border-brand focus:outline-none"
+            className="h-12 w-full rounded-xl border border-ink-200 dark:border-ink-700 px-4 text-[15px] focus:border-brand focus:outline-none"
           />
         </div>
         {status === "error" && <p className="text-sm text-red-600">{message}</p>}
@@ -102,7 +102,7 @@ function ResetForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <div className="flex min-h-screen flex-col bg-white">
+    <div className="flex min-h-screen flex-col bg-white dark:bg-ink-900">
       <Navbar />
       <main className="flex flex-1 items-center justify-center px-6 py-16">
         <Suspense>

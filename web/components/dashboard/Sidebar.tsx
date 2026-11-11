@@ -124,14 +124,20 @@ function SidebarNavInner({
     <div className="flex flex-col gap-1">
       <nav aria-label="Dashboard" className="flex flex-col">
         {items.map((item, i) => {
+          // Exact match, or a sub-page of the item — except the section
+          // home itself: "/admin" must not prefix-match "/admin/users"
+          // (that highlighted Overview on every admin sub-page). The
+          // "/dashboard/campaigns" carve-out below predates this fix and
+          // is kept as-is.
           const active =
             item.href !== "#" &&
             (pathname === item.href ||
               (item.href !== "/dashboard/campaigns" &&
+                item.href !== "/admin" &&
                 pathname.startsWith(item.href + "/")));
           return (
             <div key={item.label}>
-              {i > 0 && <hr className="border-ink-100" />}
+              {i > 0 && <hr className="border-ink-100 dark:border-ink-800" />}
               <Link
                 href={item.href}
                 onClick={onNavigate}
@@ -139,14 +145,14 @@ function SidebarNavInner({
                 className={cn(
                   "flex items-center gap-3 rounded-xl px-2 py-3 text-[15px] font-medium transition-colors",
                   active
-                    ? "bg-brand-50/70 text-ink-900"
-                    : "text-ink-700 hover:bg-ink-50 hover:text-ink-900"
+                    ? "bg-brand-50/70 dark:bg-white/10 text-ink-900 dark:text-ink-50"
+                    : "text-ink-700 dark:text-ink-200 hover:bg-ink-50 dark:hover:bg-white/5 hover:text-ink-900 dark:hover:text-ink-50"
                 )}
               >
                 <span
                   className={cn(
                     "flex h-[45px] w-[45px] shrink-0 items-center justify-center rounded-xl",
-                    active ? "bg-brand text-white" : "bg-ink-50 text-ink-500"
+                    active ? "bg-brand text-white" : "bg-ink-50 dark:bg-ink-900 text-ink-500 dark:text-ink-300"
                   )}
                 >
                   <NavIcon icon={item.icon} />
@@ -174,7 +180,7 @@ export function SidebarNav(props: {
           {props.items.map((item) => (
             <div
               key={item.label}
-              className="h-[69px] rounded-xl bg-ink-50/60"
+              className="h-[69px] rounded-xl bg-ink-50/60 dark:bg-ink-900/60"
             />
           ))}
         </div>

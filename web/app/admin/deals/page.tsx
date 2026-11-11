@@ -58,12 +58,12 @@ export default function AdminDealsPage() {
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && load()}
             placeholder="Search deal title"
-            className="w-64 rounded-xl border border-ink-200 px-4 py-2.5 text-[14px] outline-none focus:border-brand"
+            className="w-64 rounded-xl border border-ink-200 dark:border-ink-700 px-4 py-2.5 text-[14px] outline-none focus:border-brand"
           />
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="rounded-xl border border-ink-200 bg-white px-4 py-2.5 text-[14px]"
+            className="rounded-xl border border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900 px-4 py-2.5 text-[14px]"
           >
             <option value="">All statuses</option>
             {STATUSES.map((s) => (
@@ -77,14 +77,14 @@ export default function AdminDealsPage() {
           </Button>
         </div>
         {loading ? (
-          <p className="text-[14px] text-ink-500">Loading…</p>
+          <p className="text-[14px] text-ink-500 dark:text-ink-300">Loading…</p>
         ) : deals.length === 0 ? (
-          <p className="text-[14px] text-ink-500">No deals found.</p>
+          <p className="text-[14px] text-ink-500 dark:text-ink-300">No deals found.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-[14px]">
               <thead>
-                <tr className="border-b border-ink-100 text-[12px] uppercase text-ink-400">
+                <tr className="border-b border-ink-100 dark:border-ink-800 text-[12px] uppercase text-ink-400 dark:text-ink-300">
                   <th className="py-3 pr-4">Title</th>
                   <th className="py-3 pr-4">Brand</th>
                   <th className="py-3 pr-4">Creator</th>
@@ -93,27 +93,27 @@ export default function AdminDealsPage() {
                   <th className="py-3">Created</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-ink-100">
+              <tbody className="divide-y divide-ink-100 dark:divide-ink-800">
                 {deals.map((d: any) => (
                   <tr key={d.id}>
-                    <td className="py-3 pr-4 font-medium text-ink-900">
+                    <td className="py-3 pr-4 font-medium text-ink-900 dark:text-ink-50">
                       {d.title}
                     </td>
-                    <td className="py-3 pr-4 text-ink-700">
+                    <td className="py-3 pr-4 text-ink-700 dark:text-ink-200">
                       {d.brand?.email || "–"}
                     </td>
-                    <td className="py-3 pr-4 text-ink-700">
+                    <td className="py-3 pr-4 text-ink-700 dark:text-ink-200">
                       {d.creator?.email || "–"}
                     </td>
                     <td className="py-3 pr-4">
-                      <span className="rounded-full bg-ink-50 px-3 py-1 text-[12px] font-semibold capitalize text-ink-700">
+                      <span className="rounded-full bg-ink-50 dark:bg-ink-900 px-3 py-1 text-[12px] font-semibold capitalize text-ink-700 dark:text-ink-200">
                         {d.status}
                       </span>
                     </td>
-                    <td className="py-3 pr-4 text-ink-700">
+                    <td className="py-3 pr-4 text-ink-700 dark:text-ink-200">
                       {d.agreedBudget || "–"}
                     </td>
-                    <td className="py-3 text-ink-700">
+                    <td className="py-3 text-ink-700 dark:text-ink-200">
                       {new Date(d.createdAt).toLocaleDateString("en-GB")}
                     </td>
                   </tr>

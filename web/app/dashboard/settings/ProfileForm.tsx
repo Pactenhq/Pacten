@@ -23,6 +23,10 @@ export function SettingsProfileForm() {
     location: "",
     website: "",
     bio: "",
+    // Comma-separated in the form; sent as arrays. Only shown for
+    // creator/professional roles (brand profiles have no such fields).
+    languages: "",
+    industries: "",
   });
   const [initials, setInitials] = useState("");
   const [saving, setSaving] = useState(false);
@@ -42,6 +46,8 @@ export function SettingsProfileForm() {
         location: p.location || "",
         website: p.website || "",
         bio: user.role === "brand" ? p.description || "" : p.bio || "",
+        languages: Array.isArray(p.languages) ? p.languages.join(", ") : "",
+        industries: Array.isArray(p.industries) ? p.industries.join(", ") : "",
       });
       setInitials(
         name
@@ -61,6 +67,15 @@ export function SettingsProfileForm() {
       e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
     ) => setValues((v) => ({ ...v, [name]: e.target.value })),
   });
+
+  // "English, Urdu" -> ["English", "Urdu"]; blanks and duplicates dropped.
+  const parseList = (raw: string): string[] => {
+    const seen = new Set<string>();
+    return raw
+      .split(",")
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0 && !seen.has(s) && (seen.add(s), true));
+  };
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -82,6 +97,8 @@ export function SettingsProfileForm() {
         payload.displayName = values.fullName;
         payload.bio = values.bio;
         payload.website = values.website;
+        payload.languages = parseList(values.languages);
+        payload.industries = parseList(values.industries);
       }
       await api.updateProfile(payload);
       await refresh();
@@ -96,17 +113,17 @@ export function SettingsProfileForm() {
 
   return (
     <>
-      <p className="mt-1 text-[15px] text-ink-500">
+      <p className="mt-1 text-[15px] text-ink-500 dark:text-ink-300">
         Manage your public profile information.
       </p>
       <form className="mt-8 flex flex-col gap-5" onSubmit={submit}>
         <AuthError message={error} />
         <div>
-          <p className="text-sm font-medium text-ink-900">Profile Photo</p>
+          <p className="text-sm font-medium text-ink-900 dark:text-ink-50">Profile Photo</p>
           <div className="mt-3 flex flex-wrap items-center gap-4">
             <span
               aria-hidden
-              className="flex h-[72px] w-[72px] items-center justify-center rounded-full bg-brand-100 text-2xl font-bold text-brand"
+              className="flex h-[72px] w-[72px] items-center justify-center rounded-full bg-brand-100 dark:bg-brand/25 text-2xl font-bold text-brand dark:text-brand-200"
             >
               {initials}
             </span>
@@ -119,7 +136,7 @@ export function SettingsProfileForm() {
                   Remove
                 </Button>
               </div>
-              <p className="mt-2 text-xs text-ink-400">
+              <p className="mt-2 text-xs text-ink-400 dark:text-ink-300">
                 JPG, PNG or GIF. Max size 5MB.
               </p>
             </div>
@@ -138,11 +155,27 @@ export function SettingsProfileForm() {
           />
           <TextField label="Location" {...field("location")} />
           <TextField label="Website" {...field("website")} />
+          {user?.role !== "brand" && (
+            <>
+              <TextField
+                label="Languages"
+                placeholder="English, Urdu, Spanish"
+                hint="Separate with commas — these feed the marketplace Language filter."
+                {...field("languages")}
+              />
+              <TextField
+                label="Industries"
+                placeholder="Fashion, Beauty, Fitness"
+                hint="Separate with commas — these feed the marketplace Industry Experience filter."
+                {...field("industries")}
+              />
+            </>
+          )}
         </div>
         <div className="flex w-full flex-col gap-1.5">
           <label
             htmlFor="bio"
-            className="text-sm font-medium text-ink-900"
+            className="text-sm font-medium text-ink-900 dark:text-ink-50"
           >
             Bio
           </label>
@@ -150,7 +183,7 @@ export function SettingsProfileForm() {
             id="bio"
             rows={4}
             placeholder="Tell brands and clients a little about yourself..."
-            className="w-full resize-none rounded-xl border border-ink-300 bg-white px-4 py-3 text-[15px] text-ink-900 placeholder:text-ink-400 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand-100"
+            className="w-full resize-none rounded-xl border border-ink-300 dark:border-ink-700 bg-white dark:bg-ink-900 px-4 py-3 text-[15px] text-ink-900 dark:text-ink-50 placeholder:text-ink-400 dark:placeholder:text-ink-300 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand-100"
             {...field("bio")}
           />
         </div>
@@ -159,7 +192,7 @@ export function SettingsProfileForm() {
             {saving ? "Saving…" : "Save Changes"}
           </Button>
           {saved && (
-            <p className="mt-3 text-sm font-medium text-success">
+            <p className="mt-3 text-sm font-medium text-success dark:text-success-bright">
               Profile updated.
             </p>
           )}

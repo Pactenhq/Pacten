@@ -3,8 +3,6 @@
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import {
-  marketplaceCreators,
-  marketplaceProfessionals,
   type CreatorCardData,
   type ProfessionalCardData,
 } from "@/lib/mock";
@@ -61,6 +59,8 @@ export interface CreatorFilterData extends CreatorCardData {
   availableNow?: boolean;
   followersCount: number | null;
   rateValue: number | null;
+  languagesList: string[];
+  industriesList: string[];
 }
 
 export interface ProfessionalFilterData extends ProfessionalCardData {
@@ -70,6 +70,8 @@ export interface ProfessionalFilterData extends ProfessionalCardData {
   hourlyRateValue: number | null;
   yearsExp: number | null;
   skillsList: string[];
+  languagesList: string[];
+  industriesList: string[];
 }
 
 function mapCreator(p: any, i: number): CreatorFilterData {
@@ -87,6 +89,8 @@ function mapCreator(p: any, i: number): CreatorFilterData {
         ? `${Number(p.rating).toFixed(1)}★`
         : (p.rating ?? "New"),
     niches: p.niches?.length ? p.niches : [],
+    languagesList: Array.isArray(p.languages) ? p.languages : [],
+    industriesList: Array.isArray(p.industries) ? p.industries : [],
     platforms: p.platforms?.length ? p.platforms : [],
     photo: p.avatarUrl || p.photo || FALLBACK_AVATARS[i % FALLBACK_AVATARS.length],
     isVerified: p.isVerified,
@@ -101,10 +105,15 @@ function mapProfessional(p: any, i: number): ProfessionalFilterData {
     id: p.id,
     name: p.displayName || p.name || "Professional",
     role: p.title || p.role || "Social Media Professional",
+    // yearsExperience defaults to 0 in the DB, so only a positive value
+    // counts as real experience — 0 must fall through to "" ("New").
     experience:
-      p.hourlyRate != null
-        ? `$${p.hourlyRate}/hr`
+      p.yearsExperience != null && Number(p.yearsExperience) > 0
+        ? `${p.yearsExperience} years`
         : (p.experience ?? ""),
+    // The rate is its own stat ("$50/hr") — never folded into the
+    // experience slot, so it can never render "$50/hr of experience".
+    rate: p.hourlyRate != null ? `$${p.hourlyRate}/hr` : "",
     rating:
       p.rating != null && !String(p.rating).includes("★")
         ? `${Number(p.rating).toFixed(1)}★`
@@ -117,22 +126,21 @@ function mapProfessional(p: any, i: number): ProfessionalFilterData {
     hourlyRateValue: parseMoney(p.hourlyRate),
     yearsExp: parseYears(p.yearsExperience ?? p.experience),
     skillsList: Array.isArray(p.skills) ? p.skills : [],
+    languagesList: Array.isArray(p.languages) ? p.languages : [],
+    industriesList: Array.isArray(p.industries) ? p.industries : [],
   };
 }
 
 /**
- * Loads the public marketplace lists from the real API. Falls back to the
- * built-in showcase data when the API is unreachable or returns nothing.
- * Every item carries the raw fields the filter panel filters on, so the
- * marketplace pages can filter client-side on live or fallback data alike.
+ * Loads the public marketplace lists from the real API only. When the
+ * API is unreachable the lists stay EMPTY — never fabricated showcase
+ * people. Every item carries the raw fields the filter panel filters
+ * on, so the marketplace pages can filter client-side on live data.
  */
 export function useMarketplaceCreators(): CreatorFilterData[] {
-  // Start EMPTY and fill from the API. The hooks previously initialised
-  // with the built-in showcase list and only replaced it when the API
-  // returned rows — so searches briefly matched fake people and then
-  // flipped, and showcase cards (with fake ids like pf1) linked to
-  // profile pages that do not exist. The showcase list is now only an
-  // offline fallback (API unreachable).
+  // Start EMPTY and fill from the API. Showing the built-in showcase
+  // list as a fallback made searches match fake people whose cards
+  // linked to profile pages that do not exist.
   const [list, setList] = useState<CreatorFilterData[]>([]);
   useEffect(() => {
     let alive = true;
@@ -144,7 +152,7 @@ export function useMarketplaceCreators(): CreatorFilterData[] {
         }
       })
       .catch(() => {
-        if (alive) setList(marketplaceCreators.map((c, i) => mapCreator(c, i)));
+        // API unreachable: keep the list empty. Never show fake people.
       });
     return () => {
       alive = false;
@@ -165,8 +173,7 @@ export function useMarketplaceProfessionals(): ProfessionalFilterData[] {
         }
       })
       .catch(() => {
-        if (alive)
-          setList(marketplaceProfessionals.map((p, i) => mapProfessional(p, i)));
+        // API unreachable: keep the list empty. Never show fake people.
       });
     return () => {
       alive = false;

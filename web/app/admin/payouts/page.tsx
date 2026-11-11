@@ -52,7 +52,7 @@ export default function AdminPayoutsPage() {
             className={`rounded-full px-4 py-2 text-[13px] font-semibold ${
               filter === f
                 ? "bg-brand text-white"
-                : "bg-white text-ink-600 border border-ink-200"
+                : "bg-white dark:bg-ink-900 text-ink-600 dark:text-ink-300 border border-ink-200 dark:border-ink-700"
             }`}
           >
             {f === "" ? "All" : f}
@@ -61,22 +61,22 @@ export default function AdminPayoutsPage() {
       </div>
       <Card className="mt-6 p-6">
         {loading ? (
-          <p className="text-[14px] text-ink-500">Loading…</p>
+          <p className="text-[14px] text-ink-500 dark:text-ink-300">Loading…</p>
         ) : payouts.length === 0 ? (
-          <p className="text-[14px] text-ink-500">No payouts in this state.</p>
+          <p className="text-[14px] text-ink-500 dark:text-ink-300">No payouts in this state.</p>
         ) : (
-          <ul className="divide-y divide-ink-100">
+          <ul className="divide-y divide-ink-100 dark:divide-ink-800">
             {payouts.map((p: any) => (
               <li key={p.id} className="py-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <p className="text-[15px] font-bold text-ink-900">
+                    <p className="text-[15px] font-bold text-ink-900 dark:text-ink-50">
                       {fmt$(p.amountCents)}
-                      <span className="ml-2 text-[13px] font-medium text-ink-500">
+                      <span className="ml-2 text-[13px] font-medium text-ink-500 dark:text-ink-300">
                         {p.userEmail}
                       </span>
                     </p>
-                    <p className="mt-1 text-[13px] text-ink-500">
+                    <p className="mt-1 text-[13px] text-ink-500 dark:text-ink-300">
                       Requested {new Date(p.requestedAt).toLocaleDateString()}
                     </p>
                   </div>
@@ -100,7 +100,7 @@ export default function AdminPayoutsPage() {
                         setNotes({ ...notes, [p.id]: e.target.value })
                       }
                       placeholder="Notes (optional)"
-                      className="min-w-[200px] flex-1 rounded-xl border border-ink-200 px-4 py-2 text-[14px] outline-none focus:border-brand"
+                      className="min-w-[200px] flex-1 rounded-xl border border-ink-200 dark:border-ink-700 px-4 py-2 text-[14px] outline-none focus:border-brand"
                     />
                     <Button
                       size="sm"
@@ -120,7 +120,7 @@ export default function AdminPayoutsPage() {
                   </div>
                 )}
                 {p.notes && (
-                  <p className="mt-2 text-[13px] text-ink-500">
+                  <p className="mt-2 text-[13px] text-ink-500 dark:text-ink-300">
                     Notes: {p.notes}
                   </p>
                 )}

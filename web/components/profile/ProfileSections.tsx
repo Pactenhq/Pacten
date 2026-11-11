@@ -10,7 +10,7 @@ function IconButton({ label, children }: { label: string; children: React.ReactN
     <button
       type="button"
       aria-label={label}
-      className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-ink-300 bg-white text-ink-700 hover:border-brand hover:text-brand"
+      className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-ink-300 dark:border-ink-700 bg-white dark:bg-ink-900 text-ink-700 dark:text-ink-200 hover:border-brand hover:text-brand dark:hover:text-brand-200"
     >
       {children}
     </button>
@@ -56,7 +56,7 @@ export function ProfileHero({
         <Card className="p-5 sm:p-8">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-              <span className="relative -mt-16 block h-[120px] w-[120px] shrink-0 overflow-hidden rounded-3xl border-4 border-white bg-ink-100 sm:-mt-24 sm:h-[160px] sm:w-[160px]">
+              <span className="relative -mt-16 block h-[120px] w-[120px] shrink-0 overflow-hidden rounded-3xl border-4 border-white bg-ink-100 dark:bg-ink-800 sm:-mt-24 sm:h-[160px] sm:w-[160px]">
                 {photo ? (
                   <Image src={photo} alt={name} fill className="object-cover object-top" sizes="160px" />
                 ) : (
@@ -65,20 +65,20 @@ export function ProfileHero({
               </span>
               <div className="pt-1">
                 <div className="flex items-center gap-2">
-                  <h1 className="text-2xl font-extrabold tracking-tight text-ink-900 sm:text-3xl">
+                  <h1 className="text-2xl font-extrabold tracking-tight text-ink-900 dark:text-ink-50 sm:text-3xl">
                     {name}
                   </h1>
                   <VerifiedBadge />
                 </div>
-                <p className="mt-1 text-[15px] text-ink-500">{handle}</p>
-                <p className="mt-2 max-w-[560px] text-[15px] leading-relaxed text-ink-700">
+                <p className="mt-1 text-[15px] text-ink-500 dark:text-ink-300">{handle}</p>
+                <p className="mt-2 max-w-[560px] text-[15px] leading-relaxed text-ink-700 dark:text-ink-200">
                   {headline}
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {tags.map((t) => (
                     <span
                       key={t}
-                      className="inline-flex h-8 items-center rounded-full border border-brand/60 bg-white px-3.5 text-[13px] font-medium text-brand"
+                      className="inline-flex h-8 items-center rounded-full border border-brand/60 bg-white dark:bg-ink-900 px-3.5 text-[13px] font-medium text-brand dark:text-brand-200"
                     >
                       {t}
                     </span>
@@ -88,7 +88,7 @@ export function ProfileHero({
             </div>
             <div className="flex shrink-0 flex-col items-start gap-3 lg:items-end">
               {priceLabel && (
-                <p className="text-lg font-bold text-brand">{priceLabel}</p>
+                <p className="text-lg font-bold text-brand dark:text-brand-200">{priceLabel}</p>
               )}
               <div className="flex items-center gap-2.5">
                 <IconButton label="Message">
@@ -149,14 +149,14 @@ export function StatsRow({ stats }: { stats: ProfileStat[] }) {
       {stats.map((s) => (
         <Card key={s.label} className="p-5 text-center sm:p-6">
           {s.icon && STAT_ICONS[s.icon] && (
-            <span className="mx-auto mb-3 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand">
+            <span className="mx-auto mb-3 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 dark:bg-white/10 text-brand dark:text-brand-200">
               {STAT_ICONS[s.icon]}
             </span>
           )}
-          <p className="text-2xl font-extrabold text-ink-900 sm:text-[32px]">
+          <p className="text-2xl font-extrabold text-ink-900 dark:text-ink-50 sm:text-[32px]">
             {s.value}
           </p>
-          <p className="mt-1 text-sm text-ink-500">{s.label}</p>
+          <p className="mt-1 text-sm text-ink-500 dark:text-ink-300">{s.label}</p>
         </Card>
       ))}
     </div>
@@ -175,7 +175,7 @@ export function Section({
   return (
     <section>
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-xl font-bold text-ink-900">{title}</h2>
+        <h2 className="text-xl font-bold text-ink-900 dark:text-ink-50">{title}</h2>
         {action}
       </div>
       {children}
@@ -194,10 +194,10 @@ export function AboutBlock({
 }) {
   return (
     <Card className="p-5 sm:p-6">
-      <p className="text-[15px] leading-relaxed text-ink-700">{text}</p>
+      <p className="text-[15px] leading-relaxed text-ink-700 dark:text-ink-200">{text}</p>
       <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm">
-        <span className="inline-flex items-center gap-1.5 text-ink-700">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden className="text-ink-400">
+        <span className="inline-flex items-center gap-1.5 text-ink-700 dark:text-ink-200">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden className="text-ink-400 dark:text-ink-300">
             <path
               d="M12 21s7-5.5 7-11a7 7 0 1 0-14 0c0 5.5 7 11 7 11z"
               stroke="currentColor"
@@ -207,7 +207,7 @@ export function AboutBlock({
           </svg>
           {location}
         </span>
-        <span className="font-medium text-brand">{website}</span>
+        <span className="font-medium text-brand dark:text-brand-200">{website}</span>
       </div>
     </Card>
   );
@@ -219,13 +219,13 @@ export function ReviewsList({ reviews }: { reviews: Review[] }) {
       {reviews.map((r, i) => (
         <Card key={i} className="p-5 sm:p-6">
           <Stars />
-          <p className="mt-3 text-[15px] leading-relaxed text-ink-700">
+          <p className="mt-3 text-[15px] leading-relaxed text-ink-700 dark:text-ink-200">
             &ldquo;{r.quote}&rdquo;
           </p>
           <div className="mt-4 flex items-center gap-3">
             <Avatar name={r.name} size="sm" />
-            <p className="text-sm font-semibold text-ink-900">{r.name}</p>
-            <span className="text-xs text-ink-400">{r.time}</span>
+            <p className="text-sm font-semibold text-ink-900 dark:text-ink-50">{r.name}</p>
+            <span className="text-xs text-ink-400 dark:text-ink-300">{r.time}</span>
           </div>
         </Card>
       ))}
@@ -263,11 +263,11 @@ export function ServicesList({ services }: { services: Service[] }) {
           className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6"
         >
           <div>
-            <p className="text-[17px] font-bold text-ink-900">{s.title}</p>
-            <p className="mt-1 text-sm text-ink-500">{s.description}</p>
+            <p className="text-[17px] font-bold text-ink-900 dark:text-ink-50">{s.title}</p>
+            <p className="mt-1 text-sm text-ink-500 dark:text-ink-300">{s.description}</p>
           </div>
           {s.price ? (
-            <span className="inline-flex shrink-0 cursor-pointer items-center gap-1 self-start text-[15px] font-semibold text-brand hover:text-brand-dark sm:self-center">
+            <span className="inline-flex shrink-0 cursor-pointer items-center gap-1 self-start text-[15px] font-semibold text-brand dark:text-brand-200 hover:text-brand-dark sm:self-center">
               {s.price}
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
                 <path
@@ -292,7 +292,7 @@ export function ServicesList({ services }: { services: Service[] }) {
 
 export function LinkAction({ label }: { label: string }) {
   return (
-    <span className="inline-flex cursor-pointer items-center gap-1 text-sm font-semibold text-brand hover:text-brand-dark">
+    <span className="inline-flex cursor-pointer items-center gap-1 text-sm font-semibold text-brand dark:text-brand-200 hover:text-brand-dark">
       {label}
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
         <path

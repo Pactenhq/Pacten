@@ -21,7 +21,7 @@ export function AuthShell({
   return (
     <>
       <Navbar />
-      <main className="bg-mist/50">
+      <main className="bg-mist/50 dark:bg-ink-950/50">
         <div className="mx-auto flex min-h-[70vh] max-w-[1380px] items-center justify-center px-6 py-16 lg:px-12 lg:py-24">
           <Card
             className={cn(
@@ -30,11 +30,11 @@ export function AuthShell({
               className
             )}
           >
-            <h1 className="text-center text-3xl font-extrabold tracking-tight text-ink-900 lg:text-4xl">
+            <h1 className="text-center text-3xl font-extrabold tracking-tight text-ink-900 dark:text-ink-50 lg:text-4xl">
               {title}
             </h1>
             {subtitle && (
-              <p className="mt-3 text-center text-[15px] text-ink-500">
+              <p className="mt-3 text-center text-[15px] text-ink-500 dark:text-ink-300">
                 {subtitle}
               </p>
             )}

@@ -15,6 +15,7 @@ const columns: Array<{ title: string; links: Array<[string, string]> }> = [
     title: "Creators",
     links: [
       ["Marketplace", "/creators"],
+      ["Find Professionals", "/professionals"],
       ["Become a Creator", "/signup/creator"],
     ],
   },
@@ -22,6 +23,8 @@ const columns: Array<{ title: string; links: Array<[string, string]> }> = [
     title: "Brands",
     links: [
       ["Find Creators", "/creators"],
+      ["Browse Campaigns", "/campaigns"],
+      ["Pricing", "/pricing"],
       ["Post Campaign", "/dashboard/brand"],
     ],
   },
@@ -44,27 +47,27 @@ const columns: Array<{ title: string; links: Array<[string, string]> }> = [
 
 export function Footer({ logoTone = "dark" }: { logoTone?: "dark" | "brand" }) {
   return (
-    <footer className="bg-white">
+    <footer className="bg-white dark:bg-ink-900">
       <div className="mx-auto max-w-[1380px] px-6 pb-8 pt-12 lg:px-12">
         <div className="flex flex-col gap-10 lg:flex-row lg:justify-between">
           <div className="max-w-[233px]">
             <p
               className={
                 logoTone === "brand"
-                  ? "text-[28px] font-extrabold tracking-tight text-brand"
-                  : "text-[28px] font-extrabold tracking-tight text-ink-900"
+                  ? "text-[28px] font-extrabold tracking-tight text-brand dark:text-brand-200"
+                  : "text-[28px] font-extrabold tracking-tight text-ink-900 dark:text-ink-50"
               }
             >
               Pacten
             </p>
-            <p className="mt-1 text-[15px] text-ink-500">
+            <p className="mt-1 text-[15px] text-ink-500 dark:text-ink-300">
               The world&apos;s creator marketplace.
             </p>
           </div>
           <div className="grid grid-cols-2 gap-x-12 gap-y-8 sm:grid-cols-3 lg:flex lg:gap-16">
             {columns.map((col) => (
               <div key={col.title}>
-                <p className="text-sm font-semibold text-ink-900">
+                <p className="text-sm font-semibold text-ink-900 dark:text-ink-50">
                   {col.title}
                 </p>
                 <ul className="mt-4 space-y-2.5">
@@ -72,7 +75,7 @@ export function Footer({ logoTone = "dark" }: { logoTone?: "dark" | "brand" }) {
                     <li key={label}>
                       <Link
                         href={href}
-                        className="footer-link text-sm text-ink-500 hover:text-ink-900"
+                        className="footer-link text-sm text-ink-500 dark:text-ink-300 hover:text-ink-900 dark:hover:text-ink-50"
                       >
                         {label}
                       </Link>
@@ -83,8 +86,8 @@ export function Footer({ logoTone = "dark" }: { logoTone?: "dark" | "brand" }) {
             ))}
           </div>
         </div>
-        <div className="mt-10 border-t border-ink-100 pt-6">
-          <p className="text-center text-sm text-ink-500">
+        <div className="mt-10 border-t border-ink-100 dark:border-ink-800 pt-6">
+          <p className="text-center text-sm text-ink-500 dark:text-ink-300">
             © 2025 Pacten Ltd. All rights reserved.
           </p>
         </div>

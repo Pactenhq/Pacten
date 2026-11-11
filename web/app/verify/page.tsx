@@ -23,7 +23,7 @@ function ChevronDown() {
       viewBox="0 0 16 16"
       fill="none"
       aria-hidden
-      className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-ink-500"
+      className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-ink-500 dark:text-ink-300"
     >
       <path
         d="M4 6l4 4 4-4"
@@ -38,12 +38,12 @@ function ChevronDown() {
 
 export default function VerifyPage() {
   return (
-    <main className="bg-mist/50">
+    <main className="bg-mist/50 dark:bg-ink-950/50">
       <div className="mx-auto max-w-[1380px] px-6 py-14 lg:px-12 lg:py-20">
-        <h1 className="text-4xl font-extrabold tracking-tight text-ink-900 lg:text-5xl">
+        <h1 className="text-4xl font-extrabold tracking-tight text-ink-900 dark:text-ink-50 lg:text-5xl">
           Verification
         </h1>
-        <p className="mt-3 text-lg text-ink-500">
+        <p className="mt-3 text-lg text-ink-500 dark:text-ink-300">
           Submit your details for review and earn a verified badge.
         </p>
 
@@ -53,7 +53,7 @@ export default function VerifyPage() {
 
         <div className="mt-10 grid gap-6 lg:grid-cols-[685px_1fr]">
           <Card className="p-6 shadow-pop sm:p-10">
-            <h2 className="text-2xl font-bold tracking-tight text-ink-900 lg:text-3xl">
+            <h2 className="text-2xl font-bold tracking-tight text-ink-900 dark:text-ink-50 lg:text-3xl">
               Confirm Profile Details
             </h2>
             <form
@@ -89,7 +89,7 @@ export default function VerifyPage() {
               <div className="flex w-full flex-col gap-1.5">
                 <label
                   htmlFor="creator-category"
-                  className="text-sm font-medium text-ink-900"
+                  className="text-sm font-medium text-ink-900 dark:text-ink-50"
                 >
                   Creator Category
                 </label>
@@ -97,7 +97,7 @@ export default function VerifyPage() {
                   <select
                     id="creator-category"
                     name="creatorCategory"
-                    className="h-12 w-full appearance-none rounded-xl border border-ink-300 bg-white px-4 pr-11 text-[15px] text-ink-400 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand-100"
+                    className="h-12 w-full appearance-none rounded-xl border border-ink-300 dark:border-ink-700 bg-white dark:bg-ink-900 px-4 pr-11 text-[15px] text-ink-400 dark:text-ink-300 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand-100"
                     defaultValue=""
                     required
                   >
@@ -120,11 +120,11 @@ export default function VerifyPage() {
                 </Button>
               </div>
             </form>
-            <p className="mt-4 text-sm text-ink-500">
+            <p className="mt-4 text-sm text-ink-500 dark:text-ink-300">
               Already have an account?{" "}
               <Link
                 href="/login"
-                className="font-semibold text-brand hover:underline"
+                className="font-semibold text-brand dark:text-brand-200 hover:underline"
               >
                 Login
               </Link>
@@ -132,8 +132,8 @@ export default function VerifyPage() {
           </Card>
 
           <Card className="h-fit p-6 sm:p-8">
-            <h2 className="text-2xl font-bold text-ink-900">Need Help?</h2>
-            <p className="mt-3 text-[15px] leading-relaxed text-ink-500">
+            <h2 className="text-2xl font-bold text-ink-900 dark:text-ink-50">Need Help?</h2>
+            <p className="mt-3 text-[15px] leading-relaxed text-ink-500 dark:text-ink-300">
               If you have questions about the verification process, visit our
               Help Centre or contact support.
             </p>

@@ -116,6 +116,21 @@ ${body}
     );
   }
 
+  sendContractAwaitingSignature(
+    to: string,
+    contractTitle: string,
+    signerName: string,
+  ) {
+    return this.send(
+      to,
+      'Signature needed — Pacten',
+      this.layout(
+        'Signature needed',
+        `<p><strong>${signerName}</strong> has confirmed the contract <strong>${contractTitle}</strong>. Your confirmation is still needed before the contract is fully signed and the deal becomes active.</p>`,
+      ),
+    );
+  }
+
   sendContractAccepted(to: string, contractTitle: string) {
     return this.send(
       to,

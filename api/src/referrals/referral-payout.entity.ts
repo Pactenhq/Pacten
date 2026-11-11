@@ -40,6 +40,12 @@ export class ReferralPayout {
   @Column({ nullable: true })
   decidedById: string;
 
+  // Stripe transfer id (tr_...) when the approved payout was paid via a
+  // Connect transfer. Null for record-only approvals (unconnected payee
+  // or demo mode) — the cash transfer then happens off-platform.
+  @Column({ nullable: true })
+  stripeTransferId: string;
+
   @Column('text', { nullable: true })
   notes: string;
 

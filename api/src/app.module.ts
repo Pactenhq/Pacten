@@ -14,8 +14,10 @@ import { ReferralsModule } from './referrals/referrals.module';
 import { DisputesModule } from './disputes/disputes.module';
 import { AdminModule } from './admin/admin.module';
 import { EmailsModule } from './emails/emails.module';
+import { NotificationsModule } from './notifications/notifications.module';
 import { SettingsModule } from './settings/settings.module';
 import { OpportunitiesModule } from './opportunities/opportunities.module';
+import { ConnectModule } from './connect/connect.module';
 
 @Module({
   imports: [
@@ -58,8 +60,10 @@ import { OpportunitiesModule } from './opportunities/opportunities.module';
     DisputesModule,
     AdminModule,
     EmailsModule,
+    NotificationsModule,
     SettingsModule,
     OpportunitiesModule,
+    ConnectModule,
   ],
 })
 export class AppModule {}

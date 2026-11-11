@@ -9,10 +9,14 @@ import { Button } from "@/components/ui/Button";
 import { api } from "@/lib/api";
 import {
   contractTabs,
-  contractTemplates,
   type ContractStat,
   type ContractStatus,
 } from "@/lib/mock-messages";
+
+// The two contract options below are the REAL generation choices in the
+// system (see contracts.service: template 'standard' vs 'simple').
+// The tab previously listed a fabricated "Influencer Template" with
+// dead Edit/Delete buttons.
 
 // Contract Centre list pages, rebuilt from the design frames (visual design
 // unchanged). M4: rows, stats, search and tabs are now driven by the real
@@ -56,7 +60,7 @@ const badgeStyles: Record<ContractStatus, string> = {
   "Awaiting Signature": "bg-[#fff0b2] text-[#8e6c15]",
   Completed: "bg-[#e7f9dd] text-[#488a44]",
   Expired: "bg-[#ffe4e4] text-[#d00404]",
-  Cancelled: "bg-ink-100 text-ink-700",
+  Cancelled: "bg-ink-100 dark:bg-ink-800 text-ink-700 dark:text-ink-200",
   Signed: "bg-[#e7f9dd] text-[#488a44]",
 };
 
@@ -117,16 +121,16 @@ function StatCards({ stats }: { stats: ContractStat[] }) {
   return (
     <div className={cn("grid gap-4", stats.length === 2 ? "grid-cols-2" : "grid-cols-2 xl:grid-cols-4")}>
       {stats.map((s) => (
-        <div key={s.label} className="rounded-2xl border border-ink-100 bg-white p-5">
+        <div key={s.label} className="rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 p-5">
           <span
             aria-hidden
-            className="flex h-[45px] w-[45px] items-center justify-center rounded-xl bg-brand-50 text-brand"
+            className="flex h-[45px] w-[45px] items-center justify-center rounded-xl bg-brand-50 dark:bg-white/10 text-brand dark:text-brand-200"
           >
             <StatIcon label={s.label} />
           </span>
-          <p className="mt-4 text-[28px] font-extrabold text-ink-900">{s.value}</p>
-          <p className="text-[15px] font-bold text-ink-900">{s.label}</p>
-          <p className="text-sm text-ink-500">{s.description}</p>
+          <p className="mt-4 text-[28px] font-extrabold text-ink-900 dark:text-ink-50">{s.value}</p>
+          <p className="text-[15px] font-bold text-ink-900 dark:text-ink-50">{s.label}</p>
+          <p className="text-sm text-ink-500 dark:text-ink-300">{s.description}</p>
         </div>
       ))}
     </div>
@@ -138,20 +142,20 @@ function ContractRowCard({ row }: { row: Row }) {
   return (
     <button
       onClick={() => router.push(`/dashboard/contracts/${row.id}`)}
-      className="flex w-full flex-wrap items-center gap-x-8 gap-y-3 rounded-2xl border border-ink-100 bg-white px-6 py-5 text-left transition-colors hover:border-brand/50"
+      className="flex w-full flex-wrap items-center gap-x-8 gap-y-3 rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 px-6 py-5 text-left transition-colors hover:border-brand/50"
     >
-      <p className="min-w-[240px] flex-1 text-[15px] font-bold text-ink-900">{row.title}</p>
+      <p className="min-w-[240px] flex-1 text-[15px] font-bold text-ink-900 dark:text-ink-50">{row.title}</p>
       <div className="w-[110px]">
-        <p className="text-[13px] text-ink-500">Client Name</p>
-        <p className="text-sm font-bold text-ink-900">{row.client}</p>
+        <p className="text-[13px] text-ink-500 dark:text-ink-300">Client Name</p>
+        <p className="text-sm font-bold text-ink-900 dark:text-ink-50">{row.client}</p>
       </div>
       <div className="w-[110px]">
-        <p className="text-[13px] text-ink-500">{row.submittedLabel}</p>
-        <p className="text-sm font-bold text-ink-900">{row.submittedDate}</p>
+        <p className="text-[13px] text-ink-500 dark:text-ink-300">{row.submittedLabel}</p>
+        <p className="text-sm font-bold text-ink-900 dark:text-ink-50">{row.submittedDate}</p>
       </div>
       <div className="w-[110px]">
-        <p className="text-[13px] text-ink-500">Deadline</p>
-        <p className="text-sm font-bold text-ink-900">{row.deadlineDate}</p>
+        <p className="text-[13px] text-ink-500 dark:text-ink-300">Deadline</p>
+        <p className="text-sm font-bold text-ink-900 dark:text-ink-50">{row.deadlineDate}</p>
       </div>
       <StatusBadge status={row.status} />
     </button>
@@ -188,7 +192,7 @@ function ContractStatusBlock({ rows }: { rows: Row[] }) {
 
   return (
     <section className="flex flex-col gap-5">
-      <h2 className="text-[26px] font-extrabold tracking-tight text-ink-900">Contract Status</h2>
+      <h2 className="text-[26px] font-extrabold tracking-tight text-ink-900 dark:text-ink-50">Contract Status</h2>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex min-w-0 flex-1 flex-wrap gap-2.5">
           {(["All", ...contractTabs] as Tab[]).map((t) => (
@@ -199,30 +203,30 @@ function ContractStatusBlock({ rows }: { rows: Row[] }) {
                 "rounded-full px-3.5 py-2 text-[13px] font-semibold transition-colors",
                 tab === t
                   ? "bg-brand text-white"
-                  : "border border-brand/60 bg-white text-brand hover:bg-brand-50"
+                  : "border border-brand/60 bg-white dark:bg-ink-900 text-brand dark:text-brand-200 hover:bg-brand-50 dark:hover:bg-white/10"
               )}
             >
               {t}
             </button>
           ))}
         </div>
-        <div className="flex h-[50px] w-full max-w-[280px] shrink-0 items-center gap-2 rounded-xl border border-ink-200 bg-white px-4">
+        <div className="flex h-[50px] w-full max-w-[280px] shrink-0 items-center gap-2 rounded-xl border border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900 px-4">
           <input
             type="text"
             placeholder="Search"
             aria-label="Search contracts"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full bg-transparent text-[15px] text-ink-900 outline-none placeholder:text-ink-500"
+            className="w-full bg-transparent text-[15px] text-ink-900 dark:text-ink-50 outline-none placeholder:text-ink-500 dark:placeholder:text-ink-300"
           />
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden className="shrink-0 text-ink-900">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden className="shrink-0 text-ink-900 dark:text-ink-50">
             <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
             <path d="m20 20-3.5-3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
           </svg>
         </div>
       </div>
       {filtered.length === 0 ? (
-        <p className="rounded-2xl border border-ink-100 bg-white py-10 text-center text-[15px] text-ink-500">
+        <p className="rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 py-10 text-center text-[15px] text-ink-500 dark:text-ink-300">
           No contracts in this state yet.
         </p>
       ) : (
@@ -261,14 +265,14 @@ export function ContractCentre({ variant }: { variant: "brand" | "creator" }) {
     <div className="flex flex-col gap-8">
       {variant === "brand" && (
         <div>
-          <h1 className="text-[32px] font-extrabold tracking-tight text-ink-900">Contract Centre</h1>
+          <h1 className="text-[32px] font-extrabold tracking-tight text-ink-900 dark:text-ink-50">Contract Centre</h1>
         </div>
       )}
       {variant === "creator" && (
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="text-[32px] font-extrabold tracking-tight text-ink-900">Contract Centre</h1>
-            <p className="mt-1 text-[15px] text-ink-500">
+            <h1 className="text-[32px] font-extrabold tracking-tight text-ink-900 dark:text-ink-50">Contract Centre</h1>
+            <p className="mt-1 text-[15px] text-ink-500 dark:text-ink-300">
               Manage, send and track your contracts all in one place.
             </p>
           </div>
@@ -292,7 +296,7 @@ export function ContractCentre({ variant }: { variant: "brand" | "creator" }) {
       )}
 
       {loading ? (
-        <p className="text-[15px] text-ink-500">Loading contracts...</p>
+        <p className="text-[15px] text-ink-500 dark:text-ink-300">Loading contracts...</p>
       ) : (
         <>
           <StatCards stats={stats} />
@@ -300,13 +304,13 @@ export function ContractCentre({ variant }: { variant: "brand" | "creator" }) {
 
           <section className="flex flex-col gap-5">
             <div className="flex flex-wrap items-center justify-between gap-4">
-              <h2 className="text-[26px] font-extrabold tracking-tight text-ink-900">Upcoming Deadlines</h2>
+              <h2 className="text-[26px] font-extrabold tracking-tight text-ink-900 dark:text-ink-50">Upcoming Deadlines</h2>
               <Link href="/dashboard/deals">
                 <Button size="lg">+ New Contract</Button>
               </Link>
             </div>
             {rows.filter((r) => r.status === "Awaiting Signature").length === 0 ? (
-              <p className="rounded-2xl border border-ink-100 bg-white py-10 text-center text-[15px] text-ink-500">
+              <p className="rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 py-10 text-center text-[15px] text-ink-500 dark:text-ink-300">
                 No contracts awaiting signature.
               </p>
             ) : (
@@ -320,22 +324,31 @@ export function ContractCentre({ variant }: { variant: "brand" | "creator" }) {
 
       <section className="flex flex-col gap-5">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <h2 className="text-[26px] font-extrabold tracking-tight text-ink-900">Contract Templates</h2>
-          <Button size="md">+ New Template</Button>
+          <h2 className="text-[26px] font-extrabold tracking-tight text-ink-900 dark:text-ink-50">Contract Templates</h2>
         </div>
-        {contractTemplates.map((t) => (
+        {[
+          {
+            name: "Pacten Standard Transaction Agreement",
+            description:
+              "The client-supplied standard agreement, completed through a guided form. Both parties review and accept before the deal becomes active.",
+          },
+          {
+            name: "Simple Contract",
+            description:
+              "The simpler contract generated from the agreed deal terms, with the same two-party acceptance.",
+          },
+        ].map((t) => (
           <div
-            key={t.id}
-            className="flex flex-wrap items-center gap-4 rounded-2xl border border-ink-100 bg-white px-6 py-5"
+            key={t.name}
+            className="flex flex-wrap items-center gap-4 rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 px-6 py-5"
           >
-            <p className="min-w-[200px] flex-1 text-[15px] font-bold text-ink-900">{t.name}</p>
-            <p className="w-[120px] text-sm text-ink-500">{t.updated}</p>
-            <div className="flex gap-3">
-              <Button size="md">Edit</Button>
-              <Button size="md" variant="danger-outline">
-                Delete
-              </Button>
+            <div className="min-w-[200px] flex-1">
+              <p className="text-[15px] font-bold text-ink-900 dark:text-ink-50">{t.name}</p>
+              <p className="mt-1 text-sm text-ink-500 dark:text-ink-300">{t.description}</p>
             </div>
+            <Link href="/dashboard/deals">
+              <Button size="md">Create a contract</Button>
+            </Link>
           </div>
         ))}
       </section>

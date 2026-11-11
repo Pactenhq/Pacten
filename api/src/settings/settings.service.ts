@@ -39,11 +39,11 @@ export const SETTING_DEFS: SettingDef[] = [
     defaultValue: 5,
   },
   {
-    key: 'FREE_MESSAGE_LIMIT',
-    label: 'Free messages per month',
+    key: 'FREE_NEW_CONVERSATION_LIMIT',
+    label: 'Free new conversations per month',
     description:
-      'Messages a free user can send per calendar month. Placeholder number — the client has not given the final value yet. Paid plans bypass this cap.',
-    defaultValue: 50,
+      'New conversations a free user can start per calendar month. Replies within existing conversations are unlimited and never count. Paid plans bypass this cap.',
+    defaultValue: 5,
   },
 ];
 

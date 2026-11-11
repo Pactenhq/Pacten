@@ -46,16 +46,16 @@ export function ConfirmDialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby="confirm-dialog-title"
-        className="w-full max-w-[520px] rounded-2xl bg-white p-6 shadow-xl sm:p-8"
+        className="w-full max-w-[520px] rounded-2xl bg-white dark:bg-ink-900 p-6 shadow-xl sm:p-8"
         onClick={(e) => e.stopPropagation()}
       >
         <h2
           id="confirm-dialog-title"
-          className="text-xl font-extrabold text-ink-900"
+          className="text-xl font-extrabold text-ink-900 dark:text-ink-50"
         >
           {title}
         </h2>
-        <p className="mt-1 text-[14px] text-ink-500">{message}</p>
+        <p className="mt-1 text-[14px] text-ink-500 dark:text-ink-300">{message}</p>
         <div className="mt-6 flex gap-3">
           <Button
             type="button"

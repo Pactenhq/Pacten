@@ -40,14 +40,14 @@ function LoginForm() {
         {...field("password")}
       />
       <div className="flex items-center justify-between">
-        <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-ink-700">
+        <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-ink-700 dark:text-ink-200">
           <input
             type="checkbox"
-            className="h-5 w-5 rounded border-ink-300 accent-[#0c29ab]"
+            className="h-5 w-5 rounded border-ink-300 dark:border-ink-700 accent-[#0c29ab]"
           />
           Remember me
         </label>
-        <Link href="/forgot-password" className="text-sm font-semibold text-brand hover:underline">
+        <Link href="/forgot-password" className="text-sm font-semibold text-brand dark:text-brand-200 hover:underline">
           Forgot password?
         </Link>
       </div>
@@ -64,23 +64,23 @@ export default function LoginPage() {
   return (
     <>
       <Navbar />
-      <main className="bg-mist/50">
+      <main className="bg-mist/50 dark:bg-ink-950/50">
         <div className="mx-auto flex min-h-[70vh] max-w-[1380px] items-center justify-center px-6 py-16 lg:px-12 lg:py-24">
           <Card className="fade-up fade-up-2 w-full max-w-[662px] p-6 shadow-pop sm:p-10">
-            <h1 className="text-3xl font-extrabold tracking-tight text-ink-900 lg:text-4xl">
+            <h1 className="text-3xl font-extrabold tracking-tight text-ink-900 dark:text-ink-50 lg:text-4xl">
               Welcome back
             </h1>
-            <p className="mt-2 text-[15px] text-ink-500">
+            <p className="mt-2 text-[15px] text-ink-500 dark:text-ink-300">
               Log in to your Pacten account and continue where you left off.
             </p>
             <Suspense>
               <LoginForm />
             </Suspense>
-            <p className="mt-4 text-sm text-ink-500">
+            <p className="mt-4 text-sm text-ink-500 dark:text-ink-300">
               Don&apos;t have an account?{" "}
               <Link
                 href="/signup/creator"
-                className="font-semibold text-brand hover:underline"
+                className="font-semibold text-brand dark:text-brand-200 hover:underline"
               >
                 Sign up
               </Link>

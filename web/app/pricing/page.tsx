@@ -45,7 +45,7 @@ function PlanTabs({
 }) {
   return (
     <div className="mt-8 flex max-w-full justify-center overflow-x-auto px-1">
-      <div className="inline-flex shrink-0 rounded-full border border-ink-200 bg-white p-1">
+      <div className="inline-flex shrink-0 rounded-full border border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900 p-1">
       {PLAN_TABS.map((t) => (
         <button
           key={t.role}
@@ -56,7 +56,7 @@ function PlanTabs({
             "h-11 shrink-0 rounded-full px-4 text-[13px] font-semibold transition-colors sm:px-6 sm:text-[15px]",
             active === t.role
               ? "bg-brand text-white"
-              : "text-ink-500 hover:text-ink-900"
+              : "text-ink-500 dark:text-ink-300 hover:text-ink-900 dark:hover:text-ink-50"
           )}
         >
           {t.label}
@@ -69,7 +69,7 @@ function PlanTabs({
 
 function BlueCheck() {
   return (
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-label="Included" className="mx-auto text-brand">
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-label="Included" className="mx-auto text-brand dark:text-brand-200">
       <circle cx="11" cy="11" r="9.5" stroke="currentColor" strokeWidth="1.8" />
       <path
         d="m7.4 11.3 2.5 2.5 4.7-5.4"
@@ -84,7 +84,7 @@ function BlueCheck() {
 
 function RedCross() {
   return (
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-label="Not included" className="mx-auto text-danger">
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-label="Not included" className="mx-auto text-danger dark:text-danger-bright">
       <circle cx="11" cy="11" r="9.5" stroke="currentColor" strokeWidth="1.8" />
       <path
         d="m8.5 8.5 5 5m0-5-5 5"
@@ -105,21 +105,21 @@ function ComparisonTable() {
             <SparkleIcon /> Compare
           </span>
         </Tag>
-        <h2 className="mt-6 text-4xl font-extrabold tracking-tight text-ink-900">
+        <h2 className="mt-6 text-4xl font-extrabold tracking-tight text-ink-900 dark:text-ink-50">
           Why Pacten?
         </h2>
       </div>
-      <div className="mt-10 overflow-x-auto rounded-2xl border border-ink-100 shadow-card">
+      <div className="mt-10 overflow-x-auto rounded-2xl border border-ink-100 dark:border-ink-800 shadow-card">
         <table className="w-full min-w-[560px] text-left">
           <thead>
-            <tr className="bg-brand-50/70">
-              <th className="px-5 py-4 text-[15px] font-semibold text-ink-900">
+            <tr className="bg-brand-50/70 dark:bg-white/10">
+              <th className="px-5 py-4 text-[15px] font-semibold text-ink-900 dark:text-ink-50">
                 Feature
               </th>
-              <th className="px-5 py-4 text-center text-[15px] font-semibold text-ink-900">
+              <th className="px-5 py-4 text-center text-[15px] font-semibold text-ink-900 dark:text-ink-50">
                 Pacten
               </th>
-              <th className="px-5 py-4 text-center text-[15px] font-semibold text-ink-900">
+              <th className="px-5 py-4 text-center text-[15px] font-semibold text-ink-900 dark:text-ink-50">
                 Collabstr
               </th>
             </tr>
@@ -128,15 +128,15 @@ function ComparisonTable() {
             {pricingComparison.map((row, i) => (
               <tr
                 key={row.feature}
-                className={cn(i % 2 === 1 && "bg-brand-50/40")}
+                className={cn(i % 2 === 1 && "bg-brand-50/40 dark:bg-white/10")}
               >
-                <td className="px-5 py-4 text-[15px] font-medium text-ink-900">
+                <td className="px-5 py-4 text-[15px] font-medium text-ink-900 dark:text-ink-50">
                   {row.feature}
                 </td>
-                <td className="px-5 py-4 text-center text-[15px] font-semibold text-ink-900">
+                <td className="px-5 py-4 text-center text-[15px] font-semibold text-ink-900 dark:text-ink-50">
                   {row.pacten === true ? <BlueCheck /> : row.pacten}
                 </td>
-                <td className="px-5 py-4 text-center text-[15px] text-ink-700">
+                <td className="px-5 py-4 text-center text-[15px] text-ink-700 dark:text-ink-200">
                   {row.collabstr === true || row.collabstr === "check" ? (
                     <BlueCheck />
                   ) : row.collabstr === "x" ? (
@@ -177,7 +177,7 @@ function ResultIcon({ kind }: { kind: string }) {
     ),
   };
   return (
-    <span aria-hidden className="mx-auto flex h-[52px] w-[52px] items-center justify-center rounded-2xl bg-brand-50 text-brand">
+    <span aria-hidden className="mx-auto flex h-[52px] w-[52px] items-center justify-center rounded-2xl bg-brand-50 dark:bg-white/10 text-brand dark:text-brand-200">
       <svg width="26" height="26" viewBox="0 0 16 16" fill="none">
         {paths[kind]}
       </svg>
@@ -255,8 +255,8 @@ function RateCalculator() {
   };
 
   const inputCls =
-    "h-[52px] w-full rounded-xl border border-ink-200 bg-white px-4 text-[15px] text-ink-900 placeholder:text-ink-400 focus:border-brand focus:outline-none";
-  const labelCls = "mb-1.5 block text-sm font-medium text-ink-700";
+    "h-[52px] w-full rounded-xl border border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900 px-4 text-[15px] text-ink-900 dark:text-ink-50 placeholder:text-ink-400 dark:placeholder:text-ink-300 focus:border-brand focus:outline-none";
+  const labelCls = "mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200";
 
   return (
     <section className="mx-auto max-w-[1025px] px-6 py-16 lg:py-20">
@@ -266,12 +266,12 @@ function RateCalculator() {
             <SparkleIcon /> Calculator
           </span>
         </Tag>
-        <h2 className="mt-6 text-4xl font-extrabold tracking-tight text-ink-900 lg:text-[44px] lg:leading-[1.15]">
+        <h2 className="mt-6 text-4xl font-extrabold tracking-tight text-ink-900 dark:text-ink-50 lg:text-[44px] lg:leading-[1.15]">
           Creator Rate
           <br />
           <span className="text-gradient-blue">Calculator</span>
         </h2>
-        <p className="mx-auto mt-4 max-w-[640px] text-lg text-ink-500">
+        <p className="mx-auto mt-4 max-w-[640px] text-lg text-ink-500 dark:text-ink-300">
           Estimate your ideal rate based on your platform, audience, and
           content type.
         </p>
@@ -350,7 +350,7 @@ function RateCalculator() {
             Calculate My Rate
           </Button>
           {result && (
-            <p className="rounded-xl bg-brand-50 px-4 py-3 text-center text-[15px] font-semibold text-brand">
+            <p className="rounded-xl bg-brand-50 dark:bg-white/10 px-4 py-3 text-center text-[15px] font-semibold text-brand dark:text-brand-200">
               {result}
             </p>
           )}
@@ -361,32 +361,32 @@ function RateCalculator() {
         {rateCalculatorTiers.map((tier, i) => (
           <Card key={tier.label} className="card-lift p-6 text-center">
             <ResultIcon kind={icons[i] ?? "money"} />
-            <p className="mt-4 text-4xl font-extrabold text-ink-900">
+            <p className="mt-4 text-4xl font-extrabold text-ink-900 dark:text-ink-50">
               {tiers ? tiers[i] ?? tier.price : tier.price}
             </p>
-            <p className="mt-2 text-[15px] font-bold text-ink-900">
+            <p className="mt-2 text-[15px] font-bold text-ink-900 dark:text-ink-50">
               {tier.label}
             </p>
-            <p className="mt-1 text-sm leading-relaxed text-ink-500">
+            <p className="mt-1 text-sm leading-relaxed text-ink-500 dark:text-ink-300">
               {tier.blurb}
             </p>
           </Card>
         ))}
         <Card className="card-lift p-6 text-center">
           <ResultIcon kind="chart" />
-          <p className="mt-4 text-4xl font-extrabold text-ink-900">
+          <p className="mt-4 text-4xl font-extrabold text-ink-900 dark:text-ink-50">
             {confidence !== null ? `${confidence}%` : "0%"}
           </p>
-          <p className="mt-2 text-[15px] font-bold text-ink-900">
+          <p className="mt-2 text-[15px] font-bold text-ink-900 dark:text-ink-50">
             Confidence Score
           </p>
-          <p className="mt-1 text-sm leading-relaxed text-ink-500">
+          <p className="mt-1 text-sm leading-relaxed text-ink-500 dark:text-ink-300">
             Based on inputs provided
           </p>
         </Card>
       </Stagger>
 
-      <p className="mt-8 text-center text-sm text-ink-400">
+      <p className="mt-8 text-center text-sm text-ink-400 dark:text-ink-300">
         Rates are estimates only and not financial advice. Actual rates depend
         on negotiation, usage rights, and market conditions.
       </p>
@@ -400,7 +400,7 @@ function PricingFaq() {
     <section id="faq" className="mx-auto max-w-[846px] px-6 py-16 lg:py-20">
       <div className="text-center">
         <Tag>FAQ</Tag>
-        <h2 className="mt-6 text-4xl font-extrabold tracking-tight text-ink-900">
+        <h2 className="mt-6 text-4xl font-extrabold tracking-tight text-ink-900 dark:text-ink-50">
           Pricing questions, answered
         </h2>
       </div>
@@ -410,7 +410,7 @@ function PricingFaq() {
           return (
             <div
               key={item.q}
-              className="overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-card"
+              className="overflow-hidden rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 shadow-card"
             >
               <button
                 type="button"
@@ -418,7 +418,7 @@ function PricingFaq() {
                 aria-expanded={isOpen}
                 className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left"
               >
-                <span className="text-[16px] font-semibold text-ink-900">
+                <span className="text-[16px] font-semibold text-ink-900 dark:text-ink-50">
                   {item.q}
                 </span>
                 <svg
@@ -428,7 +428,7 @@ function PricingFaq() {
                   fill="none"
                   aria-hidden
                   className={cn(
-                    "shrink-0 text-ink-500 transition-transform",
+                    "shrink-0 text-ink-500 dark:text-ink-300 transition-transform",
                     isOpen && "rotate-180"
                   )}
                 >
@@ -442,7 +442,7 @@ function PricingFaq() {
                 </svg>
               </button>
               {isOpen && (
-                <p className="px-6 pb-6 text-[15px] leading-relaxed text-ink-500">
+                <p className="px-6 pb-6 text-[15px] leading-relaxed text-ink-500 dark:text-ink-300">
                   {item.a}
                 </p>
               )}
@@ -457,15 +457,15 @@ function PricingFaq() {
 export default function PricingPage() {
   const [role, setRole] = useState<"brand" | "creator" | "professional">("brand");
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-ink-900">
       <Navbar />
       <main>
         <section className="mx-auto max-w-[1185px] px-6 pb-4 pt-16 text-center lg:pt-20">
           <Tag>Pricing</Tag>
-          <h1 className="mx-auto mt-6 max-w-[724px] break-words text-[28px] font-extrabold leading-[1.2] tracking-tight text-ink-900 sm:text-4xl lg:text-[52px] lg:leading-[1.1]">
+          <h1 className="mx-auto mt-6 max-w-[724px] break-words text-[28px] font-extrabold leading-[1.2] tracking-tight text-ink-900 dark:text-ink-50 sm:text-4xl lg:text-[52px] lg:leading-[1.1]">
             Pricing that rewards growth.
           </h1>
-          <p className="mx-auto mt-5 max-w-[724px] text-lg leading-relaxed text-ink-500">
+          <p className="mx-auto mt-5 max-w-[724px] text-lg leading-relaxed text-ink-500 dark:text-ink-300">
             Creators and professionals join free. Brands can start free and
             upgrade as they grow. Pacten only succeeds when our community
             succeeds.

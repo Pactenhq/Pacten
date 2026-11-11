@@ -53,13 +53,13 @@ export function SendOpportunityModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-[520px] rounded-2xl bg-white p-6 shadow-xl sm:p-8"
+        className="w-full max-w-[520px] rounded-2xl bg-white dark:bg-ink-900 p-6 shadow-xl sm:p-8"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-xl font-extrabold text-ink-900">
+        <h2 className="text-xl font-extrabold text-ink-900 dark:text-ink-50">
           Send opportunity to {recipientName}
         </h2>
-        <p className="mt-1 text-[14px] text-ink-500">
+        <p className="mt-1 text-[14px] text-ink-500 dark:text-ink-300">
           They will see this in their dashboard and can accept or decline.
         </p>
         <form className="mt-6 flex flex-col gap-4" onSubmit={submit}>
@@ -76,9 +76,9 @@ export function SendOpportunityModal({
             required
           />
           <label className="flex flex-col gap-1.5">
-            <span className="text-[14px] font-semibold text-ink-900">Details</span>
+            <span className="text-[14px] font-semibold text-ink-900 dark:text-ink-50">Details</span>
             <textarea
-              className="min-h-[110px] rounded-xl border border-ink-200 px-4 py-3 text-[15px] text-ink-900 placeholder:text-ink-400 focus:border-brand focus:outline-none"
+              className="min-h-[110px] rounded-xl border border-ink-200 dark:border-ink-700 px-4 py-3 text-[15px] text-ink-900 dark:text-ink-50 placeholder:text-ink-400 dark:placeholder:text-ink-300 focus:border-brand focus:outline-none"
               placeholder="What is the collaboration about? Deliverables, timeline…"
               value={description}
               onChange={(e) => setDescription(e.target.value)}

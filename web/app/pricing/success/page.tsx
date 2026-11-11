@@ -42,14 +42,14 @@ function UpgradeSuccessContent() {
   }, [sessionId]);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-ink-900">
       <Navbar />
       <main className="mx-auto max-w-[484px] px-6 py-20 lg:py-28">
         {syncing ? (
           <div className="text-center">
             <span
               aria-hidden
-              className="mx-auto flex h-[70px] w-[70px] items-center justify-center rounded-full border-2 border-brand text-brand"
+              className="mx-auto flex h-[70px] w-[70px] items-center justify-center rounded-full border-2 border-brand text-brand dark:text-brand-200"
             >
               <svg
                 className="animate-spin"
@@ -64,10 +64,10 @@ function UpgradeSuccessContent() {
                 <path d="M12 3a9 9 0 1 0 9 9" />
               </svg>
             </span>
-            <h1 className="mt-8 text-3xl font-extrabold tracking-tight text-ink-900 lg:text-4xl">
+            <h1 className="mt-8 text-3xl font-extrabold tracking-tight text-ink-900 dark:text-ink-50 lg:text-4xl">
               Activating your plan&hellip;
             </h1>
-            <p className="mt-4 text-lg leading-relaxed text-ink-500">
+            <p className="mt-4 text-lg leading-relaxed text-ink-500 dark:text-ink-300">
               Just a moment while we confirm your payment with Stripe.
             </p>
           </div>
@@ -75,7 +75,7 @@ function UpgradeSuccessContent() {
           <div className="text-center">
             <span
               aria-hidden
-              className="mx-auto flex h-[70px] w-[70px] items-center justify-center rounded-full border-2 border-brand text-brand"
+              className="mx-auto flex h-[70px] w-[70px] items-center justify-center rounded-full border-2 border-brand text-brand dark:text-brand-200"
             >
               <svg
                 width="32"
@@ -90,10 +90,10 @@ function UpgradeSuccessContent() {
                 <path d="m4.5 12.5 5 5 10-11" />
               </svg>
             </span>
-            <h1 className="mt-8 text-3xl font-extrabold tracking-tight text-ink-900 lg:text-4xl">
+            <h1 className="mt-8 text-3xl font-extrabold tracking-tight text-ink-900 dark:text-ink-50 lg:text-4xl">
               Your plan has been upgraded! &#x1F389;
             </h1>
-            <p className="mt-4 text-lg leading-relaxed text-ink-500">
+            <p className="mt-4 text-lg leading-relaxed text-ink-500 dark:text-ink-300">
               Your new plan is active and you can start using your additional
               features right away
             </p>

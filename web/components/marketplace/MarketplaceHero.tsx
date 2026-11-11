@@ -54,24 +54,24 @@ export function MarketplaceHero({
   return (
     <section className="mx-auto max-w-[1380px] px-6 pt-12 text-center lg:px-12 lg:pt-16">
       <div className="flex justify-center">
-        <span className="inline-flex h-9 items-center gap-2 rounded-full bg-brand-50 px-4 text-sm font-semibold text-brand">
+        <span className="inline-flex h-9 items-center gap-2 rounded-full bg-brand-50 dark:bg-white/10 px-4 text-sm font-semibold text-brand dark:text-brand-200">
           <SparkleIcon />
           {eyebrow}
         </span>
       </div>
       <h1 className="mx-auto mt-6 max-w-[900px] break-words text-[28px] font-extrabold leading-[1.2] tracking-tight sm:text-4xl lg:text-[64px] lg:leading-[1.05]">
         <span className="text-gradient-blue block">{titleBlue}</span>
-        <span className="block text-ink-900">{titleDark}</span>
+        <span className="block text-ink-900 dark:text-ink-50">{titleDark}</span>
       </h1>
-      <p className="mx-auto mt-5 max-w-[640px] text-lg text-ink-600">{subtitle}</p>
-      <div className="mx-auto mt-8 max-w-[820px] rounded-2xl border border-ink-100 bg-white p-2 shadow-[0_2px_16px_rgba(16,24,40,0.06)]">
+      <p className="mx-auto mt-5 max-w-[640px] text-lg text-ink-600 dark:text-ink-300">{subtitle}</p>
+      <div className="mx-auto mt-8 max-w-[820px] rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 p-2 shadow-[0_2px_16px_rgba(16,24,40,0.06)]">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           <input
             placeholder={placeholder}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && submit()}
-            className="h-[52px] w-full bg-transparent px-4 text-[15px] text-ink-900 placeholder:text-ink-400 focus:outline-none"
+            className="h-[52px] w-full bg-transparent px-4 text-[15px] text-ink-900 dark:text-ink-50 placeholder:text-ink-400 dark:placeholder:text-ink-300 focus:outline-none"
             aria-label={placeholder}
           />
           <Button
@@ -103,18 +103,18 @@ export function ResultCount({
 }) {
   return (
     <div className="mx-auto max-w-[1380px] px-6 lg:px-12">
-      <p className="text-[13px] text-ink-500">{count}</p>
+      <p className="text-[13px] text-ink-500 dark:text-ink-300">{count}</p>
       {quickFilters && quickFilters.length > 0 && (
         <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 sm:justify-end">
-          <span className="text-sm font-bold text-ink-900">Quick Filters:</span>
+          <span className="text-sm font-bold text-ink-900 dark:text-ink-50">Quick Filters:</span>
           {quickFilters.map((f) => (
             <label
               key={f}
-              className="flex cursor-pointer items-center gap-2 text-[15px] text-ink-700"
+              className="flex cursor-pointer items-center gap-2 text-[15px] text-ink-700 dark:text-ink-200"
             >
               <input
                 type="checkbox"
-                className="h-[18px] w-[18px] cursor-pointer rounded border-ink-300 accent-[#0c29ab]"
+                className="h-[18px] w-[18px] cursor-pointer rounded border-ink-300 dark:border-ink-700 accent-[#0c29ab]"
               />
               {f}
             </label>
@@ -144,8 +144,8 @@ export function Pagination({
           className={cn(
             "inline-flex h-10 w-10 items-center justify-center rounded-lg border text-sm font-medium transition-colors",
             p === page
-              ? "border-brand bg-white font-semibold text-brand"
-              : "border-ink-200 bg-white text-ink-700 hover:border-brand hover:text-brand"
+              ? "border-brand bg-white dark:bg-ink-900 font-semibold text-brand dark:text-brand-200"
+              : "border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900 text-ink-700 dark:text-ink-200 hover:border-brand hover:text-brand dark:hover:text-brand-200"
           )}
         >
           {p}
@@ -154,7 +154,7 @@ export function Pagination({
       <button
         onClick={() => onPageChange?.(Math.min(totalPages, page + 1))}
         disabled={page >= totalPages}
-        className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-ink-200 bg-white text-ink-700 hover:border-brand hover:text-brand disabled:cursor-not-allowed disabled:opacity-40"
+        className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900 text-ink-700 dark:text-ink-200 hover:border-brand hover:text-brand dark:hover:text-brand-200 disabled:cursor-not-allowed disabled:opacity-40"
         aria-label="Next page"
       >
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
@@ -215,8 +215,8 @@ export function PlatformTabs({
           className={cn(
             "inline-flex h-10 items-center gap-2 rounded-full border px-4 text-sm font-medium transition-colors",
             t === current
-              ? "border-brand bg-white font-semibold text-brand"
-              : "border-ink-200 bg-white text-ink-700 hover:border-brand hover:text-brand"
+              ? "border-brand bg-white dark:bg-ink-900 font-semibold text-brand dark:text-brand-200"
+              : "border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900 text-ink-700 dark:text-ink-200 hover:border-brand hover:text-brand dark:hover:text-brand-200"
           )}
         >
           {PLATFORM_ICONS[t] ?? PLATFORM_ICONS.All}

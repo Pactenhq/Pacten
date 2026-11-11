@@ -154,7 +154,7 @@ export default function BrandDashboardPage() {
           {requests.length > 0 ? (
             <RequestsTable rows={requests} />
           ) : (
-            <p className="py-4 text-[14px] text-ink-500">
+            <p className="py-4 text-[14px] text-ink-500 dark:text-ink-300">
               No applications received yet. When creators apply to your
               campaigns, they will appear here.
             </p>
@@ -169,7 +169,7 @@ export default function BrandDashboardPage() {
               ))}
             </div>
           ) : (
-            <p className="text-[14px] text-ink-500">No active campaigns yet.</p>
+            <p className="text-[14px] text-ink-500 dark:text-ink-300">No active campaigns yet.</p>
           )}
         </SectionCard>
 
@@ -181,7 +181,7 @@ export default function BrandDashboardPage() {
               ))}
             </div>
           ) : (
-            <p className="text-[14px] text-ink-500">No completed campaigns yet.</p>
+            <p className="text-[14px] text-ink-500 dark:text-ink-300">No completed campaigns yet.</p>
           )}
         </SectionCard>
 

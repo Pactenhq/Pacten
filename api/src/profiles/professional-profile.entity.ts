@@ -37,6 +37,12 @@ export class ProfessionalProfile {
   skills: string[];
 
   @Column('text', { array: true, default: '{}' })
+  languages: string[];
+
+  @Column('text', { array: true, default: '{}' })
+  industries: string[];
+
+  @Column('text', { array: true, default: '{}' })
   platforms: string[];
 
   @Column({ nullable: true })

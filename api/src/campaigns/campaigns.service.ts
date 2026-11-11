@@ -15,6 +15,8 @@ import {
   CreateApplicationDto,
 } from './dto/campaign.dto';
 import { EmailsService } from '../emails/emails.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationType } from '../notifications/notification.entity';
 import { PlanLimitsService } from '../common/plan-limits/plan-limits.service';
 import { BrandProfile } from '../profiles/brand-profile.entity';
 import { In } from 'typeorm';
@@ -30,6 +32,7 @@ export class CampaignsService {
     private brandProfiles: Repository<BrandProfile>,
     private emails: EmailsService,
     private planLimits: PlanLimitsService,
+    private notifications: NotificationsService,
   ) {}
 
   /**
@@ -266,6 +269,28 @@ export class CampaignsService {
     } catch {
       // Email is best-effort.
     }
+    // In-app notifications: confirmation for the applicant (mirrors the
+    // email) + a new-application alert for the brand. Best-effort;
+    // NotificationsService.create never throws.
+    const applicantName =
+      [applicant.firstName, applicant.lastName].filter(Boolean).join(' ') ||
+      applicant.email;
+    await this.notifications.create({
+      userId: applicant.id,
+      type: NotificationType.APPLICATION_RECEIVED,
+      title: 'Application received',
+      body: `Your application for ${campaign.title} was received.`,
+      link: '/dashboard/applications',
+      relatedId: saved.id,
+    });
+    await this.notifications.create({
+      userId: campaign.brandId,
+      type: NotificationType.APPLICATION_RECEIVED,
+      title: 'New application',
+      body: `${applicantName} applied for ${campaign.title}.`,
+      link: `/dashboard/campaigns/${campaign.id}/manage`,
+      relatedId: saved.id,
+    });
     return saved;
   }
 
@@ -312,7 +337,26 @@ export class CampaignsService {
       throw new ForbiddenException('Not your campaign');
     }
     application.status = status;
-    return this.applications.save(application);
+    const decided = await this.applications.save(application);
+    // In-app notification for the applicant on a brand decision
+    // (accepted/rejected only — no email exists for this event).
+    if (
+      status === ApplicationStatus.ACCEPTED ||
+      status === ApplicationStatus.REJECTED
+    ) {
+      const accepted = status === ApplicationStatus.ACCEPTED;
+      await this.notifications.create({
+        userId: application.applicantId,
+        type: NotificationType.APPLICATION_DECISION,
+        title: accepted ? 'Application accepted' : 'Application declined',
+        body: accepted
+          ? `Your application for ${application.campaign.title} was accepted.`
+          : `Your application for ${application.campaign.title} was declined.`,
+        link: '/dashboard/applications',
+        relatedId: decided.id,
+      });
+    }
+    return decided;
   }
 
   async withdrawApplication(

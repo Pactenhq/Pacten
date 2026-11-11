@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { SettingsProfileForm } from "./ProfileForm";
 
 // Settings frame: left nav (Profile / Account) + panel. The Account
@@ -33,25 +34,25 @@ function AccountPanel() {
   ];
   return (
     <div>
-      <p className="mt-1 text-[15px] text-ink-500">
+      <p className="mt-1 text-[15px] text-ink-500 dark:text-ink-300">
         Your Pacten account details.
       </p>
       <dl className="mt-6 space-y-4">
         {rows.map(([label, value]) => (
           <div
             key={label}
-            className="flex flex-wrap items-center justify-between gap-2 border-b border-ink-100 pb-3"
+            className="flex flex-wrap items-center justify-between gap-2 border-b border-ink-100 dark:border-ink-800 pb-3"
           >
-            <dt className="text-sm font-medium text-ink-500">{label}</dt>
-            <dd className="text-[15px] font-semibold capitalize text-ink-900">
+            <dt className="text-sm font-medium text-ink-500 dark:text-ink-300">{label}</dt>
+            <dd className="text-[15px] font-semibold capitalize text-ink-900 dark:text-ink-50">
               {value}
             </dd>
           </div>
         ))}
       </dl>
 
-      <h2 className="mt-8 text-lg font-bold text-ink-900">Password</h2>
-      <p className="mt-1 text-[15px] text-ink-500">
+      <h2 className="mt-8 text-lg font-bold text-ink-900 dark:text-ink-50">Password</h2>
+      <p className="mt-1 text-[15px] text-ink-500 dark:text-ink-300">
         To change your password, use the secure reset flow — we email you a
         link to set a new one.
       </p>
@@ -61,20 +62,20 @@ function AccountPanel() {
         </Button>
       </Link>
 
-      <h2 className="mt-8 text-lg font-bold text-ink-900">Privacy &amp; terms</h2>
-      <p className="mt-1 text-[15px] text-ink-500">
+      <h2 className="mt-8 text-lg font-bold text-ink-900 dark:text-ink-50">Privacy &amp; terms</h2>
+      <p className="mt-1 text-[15px] text-ink-500 dark:text-ink-300">
         Read how Pacten handles your data in our{" "}
-        <Link href="/privacy" className="font-semibold text-brand hover:underline">
+        <Link href="/privacy" className="font-semibold text-brand dark:text-brand-200 hover:underline">
           Privacy Policy
         </Link>{" "}
         and the rules of the marketplace in our{" "}
-        <Link href="/terms" className="font-semibold text-brand hover:underline">
+        <Link href="/terms" className="font-semibold text-brand dark:text-brand-200 hover:underline">
           Terms of Service
         </Link>
         .
       </p>
 
-      <h2 className="mt-8 text-lg font-bold text-ink-900">Session</h2>
+      <h2 className="mt-8 text-lg font-bold text-ink-900 dark:text-ink-50">Session</h2>
       <div className="mt-3">
         <Button variant="danger-outline" size="md" onClick={() => logout()}>
           Log out
@@ -87,42 +88,47 @@ function AccountPanel() {
 export default function SettingsPage() {
   const [active, setActive] = useState("Profile");
 
+  // Gated like every other dashboard page (via ProtectedRoute, the same
+  // wrapper DashboardShell uses): a logged-out visitor is sent to
+  // /login instead of seeing the empty profile form.
   return (
-    <div className="min-h-screen bg-white">
-      <Navbar />
-      <main className="mx-auto max-w-[1185px] px-6 py-12 lg:py-16">
-        <div className="grid gap-8 lg:grid-cols-[240px_1fr]">
-          <nav aria-label="Settings" className="h-fit">
-            <ul className="flex flex-row gap-1 overflow-x-auto lg:flex-col lg:gap-1">
-              {settingsNav.map((item) => (
-                <li key={item} className="shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => setActive(item)}
-                    aria-current={active === item ? "page" : undefined}
-                    className={cn(
-                      "flex h-11 w-full items-center rounded-xl px-4 text-[15px] font-medium transition-colors",
-                      active === item
-                        ? "bg-brand-50 text-brand"
-                        : "text-ink-500 hover:bg-ink-50 hover:text-ink-900"
-                    )}
-                  >
-                    {item}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </nav>
+    <ProtectedRoute>
+      <div className="min-h-screen bg-white dark:bg-ink-900">
+        <Navbar />
+        <main className="mx-auto max-w-[1185px] px-6 py-12 lg:py-16">
+          <div className="grid gap-8 lg:grid-cols-[240px_1fr]">
+            <nav aria-label="Settings" className="h-fit">
+              <ul className="flex flex-row gap-1 overflow-x-auto lg:flex-col lg:gap-1">
+                {settingsNav.map((item) => (
+                  <li key={item} className="shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setActive(item)}
+                      aria-current={active === item ? "page" : undefined}
+                      className={cn(
+                        "flex h-11 w-full items-center rounded-xl px-4 text-[15px] font-medium transition-colors",
+                        active === item
+                          ? "bg-brand-50 dark:bg-white/10 text-brand dark:text-brand-200"
+                          : "text-ink-500 dark:text-ink-300 hover:bg-ink-50 dark:hover:bg-white/5 hover:text-ink-900 dark:hover:text-ink-50"
+                      )}
+                    >
+                      {item}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </nav>
 
-          <Card className="h-fit p-6 lg:p-8">
-            <h1 className="text-2xl font-extrabold tracking-tight text-ink-900">
-              {active}
-            </h1>
-            {active === "Profile" ? <SettingsProfileForm /> : <AccountPanel />}
-          </Card>
-        </div>
-      </main>
-      <Footer />
-    </div>
+            <Card className="h-fit p-6 lg:p-8">
+              <h1 className="text-2xl font-extrabold tracking-tight text-ink-900 dark:text-ink-50">
+                {active}
+              </h1>
+              {active === "Profile" ? <SettingsProfileForm /> : <AccountPanel />}
+            </Card>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    </ProtectedRoute>
   );
 }

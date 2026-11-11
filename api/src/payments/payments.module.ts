@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Payment } from './payment.entity';
 import { PaymentEvent } from './payment-event.entity';
@@ -18,7 +18,8 @@ import { PaymentsWebhookController } from './payments-webhook.controller';
 
 @Module({
   imports: [
-    ReferralsModule,
+    // Circular with ReferralsModule (see its comment) — forwardRef.
+    forwardRef(() => ReferralsModule),
     TypeOrmModule.forFeature([
       Payment,
       PaymentEvent,

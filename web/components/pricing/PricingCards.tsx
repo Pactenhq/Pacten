@@ -46,7 +46,7 @@ function PlanIcon({ highlighted, index }: { highlighted?: boolean; index: number
       aria-hidden
       className={cn(
         "flex h-[52px] w-[52px] items-center justify-center rounded-2xl",
-        highlighted ? "bg-white/15 text-white" : "bg-brand-50 text-brand"
+        highlighted ? "bg-white/15 text-white" : "bg-brand-50 dark:bg-white/10 text-brand dark:text-brand-200"
       )}
     >
       <svg width="26" height="26" viewBox="0 0 16 16" fill="none">
@@ -65,7 +65,7 @@ function CheckItem({ children, light }: { children: React.ReactNode; light?: boo
         viewBox="0 0 20 20"
         fill="none"
         aria-hidden
-        className={cn("mt-0.5 shrink-0", light ? "text-white" : "text-brand")}
+        className={cn("mt-0.5 shrink-0", light ? "text-white" : "text-brand dark:text-brand-200")}
       >
         <circle cx="10" cy="10" r="8.5" stroke="currentColor" strokeWidth="1.6" />
         <path
@@ -76,7 +76,7 @@ function CheckItem({ children, light }: { children: React.ReactNode; light?: boo
           strokeLinejoin="round"
         />
       </svg>
-      <span className={cn("text-[15px]", light ? "text-white/90" : "text-ink-700")}>
+      <span className={cn("text-[15px]", light ? "text-white/90" : "text-ink-700 dark:text-ink-200")}>
         {children}
       </span>
     </li>
@@ -104,12 +104,12 @@ export function PricingCards({ role }: { role: PlanRole }) {
   }, [role]);
 
   if (loading) {
-    return <p className="text-center text-[15px] text-ink-500">Loading plans...</p>;
+    return <p className="text-center text-[15px] text-ink-500 dark:text-ink-300">Loading plans...</p>;
   }
 
   if (plans.length === 0) {
     return (
-      <p className="text-center text-[15px] text-ink-500">
+      <p className="text-center text-[15px] text-ink-500 dark:text-ink-300">
         Plans are unavailable right now. Please try again later.
       </p>
     );
@@ -135,11 +135,11 @@ export function PricingCards({ role }: { role: PlanRole }) {
               "relative flex flex-col rounded-2xl border p-6",
               highlighted
                 ? "border-brand-dark bg-brand-dark text-white shadow-lift"
-                : "border-ink-200 bg-white"
+                : "border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900"
             )}
           >
             {highlighted && (
-              <span className="absolute -top-3.5 right-5 inline-flex h-7 items-center rounded-full bg-white px-3 text-xs font-semibold text-brand-dark">
+              <span className="absolute -top-3.5 right-5 inline-flex h-7 items-center rounded-full bg-white dark:bg-ink-900 px-3 text-xs font-semibold text-brand-dark dark:text-brand-200">
                 Most popular
               </span>
             )}
@@ -147,7 +147,7 @@ export function PricingCards({ role }: { role: PlanRole }) {
             <p
               className={cn(
                 "mt-5 text-2xl font-extrabold",
-                highlighted ? "text-white" : "text-ink-900"
+                highlighted ? "text-white" : "text-ink-900 dark:text-ink-50"
               )}
             >
               {plan.name}
@@ -155,7 +155,7 @@ export function PricingCards({ role }: { role: PlanRole }) {
             <p
               className={cn(
                 "mt-1 text-lg font-bold",
-                highlighted ? "text-white" : "text-brand"
+                highlighted ? "text-white" : "text-brand dark:text-brand-200"
               )}
             >
               {fmtPrice(plan)}{plan.priceCentsMonthly > 0 && <span className="text-sm font-semibold">/month</span>}
@@ -163,7 +163,7 @@ export function PricingCards({ role }: { role: PlanRole }) {
             <hr
               className={cn(
                 "my-5 border-0 border-t",
-                highlighted ? "border-white/20" : "border-ink-100"
+                highlighted ? "border-white/20" : "border-ink-100 dark:border-ink-800"
               )}
             />
             <ul className="flex flex-col gap-3">

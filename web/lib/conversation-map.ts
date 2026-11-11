@@ -13,12 +13,19 @@ export function otherParticipant(c: any, myId?: string) {
   );
 }
 
+export function initialsForName(name: string): string {
+  const parts = (name || "").trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "U";
+  return (parts[0][0] + (parts[1]?.[0] ?? "")).toUpperCase();
+}
+
 export function mapConversation(c: any, myId?: string) {
   const other = otherParticipant(c, myId);
   const fullName = [other.firstName, other.lastName].filter(Boolean).join(" ");
   return {
     id: c.id,
     name: fullName || other.email || "User",
+    initials: initialsForName(fullName || other.email || "User"),
     handle: other.email ? `@${String(other.email).split("@")[0]}` : "",
     avatar: other.avatar ?? "",
     preview: c.lastMessage?.content ?? "",

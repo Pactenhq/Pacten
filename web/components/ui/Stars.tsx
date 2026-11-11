@@ -35,7 +35,7 @@ export function VerifiedBadge({ className }: { className?: string }) {
       viewBox="0 0 22 22"
       fill="none"
       aria-label="Verified"
-      className={cn("shrink-0 text-brand", className)}
+      className={cn("shrink-0 text-brand dark:text-brand-200", className)}
     >
       <circle cx="11" cy="11" r="10" fill="currentColor" />
       <path

@@ -5,7 +5,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MoreThanOrEqual, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { SettingsService } from '../../settings/settings.service';
 import {
@@ -26,10 +26,12 @@ import { Message } from '../../messaging/message.entity';
  *   FREE_BRAND_HIRE_LIMIT  (default 1)  — total deals a free brand creates
  *   FREE_APPLICATION_LIMIT (default 5)  — total applications by a free
  *                                         creator/professional
- *   FREE_MESSAGE_LIMIT     (default 50) — messages sent per calendar month
- *                                         by a free user (placeholder —
- *                                         the client has not given the
- *                                         final number yet)
+ *   FREE_NEW_CONVERSATION_LIMIT (default 5) — NEW conversations a free
+ *                                         user starts per calendar month.
+ *                                         Replies inside an existing
+ *                                         conversation are unlimited and
+ *                                         never count (client-confirmed
+ *                                         rule, Oct 31 2026).
  * Enforcement queries the user's CURRENT subscription state at action
  * time, so upgrades take effect immediately.
  * Limits are admin-editable on /admin/settings (M4); the settings
@@ -108,18 +110,50 @@ export class PlanLimitsService {
     if (count >= limit) throw this.limitError('application(s)', limit);
   }
 
-  async assertCanSendMessage(userId: string): Promise<void> {
+  /**
+   * Free-plan message cap (client-confirmed rule, Oct 31 2026): a free
+   * user may START up to `limit` new conversations per calendar month.
+   * A message in a conversation that already has any message is a
+   * reply — unlimited, exempt, whoever started the conversation.
+   * "Started" means the earliest message of the conversation overall
+   * was sent by this user. Paid users bypass all caps (unchanged).
+   */
+  async assertCanSendMessage(
+    userId: string,
+    conversationId?: string,
+  ): Promise<void> {
     if (await this.isPaidUser(userId)) return;
-    const limit = this.cap('FREE_MESSAGE_LIMIT', 50);
+    // Reply inside an existing conversation: exempt, no counting.
+    if (conversationId) {
+      const existingCount = await this.messagesRepo.count({
+        where: { conversationId },
+      });
+      if (existingCount > 0) return;
+    }
+    const limit = this.cap('FREE_NEW_CONVERSATION_LIMIT', 5);
     const monthStart = new Date();
     monthStart.setDate(1);
     monthStart.setHours(0, 0, 0, 0);
-    const count = await this.messagesRepo.count({
-      where: { senderId: userId, createdAt: MoreThanOrEqual(monthStart) },
-    });
-    if (count >= limit) {
+    // Distinct conversations this user messaged in this month, then
+    // keep only the ones they actually started (earliest message
+    // overall was theirs). No raw SQL.
+    const touched = await this.messagesRepo
+      .createQueryBuilder('m')
+      .select('DISTINCT m.conversationId', 'conversationId')
+      .where('m.senderId = :userId', { userId })
+      .andWhere('m.createdAt >= :monthStart', { monthStart })
+      .getRawMany<{ conversationId: string }>();
+    let started = 0;
+    for (const row of touched) {
+      const first = await this.messagesRepo.findOne({
+        where: { conversationId: row.conversationId },
+        order: { createdAt: 'ASC' },
+      });
+      if (first && first.senderId === userId) started++;
+    }
+    if (started >= limit) {
       throw new HttpException(
-        `Free plan limit reached: your free plan includes ${limit} messages per month. Upgrade to a paid plan to continue.`,
+        `Free plan limit reached: your free plan includes ${limit} new conversations per month. Replies in existing conversations are unlimited. Upgrade to a paid plan to start more conversations.`,
         HttpStatus.TOO_MANY_REQUESTS,
       );
     }

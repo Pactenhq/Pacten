@@ -24,7 +24,7 @@ export function Stepper({
                   "flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold sm:h-9 sm:w-9 sm:text-[15px]",
                   active || done
                     ? "bg-brand text-white"
-                    : "bg-ink-100 text-ink-500"
+                    : "bg-ink-100 dark:bg-ink-800 text-ink-500 dark:text-ink-300"
                 )}
               >
                 {idx + 1}
@@ -32,7 +32,7 @@ export function Stepper({
               <span
                 className={cn(
                   "whitespace-nowrap text-xs sm:text-sm",
-                  active ? "font-semibold text-brand" : "font-medium text-ink-500"
+                  active ? "font-semibold text-brand dark:text-brand-200" : "font-medium text-ink-500 dark:text-ink-300"
                 )}
               >
                 {label}
@@ -41,7 +41,7 @@ export function Stepper({
             {idx < steps.length - 1 && (
               <span
                 aria-hidden
-                className="mt-[15px] h-[2px] w-6 bg-ink-200 sm:mt-[17px] sm:w-20"
+                className="mt-[15px] h-[2px] w-6 bg-ink-200 dark:bg-ink-700 sm:mt-[17px] sm:w-20"
               />
             )}
           </li>

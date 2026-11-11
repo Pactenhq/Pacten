@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Navbar } from "@/components/ui/Navbar";
 import { Footer } from "@/components/ui/Footer";
 import { Drawer } from "@/components/ui/Drawer";
@@ -51,9 +51,29 @@ export default function CreatorsPage() {
     price: null,
     verifiedOnly: false,
     availableNow: false,
+    language: "",
+    industry: "",
   });
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 9;
+
+  // Distinct real languages/industries across the loaded creators, for
+  // the Language / Industry Experience dropdowns (same source the
+  // cards render from: API `languages` / `industries`).
+  const languageOptions = useMemo(
+    () =>
+      [...new Set(allCreators.flatMap((c) => c.languagesList ?? []))].sort(
+        (a, b) => a.localeCompare(b)
+      ),
+    [allCreators]
+  );
+  const industryOptions = useMemo(
+    () =>
+      [...new Set(allCreators.flatMap((c) => c.industriesList ?? []))].sort(
+        (a, b) => a.localeCompare(b)
+      ),
+    [allCreators]
+  );
 
   // Arriving from the home-page hero search (?q=...) — start filtered.
   useEffect(() => {
@@ -80,6 +100,14 @@ export default function CreatorsPage() {
     if (filters.category !== "All") {
       const niches = (c.niches ?? []).map((n: string) => n.toLowerCase());
       if (!niches.includes(filters.category.toLowerCase())) return false;
+    }
+    // Language / industry membership, same semantics as the Skills
+    // filter: only creators carrying the selected value pass.
+    if (filters.language && !(c.languagesList ?? []).includes(filters.language)) {
+      return false;
+    }
+    if (filters.industry && !(c.industriesList ?? []).includes(filters.industry)) {
+      return false;
     }
     // Range/boolean filters only exclude items that actually carry data;
     // items without the field pass through so the panel never empties the
@@ -118,8 +146,8 @@ export default function CreatorsPage() {
       <Navbar />
       <main className="pb-20">
         <MarketplaceHero
-          eyebrow="10,000+ Verified Creators"
-          titleBlue="Find the perfect creator"
+          eyebrow="Creator Marketplace"
+          titleBlue="Hire content creators"
           titleDark="for your next campaign."
           subtitle="Browse verified TikTok, Instagram, YouTube, Twitch, LinkedIn and UGC creators."
           placeholder="Search creators, niches or platforms..."
@@ -140,8 +168,8 @@ export default function CreatorsPage() {
         <div className="mx-auto mt-8 max-w-[1380px] px-6 lg:px-12">
           <div className="flex gap-8">
             <aside className="hidden w-[300px] shrink-0 lg:block">
-              <div className="sticky top-24 rounded-2xl border border-ink-100 bg-white p-5 shadow-card">
-                <FilterPanel kind="creators" onCreatorFilterChange={handleFilter} />
+              <div className="sticky top-24 rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 p-5 shadow-card">
+                <FilterPanel kind="creators" languageOptions={languageOptions} industryOptions={industryOptions} onCreatorFilterChange={handleFilter} />
               </div>
             </aside>
             <div className="min-w-0 flex-1">
@@ -162,7 +190,7 @@ export default function CreatorsPage() {
         onClose={() => setDrawerOpen(false)}
         title="Filters"
       >
-        <FilterPanel kind="creators" onCreatorFilterChange={handleFilter} />
+        <FilterPanel kind="creators" languageOptions={languageOptions} industryOptions={industryOptions} onCreatorFilterChange={handleFilter} />
       </Drawer>
     </>
   );

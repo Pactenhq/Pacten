@@ -36,6 +36,11 @@ function NewDealForm() {
   const [error, setError] = useState("");
   // null = loading, [] = fetch failed/empty -> fall back to manual UUID entry
   const [creators, setCreators] = useState<CreatorOption[] | null>(null);
+  // Manual entry lets a brand hire ANY creator by user ID. The dropdown
+  // only carries the top 100 by rating, so without this toggle a
+  // brand-new creator (or any creator past the 100th) could never be
+  // selected for a direct deal once the directory grew past 100.
+  const [manualCreator, setManualCreator] = useState(false);
 
   useEffect(() => {
     api
@@ -123,10 +128,10 @@ function NewDealForm() {
   };
 
   const inputCls =
-    "w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:border-blue-500 focus:outline-none";
+    "w-full rounded-lg border border-gray-300 dark:border-ink-700 px-4 py-2.5 focus:border-blue-500 focus:outline-none";
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-5 rounded-2xl border border-gray-200 bg-white p-6">
+    <form onSubmit={submit} className="flex flex-col gap-5 rounded-2xl border border-gray-200 dark:border-ink-700 bg-white dark:bg-ink-900 p-6">
       {applicationId && (
         <p className="rounded-lg bg-blue-50 px-4 py-2 text-sm text-blue-800">
           Creating deal from an accepted application — details pre-filled.
@@ -154,19 +159,39 @@ function NewDealForm() {
         <label className="mb-1 block text-sm font-medium">Creator *</label>
         {creators === null ? (
           <input className={inputCls} disabled placeholder="Loading creators…" />
-        ) : creators.length > 0 ? (
-          <select className={inputCls} value={form.creatorId} onChange={set("creatorId")} required>
-            <option value="">Select a creator…</option>
-            {creators.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
+        ) : creators.length > 0 && !manualCreator ? (
+          <>
+            <select className={inputCls} value={form.creatorId} onChange={set("creatorId")} required>
+              <option value="">Select a creator…</option>
+              {creators.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={() => setManualCreator(true)}
+              className="mt-1 cursor-pointer text-xs font-semibold text-brand dark:text-brand-200 hover:underline"
+            >
+              Can&apos;t find the creator? Enter creator ID manually
+            </button>
+          </>
         ) : (
-          <input className={inputCls} value={form.creatorId} onChange={set("creatorId")} required placeholder="Creator's user UUID" />
+          <>
+            <input className={inputCls} value={form.creatorId} onChange={set("creatorId")} required placeholder="Creator's user UUID" />
+            {creators.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setManualCreator(false)}
+                className="mt-1 cursor-pointer text-xs font-semibold text-brand dark:text-brand-200 hover:underline"
+              >
+                Back to creator list
+              </button>
+            )}
+          </>
         )}
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="mt-1 text-xs text-gray-500 dark:text-ink-300">
           Direct deal with this creator — no campaign needed.
         </p>
       </div>
@@ -223,7 +248,7 @@ export default function NewDealPage() {
           title="New Deal"
           subtitle="Propose a collaboration deal with a creator."
         />
-        <Suspense fallback={<p className="text-sm text-gray-500">Loading…</p>}>
+        <Suspense fallback={<p className="text-sm text-gray-500 dark:text-ink-300">Loading…</p>}>
           <NewDealForm />
         </Suspense>
       </div>

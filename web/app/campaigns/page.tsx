@@ -142,9 +142,9 @@ export default function CampaignsPage() {
       <Navbar />
       <main className="pb-20">
         <MarketplaceHero
-          eyebrow="1,000+ Active Opportunities"
-          titleBlue="Find your next opportunity."
-          titleDark="Work on projects you love."
+          eyebrow="Campaigns & Opportunities"
+          titleBlue="Discover creator campaigns"
+          titleDark="and brand collaborations."
           subtitle="Discover brand campaigns, creative projects, and long-term collaborations."
           placeholder="Search by job title, skills, brand or keyword..."
           onSearch={handleSearch}
@@ -158,7 +158,7 @@ export default function CampaignsPage() {
         <div className="mx-auto mt-8 max-w-[1380px] px-6 lg:px-12">
           <div className="flex gap-8">
             <aside className="hidden w-[300px] shrink-0 lg:block">
-              <div className="sticky top-24 rounded-2xl border border-ink-100 bg-white p-5 shadow-card">
+              <div className="sticky top-24 rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 p-5 shadow-card">
                 <FilterPanel kind="campaigns" onFilterChange={handleFilterChange} />
               </div>
             </aside>
@@ -188,11 +188,11 @@ export default function CampaignsPage() {
                 ))}
               </div>
               {!loading && pagedCampaigns.length === 0 && (
-                <div className="rounded-2xl border border-ink-100 bg-white p-12 text-center shadow-card">
-                  <p className="text-lg font-bold text-ink-900">
+                <div className="rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 p-12 text-center shadow-card">
+                  <p className="text-lg font-bold text-ink-900 dark:text-ink-50">
                     No campaigns match your search or filters
                   </p>
-                  <p className="mt-2 text-[15px] text-ink-500">
+                  <p className="mt-2 text-[15px] text-ink-500 dark:text-ink-300">
                     Try a different keyword, or clear the filters in the
                     Filters panel.
                   </p>

@@ -9,8 +9,8 @@ import type { KanbanColumn } from "@/lib/mock-campaigns";
 export function TaskBoard({ columns }: { columns: KanbanColumn[] }) {
   return (
     <Card className="p-6">
-      <h2 className="text-[18px] font-bold text-ink-900">Task Management</h2>
-      <p className="mt-1 text-[14px] text-ink-500">
+      <h2 className="text-[18px] font-bold text-ink-900 dark:text-ink-50">Task Management</h2>
+      <p className="mt-1 text-[14px] text-ink-500 dark:text-ink-300">
         Manage tasks and subtasks for this campaign
       </p>
 
@@ -18,13 +18,13 @@ export function TaskBoard({ columns }: { columns: KanbanColumn[] }) {
         {columns.map((col) => (
           <div
             key={col.title}
-            className="rounded-xl bg-ink-50 p-3"
+            className="rounded-xl bg-ink-50 dark:bg-ink-900 p-3"
           >
             <div className="flex items-center justify-between px-1 pb-3">
-              <span className="text-[12px] font-bold tracking-wide text-ink-500 uppercase">
+              <span className="text-[12px] font-bold tracking-wide text-ink-500 dark:text-ink-300 uppercase">
                 {col.title}
               </span>
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs font-bold text-ink-700 shadow-card">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white dark:bg-ink-900 text-xs font-bold text-ink-700 dark:text-ink-200 shadow-card">
                 {col.count}
               </span>
             </div>
@@ -32,10 +32,10 @@ export function TaskBoard({ columns }: { columns: KanbanColumn[] }) {
               {col.tasks.map((t) => (
                 <div
                   key={t.title}
-                  className="rounded-xl border border-ink-100 bg-white p-3.5 shadow-card"
+                  className="rounded-xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 p-3.5 shadow-card"
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <p className="text-[14px] font-semibold text-ink-900">
+                    <p className="text-[14px] font-semibold text-ink-900 dark:text-ink-50">
                       {t.title}
                     </p>
                     {t.tag && (
@@ -44,22 +44,22 @@ export function TaskBoard({ columns }: { columns: KanbanColumn[] }) {
                       </Tag>
                     )}
                   </div>
-                  <p className="mt-1 text-[13px] text-ink-500">{t.meta}</p>
+                  <p className="mt-1 text-[13px] text-ink-500 dark:text-ink-300">{t.meta}</p>
                   {typeof t.progress === "number" && (
                     <div className="mt-2.5">
-                      <div className="h-1.5 overflow-hidden rounded-full bg-ink-100">
+                      <div className="h-1.5 overflow-hidden rounded-full bg-ink-100 dark:bg-ink-800">
                         <div
                           className="h-full rounded-full bg-brand"
                           style={{ width: `${t.progress}%` }}
                         />
                       </div>
-                      <p className="mt-1 text-right text-xs font-semibold text-ink-500">
+                      <p className="mt-1 text-right text-xs font-semibold text-ink-500 dark:text-ink-300">
                         {t.progress}%
                       </p>
                     </div>
                   )}
                   <div className="mt-2.5 flex items-center justify-between">
-                    <button className="cursor-pointer text-[13px] font-semibold text-brand hover:underline">
+                    <button className="cursor-pointer text-[13px] font-semibold text-brand dark:text-brand-200 hover:underline">
                       + Add task
                     </button>
                     {t.assignee && (
@@ -67,7 +67,7 @@ export function TaskBoard({ columns }: { columns: KanbanColumn[] }) {
                         aria-hidden
                         className={cn(
                           "flex h-7 w-7 items-center justify-center rounded-full",
-                          "bg-brand-100 text-[11px] font-bold text-brand"
+                          "bg-brand-100 dark:bg-brand/25 text-[11px] font-bold text-brand dark:text-brand-200"
                         )}
                       >
                         {t.assignee}

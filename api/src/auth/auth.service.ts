@@ -95,11 +95,16 @@ export class AuthService {
     const displayName = `${dto.firstName} ${dto.lastName}`.trim();
     await this.emails.sendVerificationEmail(dto.email, displayName, verificationToken);
 
+    // The verification token is returned only outside production so
+    // local/dev tests can complete the flow without an inbox; it is
+    // never exposed in production (same rule as the reset token in
+    // forgot-password below). Returning it unconditionally would let
+    // anyone verify an arbitrary email address without inbox access.
+    const isProduction = this.config.get('NODE_ENV') === 'production';
     return {
       message: 'Account created. Please check your email to verify.',
       userId: user.id,
-      // Remove in production — for development only
-      verificationToken,
+      ...(isProduction ? {} : { verificationToken }),
     };
   }
 

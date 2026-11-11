@@ -89,10 +89,10 @@ export default function CancelSubscriptionPage() {
               Back to Subscription
             </Button>
           </Link>
-          <h1 className="mt-6 text-3xl font-extrabold tracking-tight text-ink-900">
+          <h1 className="mt-6 text-3xl font-extrabold tracking-tight text-ink-900 dark:text-ink-50">
             Cancel Subscription
           </h1>
-          <p className="mt-2 max-w-[703px] text-[15px] text-ink-500">
+          <p className="mt-2 max-w-[703px] text-[15px] text-ink-500 dark:text-ink-300">
             We&rsquo;re sorry to see you go. Before you cancel, please review
             what happens to your plan and access.
           </p>
@@ -101,10 +101,10 @@ export default function CancelSubscriptionPage() {
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="flex flex-col gap-6">
             <Card className="p-6">
-              <h2 className="text-lg font-bold text-ink-900">
+              <h2 className="text-lg font-bold text-ink-900 dark:text-ink-50">
                 Why are you cancelling?
               </h2>
-              <p className="mt-1 text-sm text-ink-500">
+              <p className="mt-1 text-sm text-ink-500 dark:text-ink-300">
                 Your feedback helps us improve.
               </p>
               <div className="mt-5 flex flex-col">
@@ -113,7 +113,7 @@ export default function CancelSubscriptionPage() {
                   return (
                     <label
                       key={reason}
-                      className="flex cursor-pointer items-center justify-between gap-3 border-b border-ink-100 py-3.5 text-[15px] text-ink-700 last:border-0"
+                      className="flex cursor-pointer items-center justify-between gap-3 border-b border-ink-100 dark:border-ink-800 py-3.5 text-[15px] text-ink-700 dark:text-ink-200 last:border-0"
                     >
                       {reason}
                       <span
@@ -122,7 +122,7 @@ export default function CancelSubscriptionPage() {
                           "flex h-5 w-5 shrink-0 items-center justify-center rounded-[4px] border transition-colors",
                           checked
                             ? "border-brand bg-brand text-white"
-                            : "border-ink-300 bg-white"
+                            : "border-ink-300 dark:border-ink-700 bg-white dark:bg-ink-900"
                         )}
                       >
                         {checked && (
@@ -147,21 +147,21 @@ export default function CancelSubscriptionPage() {
                   );
                 })}
               </div>
-              <p className="mt-6 text-[15px] font-medium text-ink-900">
+              <p className="mt-6 text-[15px] font-medium text-ink-900 dark:text-ink-50">
                 Tell us more (optional)
               </p>
               <textarea
                 rows={4}
                 placeholder="Share your feedback..."
-                className="mt-2 w-full resize-none rounded-xl border border-ink-300 bg-white px-4 py-3 text-[15px] text-ink-900 placeholder:text-ink-400 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand-100"
+                className="mt-2 w-full resize-none rounded-xl border border-ink-300 dark:border-ink-700 bg-white dark:bg-ink-900 px-4 py-3 text-[15px] text-ink-900 dark:text-ink-50 placeholder:text-ink-400 dark:placeholder:text-ink-300 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand-100"
               />
             </Card>
 
-            <Card className="bg-brand-50/60 p-6">
-              <h2 className="text-lg font-bold text-ink-900">
+            <Card className="bg-brand-50/60 dark:bg-white/10 p-6">
+              <h2 className="text-lg font-bold text-ink-900 dark:text-ink-50">
                 Want to keep your plan?
               </h2>
-              <p className="mt-1 text-sm text-ink-500">
+              <p className="mt-1 text-sm text-ink-500 dark:text-ink-300">
                 Switch to a different plan that better fits your needs.
               </p>
               <div className="mt-5">
@@ -174,12 +174,12 @@ export default function CancelSubscriptionPage() {
 
           <div className="flex flex-col gap-6">
             {loading ? (
-              <div className="rounded-2xl bg-brand-50/60 p-6">
-                <p className="text-[15px] text-ink-500">Loading your plan...</p>
+              <div className="rounded-2xl bg-brand-50/60 dark:bg-white/10 p-6">
+                <p className="text-[15px] text-ink-500 dark:text-ink-300">Loading your plan...</p>
               </div>
             ) : plan ? (
               <>
-                <div className="rounded-2xl bg-brand-50/60 p-6">
+                <div className="rounded-2xl bg-brand-50/60 dark:bg-white/10 p-6">
                   <div className="flex items-center gap-3">
                     <span
                       aria-hidden
@@ -191,30 +191,30 @@ export default function CancelSubscriptionPage() {
                       </svg>
                     </span>
                     {tag && (
-                      <span className="inline-flex h-7 items-center rounded-full bg-white px-3 text-xs font-semibold text-brand">
+                      <span className="inline-flex h-7 items-center rounded-full bg-white dark:bg-ink-900 px-3 text-xs font-semibold text-brand dark:text-brand-200">
                         {tag}
                       </span>
                     )}
                   </div>
-                  <p className="mt-4 text-3xl font-extrabold text-ink-900">
+                  <p className="mt-4 text-3xl font-extrabold text-ink-900 dark:text-ink-50">
                     {plan.name}
                   </p>
-                  <p className="mt-1 text-lg font-bold text-brand">
+                  <p className="mt-1 text-lg font-bold text-brand dark:text-brand-200">
                     {fmtPrice(plan.priceCentsMonthly)}
                   </p>
-                  <p className="mt-2 text-sm leading-relaxed text-ink-500">
+                  <p className="mt-2 text-sm leading-relaxed text-ink-500 dark:text-ink-300">
                     Your current plan, billed monthly.
                     {periodEnd &&
                       ` Current period ends ${new Date(periodEnd).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}.`}
                   </p>
                 </div>
 
-                <div className="rounded-2xl bg-brand-50/60 p-6">
+                <div className="rounded-2xl bg-brand-50/60 dark:bg-white/10 p-6">
                   <ul className="space-y-3">
                     {(plan.benefits ?? []).map((f) => (
                       <li
                         key={f}
-                        className="flex items-start gap-3 text-[15px] text-ink-700"
+                        className="flex items-start gap-3 text-[15px] text-ink-700 dark:text-ink-200"
                       >
                         <svg
                           width="20"
@@ -222,7 +222,7 @@ export default function CancelSubscriptionPage() {
                           viewBox="0 0 20 20"
                           fill="none"
                           aria-hidden
-                          className="mt-0.5 shrink-0 text-brand"
+                          className="mt-0.5 shrink-0 text-brand dark:text-brand-200"
                         >
                           <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="1.6" />
                           <path
@@ -240,8 +240,8 @@ export default function CancelSubscriptionPage() {
                 </div>
               </>
             ) : (
-              <div className="rounded-2xl bg-brand-50/60 p-6">
-                <p className="text-[15px] text-ink-700">
+              <div className="rounded-2xl bg-brand-50/60 dark:bg-white/10 p-6">
+                <p className="text-[15px] text-ink-700 dark:text-ink-200">
                   You don&rsquo;t have an active subscription right now.
                 </p>
                 <div className="mt-4">

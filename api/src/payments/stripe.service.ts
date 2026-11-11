@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'crypto';
 import Stripe from 'stripe';
@@ -80,6 +80,76 @@ export class StripeService {
       metadata: params.metadata || {},
     });
     return { id: tr.id };
+  }
+
+  /**
+   * Stripe Connect (Express) onboarding.
+   *
+   * Demo mode has no real Stripe account behind it, so onboarding cannot
+   * be simulated meaningfully (there is no Stripe-hosted page to visit):
+   * these methods throw in demo mode and ConnectService reports the
+   * demo state instead. Live TEST mode uses the real sk_test_* key.
+   */
+  async createExpressAccount(params: {
+    email: string;
+    country: string;
+  }): Promise<{ id: string }> {
+    if (this.demoMode) {
+      throw new BadRequestException(
+        'Stripe Connect is not available in demo mode',
+      );
+    }
+    const account = await this.stripe.accounts.create({
+      type: 'express',
+      country: params.country,
+      email: params.email,
+      capabilities: {
+        transfers: { requested: true },
+        card_payments: { requested: true },
+      },
+    });
+    return { id: account.id };
+  }
+
+  async createAccountLink(params: {
+    accountId: string;
+    refreshUrl: string;
+    returnUrl: string;
+  }): Promise<{ url: string }> {
+    if (this.demoMode) {
+      throw new BadRequestException(
+        'Stripe Connect is not available in demo mode',
+      );
+    }
+    const link = await this.stripe.accountLinks.create({
+      account: params.accountId,
+      refresh_url: params.refreshUrl,
+      return_url: params.returnUrl,
+      type: 'account_onboarding',
+    });
+    return { url: link.url };
+  }
+
+  async retrieveConnectAccount(accountId: string): Promise<{
+    id: string;
+    email: string | null;
+    detailsSubmitted: boolean;
+    chargesEnabled: boolean;
+    payoutsEnabled: boolean;
+  }> {
+    if (this.demoMode) {
+      throw new BadRequestException(
+        'Stripe Connect is not available in demo mode',
+      );
+    }
+    const account = await this.stripe.accounts.retrieve(accountId);
+    return {
+      id: account.id,
+      email: account.email ?? null,
+      detailsSubmitted: account.details_submitted ?? false,
+      chargesEnabled: account.charges_enabled ?? false,
+      payoutsEnabled: account.payouts_enabled ?? false,
+    };
   }
 
   async createCheckoutSession(params: {

@@ -45,13 +45,13 @@ export default function DealsPage() {
       case "active":
         return "bg-green-100 text-green-800";
       case "completed":
-        return "bg-gray-100 text-gray-800";
+        return "bg-gray-100 dark:bg-ink-900 text-gray-800 dark:text-ink-100";
       case "cancelled":
         return "bg-red-100 text-red-800";
       case "disputed":
         return "bg-orange-100 text-orange-800";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-gray-100 dark:bg-ink-900 text-gray-800 dark:text-ink-100";
     }
   };
 
@@ -73,39 +73,39 @@ export default function DealsPage() {
         </div>
 
         {loading ? (
-          <p className="text-gray-500">Loading deals...</p>
+          <p className="text-gray-500 dark:text-ink-300">Loading deals...</p>
         ) : deals.length === 0 ? (
-          <div className="rounded-2xl border border-gray-200 bg-white p-12 text-center">
-            <p className="text-lg font-medium text-gray-700">No deals yet</p>
-            <p className="mt-2 text-gray-500">
+          <div className="rounded-2xl border border-gray-200 dark:border-ink-700 bg-white dark:bg-ink-900 p-12 text-center">
+            <p className="text-lg font-medium text-gray-700 dark:text-ink-200">No deals yet</p>
+            <p className="mt-2 text-gray-500 dark:text-ink-300">
               Create a deal to start collaborating with creators.
             </p>
           </div>
         ) : (
-          <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
+          <div className="overflow-hidden rounded-2xl border border-gray-200 dark:border-ink-700 bg-white dark:bg-ink-900">
             <table className="w-full">
-              <thead className="bg-gray-50">
+              <thead className="bg-gray-50 dark:bg-ink-950">
                 <tr>
-                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">
+                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 dark:text-ink-300">
                     Deal
                   </th>
-                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">
+                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 dark:text-ink-300">
                     Partner
                   </th>
-                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">
+                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 dark:text-ink-300">
                     Budget
                   </th>
-                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">
+                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 dark:text-ink-300">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">
+                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 dark:text-ink-300">
                     Updated
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {deals.map((deal) => (
-                  <tr key={deal.id} className="hover:bg-gray-50">
+                  <tr key={deal.id} className="hover:bg-gray-50 dark:hover:bg-ink-950">
                     <td className="px-6 py-4">
                       <Link
                         href={`/dashboard/deals/${deal.id}`}
@@ -114,7 +114,7 @@ export default function DealsPage() {
                         {String(deal.title ?? "").replace(/^Deal:\s*/i, "")}
                       </Link>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
+                    <td className="px-6 py-4 text-sm text-gray-600 dark:text-ink-200">
                       {(() => {
                         // Show the COUNTERPARTY's name (never a raw email):
                         // brands see the creator, sellers see the brand.
@@ -129,7 +129,7 @@ export default function DealsPage() {
                         return name || partner?.email || "-";
                       })()}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
+                    <td className="px-6 py-4 text-sm text-gray-600 dark:text-ink-200">
                       {deal.agreedBudget != null &&
                       deal.agreedBudget !== "" &&
                       Number.isFinite(Number(deal.agreedBudget))
@@ -143,7 +143,7 @@ export default function DealsPage() {
                         {deal.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
+                    <td className="px-6 py-4 text-sm text-gray-500 dark:text-ink-300">
                       {deal.updatedAt
                         ? new Date(deal.updatedAt).toLocaleDateString()
                         : "-"}

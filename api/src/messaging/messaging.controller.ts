@@ -4,6 +4,7 @@ import {
   Post,
   Body,
   Param,
+  Query,
   UseGuards,
   Request,
 } from '@nestjs/common';
@@ -39,8 +40,16 @@ export class MessagingController {
   }
 
   @Get(':id/messages')
-  getMessages(@Request() req: any, @Param('id') id: string) {
-    return this.messagingService.getMessages(id, req.user.id);
+  getMessages(
+    @Request() req: any,
+    @Param('id') id: string,
+    @Query('markRead') markRead?: string,
+  ) {
+    return this.messagingService.getMessages(
+      id,
+      req.user.id,
+      markRead !== 'false',
+    );
   }
 
   @Post(':id/messages')

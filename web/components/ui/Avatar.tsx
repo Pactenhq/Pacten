@@ -22,7 +22,7 @@ export function Avatar({
   return (
     <span
       className={cn(
-        "relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-100",
+        "relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-100 dark:bg-brand/25",
         className
       )}
       style={{ width: px, height: px }}
@@ -31,7 +31,7 @@ export function Avatar({
       {src ? (
         <Image src={src} alt={name} width={px} height={px} />
       ) : (
-        <span className="font-semibold text-brand">{initials}</span>
+        <span className="font-semibold text-brand dark:text-brand-200">{initials}</span>
       )}
     </span>
   );

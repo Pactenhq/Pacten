@@ -15,7 +15,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 
 function Pill({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-flex rounded-full bg-brand-50 px-3 py-1 text-[13px] font-medium text-brand">
+    <span className="inline-flex rounded-full bg-brand-50 dark:bg-white/10 px-3 py-1 text-[13px] font-medium text-brand dark:text-brand-200">
       {children}
     </span>
   );
@@ -60,15 +60,15 @@ export default function ProfessionalDetailPage() {
     <>
       <Navbar />
       <main className="mx-auto max-w-[1100px] px-6 pb-20 pt-10 lg:px-12">
-        <Link href="/professionals" className="text-[14px] font-medium text-brand hover:underline">
+        <Link href="/professionals" className="text-[14px] font-medium text-brand dark:text-brand-200 hover:underline">
           ← Back to professionals
         </Link>
         {loading ? (
-          <p className="mt-10 text-ink-500">Loading profile…</p>
+          <p className="mt-10 text-ink-500 dark:text-ink-300">Loading profile…</p>
         ) : notFound || !profile ? (
           <Card className="mt-10 p-10 text-center">
-            <p className="text-lg font-bold text-ink-900">Professional not found</p>
-            <p className="mt-2 text-ink-500">This profile may have been removed.</p>
+            <p className="text-lg font-bold text-ink-900 dark:text-ink-50">Professional not found</p>
+            <p className="mt-2 text-ink-500 dark:text-ink-300">This profile may have been removed.</p>
           </Card>
         ) : (
           <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_360px]">
@@ -83,7 +83,7 @@ export default function ProfessionalDetailPage() {
                   />
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h1 className="text-2xl font-extrabold text-ink-900">
+                      <h1 className="text-2xl font-extrabold text-ink-900 dark:text-ink-50">
                         {profile.displayName}
                       </h1>
                       {profile.isVerified && (
@@ -97,10 +97,10 @@ export default function ProfessionalDetailPage() {
                         </span>
                       )}
                     </div>
-                    <p className="mt-1 text-[15px] font-semibold text-ink-900">
+                    <p className="mt-1 text-[15px] font-semibold text-ink-900 dark:text-ink-50">
                       {profile.title || "Social Media Professional"}
                     </p>
-                    <p className="mt-1 text-[15px] text-ink-500">
+                    <p className="mt-1 text-[15px] text-ink-500 dark:text-ink-300">
                       {profile.rating
                         ? `${Number(profile.rating).toFixed(1)}★ (${profile.reviewsCount ?? 0} reviews)`
                         : ""}
@@ -116,8 +116,8 @@ export default function ProfessionalDetailPage() {
                 </div>
                 {profile.bio && (
                   <div className="mt-6">
-                    <h2 className="text-lg font-bold text-ink-900">About</h2>
-                    <p className="mt-2 whitespace-pre-line text-[15px] leading-relaxed text-ink-700">
+                    <h2 className="text-lg font-bold text-ink-900 dark:text-ink-50">About</h2>
+                    <p className="mt-2 whitespace-pre-line text-[15px] leading-relaxed text-ink-700 dark:text-ink-200">
                       {profile.bio}
                     </p>
                   </div>
@@ -126,10 +126,10 @@ export default function ProfessionalDetailPage() {
             </div>
             <div>
               <Card className="p-6">
-                <h2 className="text-lg font-bold text-ink-900">Work with {profile.displayName}</h2>
+                <h2 className="text-lg font-bold text-ink-900 dark:text-ink-50">Work with {profile.displayName}</h2>
                 {profile.hourlyRate && (
-                  <p className="mt-2 text-[15px] text-ink-700">
-                    Hourly rate: <span className="font-bold text-ink-900">\${profile.hourlyRate}/hr</span>
+                  <p className="mt-2 text-[15px] text-ink-700 dark:text-ink-200">
+                    Hourly rate: <span className="font-bold text-ink-900 dark:text-ink-50">\${profile.hourlyRate}/hr</span>
                   </p>
                 )}
                 {profile.openToProjects === false && (
@@ -156,8 +156,8 @@ export default function ProfessionalDetailPage() {
                     Message
                   </Button>
                   {!user && (
-                    <p className="text-[13px] text-ink-500">
-                      <Link href="/login" className="font-medium text-brand hover:underline">
+                    <p className="text-[13px] text-ink-500 dark:text-ink-300">
+                      <Link href="/login" className="font-medium text-brand dark:text-brand-200 hover:underline">
                         Log in
                       </Link>{" "}
                       to message this professional.

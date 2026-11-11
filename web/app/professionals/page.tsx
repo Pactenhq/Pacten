@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Navbar } from "@/components/ui/Navbar";
 import { Footer } from "@/components/ui/Footer";
 import { Drawer } from "@/components/ui/Drawer";
@@ -48,9 +48,40 @@ export default function ProfessionalsPage() {
     availableNow: false,
     openToProjects: false,
     experience: [],
+    skill: "",
+    language: "",
+    industry: "",
   });
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 9;
+
+  // Distinct real skills across the loaded professionals, for the
+  // Skills dropdown (same source the cards render from: API `skills`).
+  const skillOptions = useMemo(
+    () =>
+      [...new Set(allProfessionals.flatMap((p) => p.skillsList ?? []))].sort(
+        (a, b) => a.localeCompare(b)
+      ),
+    [allProfessionals]
+  );
+
+  // Distinct real languages/industries across the loaded professionals,
+  // for the Language / Industry Experience dropdowns (API `languages` /
+  // `industries`).
+  const languageOptions = useMemo(
+    () =>
+      [...new Set(allProfessionals.flatMap((p) => p.languagesList ?? []))].sort(
+        (a, b) => a.localeCompare(b)
+      ),
+    [allProfessionals]
+  );
+  const industryOptions = useMemo(
+    () =>
+      [...new Set(allProfessionals.flatMap((p) => p.industriesList ?? []))].sort(
+        (a, b) => a.localeCompare(b)
+      ),
+    [allProfessionals]
+  );
 
   // Arriving from the home-page hero search (?q=...) — start filtered.
   useEffect(() => {
@@ -71,6 +102,20 @@ export default function ProfessionalsPage() {
       if (!hay.includes(q)) return false;
     }
     if (filters.category !== "All" && !categoryMatches(filters.category, p)) {
+      return false;
+    }
+    // Skill membership, same semantics as the API filter
+    // (`:skill = ANY(p.skills)`): only professionals carrying the
+    // selected skill pass.
+    if (filters.skill && !(p.skillsList ?? []).includes(filters.skill)) {
+      return false;
+    }
+    // Language / industry membership, same semantics as the Skills
+    // filter above.
+    if (filters.language && !(p.languagesList ?? []).includes(filters.language)) {
+      return false;
+    }
+    if (filters.industry && !(p.industriesList ?? []).includes(filters.industry)) {
       return false;
     }
     // Range/boolean filters only exclude items that actually carry data;
@@ -107,8 +152,8 @@ export default function ProfessionalsPage() {
       <Navbar />
       <main className="pb-20">
         <MarketplaceHero
-          eyebrow="10,000+ Verified Professionals"
-          titleBlue="Find the right professional"
+          eyebrow="Professional Marketplace"
+          titleBlue="Find social media professionals"
           titleDark="for your next project."
           subtitle="Work with vetted editors, designers, strategists, copywriters and more."
           placeholder="Search professionals, skills or services..."
@@ -124,8 +169,8 @@ export default function ProfessionalsPage() {
         <div className="mx-auto mt-8 max-w-[1380px] px-6 lg:px-12">
           <div className="flex gap-8">
             <aside className="hidden w-[300px] shrink-0 lg:block">
-              <div className="sticky top-24 rounded-2xl border border-ink-100 bg-white p-5 shadow-card">
-                <FilterPanel kind="professionals" onProfessionalFilterChange={handleFilter} />
+              <div className="sticky top-24 rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 p-5 shadow-card">
+                <FilterPanel kind="professionals" skillOptions={skillOptions} languageOptions={languageOptions} industryOptions={industryOptions} onProfessionalFilterChange={handleFilter} />
               </div>
             </aside>
             <div className="min-w-0 flex-1">
@@ -164,7 +209,7 @@ export default function ProfessionalsPage() {
         onClose={() => setDrawerOpen(false)}
         title="Filters"
       >
-        <FilterPanel kind="professionals" onProfessionalFilterChange={handleFilter} />
+        <FilterPanel kind="professionals" skillOptions={skillOptions} languageOptions={languageOptions} industryOptions={industryOptions} onProfessionalFilterChange={handleFilter} />
       </Drawer>
     </>
   );

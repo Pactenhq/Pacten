@@ -27,14 +27,14 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-white">
+    <div className="flex min-h-screen flex-col bg-white dark:bg-ink-900">
       <Navbar />
       <main className="flex flex-1 items-center justify-center px-6 py-16">
         <Card className="fade-up fade-up-2 w-full max-w-[480px] p-8 shadow-pop sm:p-10">
-          <h1 className="text-3xl font-extrabold tracking-tight text-ink-900">
+          <h1 className="text-3xl font-extrabold tracking-tight text-ink-900 dark:text-ink-50">
             Forgot password?
           </h1>
-          <p className="mt-3 text-[15px] leading-relaxed text-ink-500">
+          <p className="mt-3 text-[15px] leading-relaxed text-ink-500 dark:text-ink-300">
             Enter your email address and we&apos;ll send you a link to reset your password.
           </p>
 
@@ -45,7 +45,7 @@ export default function ForgotPasswordPage() {
           ) : (
             <form onSubmit={submit} className="mt-6 space-y-4">
               <div>
-                <label htmlFor="email" className="mb-1.5 block text-sm font-semibold text-ink-900">
+                <label htmlFor="email" className="mb-1.5 block text-sm font-semibold text-ink-900 dark:text-ink-50">
                   Email address
                 </label>
                 <input
@@ -55,7 +55,7 @@ export default function ForgotPasswordPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
-                  className="h-12 w-full rounded-xl border border-ink-200 px-4 text-[15px] focus:border-brand focus:outline-none"
+                  className="h-12 w-full rounded-xl border border-ink-200 dark:border-ink-700 px-4 text-[15px] focus:border-brand focus:outline-none"
                 />
               </div>
               {status === "error" && (
@@ -67,9 +67,9 @@ export default function ForgotPasswordPage() {
             </form>
           )}
 
-          <p className="mt-6 text-center text-sm text-ink-500">
+          <p className="mt-6 text-center text-sm text-ink-500 dark:text-ink-300">
             Remember your password?{" "}
-            <Link href="/login" className="font-semibold text-brand hover:underline">
+            <Link href="/login" className="font-semibold text-brand dark:text-brand-200 hover:underline">
               Back to login
             </Link>
           </p>

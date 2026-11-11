@@ -28,11 +28,11 @@ export function BrandApplicationsTable({
 
   return (
     <Card className="overflow-hidden">
-      <div className="border-b border-ink-100 p-6">
-        <h2 className="text-[18px] font-bold text-ink-900">Applications</h2>
+      <div className="border-b border-ink-100 dark:border-ink-800 p-6">
+        <h2 className="text-[18px] font-bold text-ink-900 dark:text-ink-50">Applications</h2>
         <div className="mt-4 flex flex-col gap-3 lg:flex-row lg:items-center">
-          <label className="flex h-[50px] flex-1 items-center gap-2.5 rounded-xl border border-ink-300 px-4">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden className="text-ink-400">
+          <label className="flex h-[50px] flex-1 items-center gap-2.5 rounded-xl border border-ink-300 dark:border-ink-700 px-4">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden className="text-ink-400 dark:text-ink-300">
               <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
               <path d="m20 20-3.5-3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
             </svg>
@@ -40,7 +40,7 @@ export function BrandApplicationsTable({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search deliverables..."
-              className="h-full flex-1 bg-transparent text-[15px] text-ink-900 placeholder:text-ink-400 focus:outline-none"
+              className="h-full flex-1 bg-transparent text-[15px] text-ink-900 dark:text-ink-50 placeholder:text-ink-400 dark:placeholder:text-ink-300 focus:outline-none"
             />
           </label>
           <div className="flex flex-wrap items-center gap-3">
@@ -49,7 +49,7 @@ export function BrandApplicationsTable({
             <FilterSelect label="Date Applied" options={["Date Applied", "Newest First", "Oldest First"]} />
             <button
               onClick={() => setQuery("")}
-              className="cursor-pointer text-[14px] font-semibold text-brand hover:underline"
+              className="cursor-pointer text-[14px] font-semibold text-brand dark:text-brand-200 hover:underline"
             >
               Clear Filters
             </button>
@@ -57,7 +57,7 @@ export function BrandApplicationsTable({
         </div>
       </div>
 
-      <div className="hidden grid-cols-[1.4fr_1fr_1fr_130px_150px] items-center gap-4 border-b border-ink-100 px-6 py-3 text-[12px] font-bold tracking-wide text-ink-400 uppercase md:grid">
+      <div className="hidden grid-cols-[1.4fr_1fr_1fr_130px_150px] items-center gap-4 border-b border-ink-100 dark:border-ink-800 px-6 py-3 text-[12px] font-bold tracking-wide text-ink-400 dark:text-ink-300 uppercase md:grid">
         <span>Creator</span>
         <span>Job Title</span>
         <span>Applied</span>
@@ -65,7 +65,7 @@ export function BrandApplicationsTable({
         <span className="text-right">Actions</span>
       </div>
 
-      <ul className="divide-y divide-ink-100">
+      <ul className="divide-y divide-ink-100 dark:divide-ink-800">
         {filtered.map((r) => (
           <li
             key={r.handle + r.campaign}
@@ -74,7 +74,7 @@ export function BrandApplicationsTable({
             <div className="flex items-center gap-4">
               <span
                 aria-hidden
-                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand-100 text-sm font-bold text-brand"
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand-100 dark:bg-brand/25 text-sm font-bold text-brand dark:text-brand-200"
               >
                 {r.name
                   .split(" ")
@@ -82,17 +82,17 @@ export function BrandApplicationsTable({
                   .join("")}
               </span>
               <div>
-                <p className="text-[15px] font-bold text-ink-900">{r.name}</p>
-                <p className="text-[13px] text-ink-500">{r.handle}</p>
+                <p className="text-[15px] font-bold text-ink-900 dark:text-ink-50">{r.name}</p>
+                <p className="text-[13px] text-ink-500 dark:text-ink-300">{r.handle}</p>
               </div>
             </div>
             <div className="hidden md:block">
-              <p className="text-[15px] font-bold text-ink-900">{r.campaign}</p>
-              <p className="text-[13px] text-ink-500">{r.brand}</p>
+              <p className="text-[15px] font-bold text-ink-900 dark:text-ink-50">{r.campaign}</p>
+              <p className="text-[13px] text-ink-500 dark:text-ink-300">{r.brand}</p>
             </div>
             <div className="hidden md:block">
-              <p className="text-[14px] font-semibold text-ink-900">{r.appliedDate}</p>
-              <p className="text-[13px] text-ink-400">{r.appliedAgo}</p>
+              <p className="text-[14px] font-semibold text-ink-900 dark:text-ink-50">{r.appliedDate}</p>
+              <p className="text-[13px] text-ink-400 dark:text-ink-300">{r.appliedAgo}</p>
             </div>
             <div className="hidden md:block">
               <StatusTag status={r.status} />
@@ -103,10 +103,10 @@ export function BrandApplicationsTable({
               </Button>
             </div>
             <div className="col-span-2 flex flex-wrap items-center gap-x-6 gap-y-1 md:hidden">
-              <span className="text-[13px] text-ink-500">
+              <span className="text-[13px] text-ink-500 dark:text-ink-300">
                 {r.campaign} · {r.brand}
               </span>
-              <span className="text-[13px] text-ink-500">
+              <span className="text-[13px] text-ink-500 dark:text-ink-300">
                 {r.appliedDate} · {r.appliedAgo}
               </span>
               <StatusTag status={r.status} />
@@ -135,11 +135,11 @@ export function CreatorApplicationsTable({
 
   return (
     <Card className="overflow-hidden">
-      <div className="border-b border-ink-100 p-6">
-        <h2 className="text-[18px] font-bold text-ink-900">Application</h2>
+      <div className="border-b border-ink-100 dark:border-ink-800 p-6">
+        <h2 className="text-[18px] font-bold text-ink-900 dark:text-ink-50">Application</h2>
         <div className="mt-4 flex flex-col gap-3 lg:flex-row lg:items-center">
-          <label className="flex h-[50px] flex-1 items-center gap-2.5 rounded-xl border border-ink-300 px-4">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden className="text-ink-400">
+          <label className="flex h-[50px] flex-1 items-center gap-2.5 rounded-xl border border-ink-300 dark:border-ink-700 px-4">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden className="text-ink-400 dark:text-ink-300">
               <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
               <path d="m20 20-3.5-3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
             </svg>
@@ -147,7 +147,7 @@ export function CreatorApplicationsTable({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by job title or company"
-              className="h-full flex-1 bg-transparent text-[15px] text-ink-900 placeholder:text-ink-400 focus:outline-none"
+              className="h-full flex-1 bg-transparent text-[15px] text-ink-900 dark:text-ink-50 placeholder:text-ink-400 dark:placeholder:text-ink-300 focus:outline-none"
             />
           </label>
           <div className="flex flex-wrap items-center gap-3">
@@ -156,7 +156,7 @@ export function CreatorApplicationsTable({
             <FilterSelect label="Date Applied" options={["Date Applied", "Newest First", "Oldest First"]} />
             <button
               onClick={() => setQuery("")}
-              className="cursor-pointer text-[14px] font-semibold text-brand hover:underline"
+              className="cursor-pointer text-[14px] font-semibold text-brand dark:text-brand-200 hover:underline"
             >
               Clear Filters
             </button>
@@ -164,7 +164,7 @@ export function CreatorApplicationsTable({
         </div>
       </div>
 
-      <ul className="divide-y divide-ink-100">
+      <ul className="divide-y divide-ink-100 dark:divide-ink-800">
         {filtered.map((r, i) => (
           <li
             key={r.jobTitle + i}
@@ -173,13 +173,13 @@ export function CreatorApplicationsTable({
             <div className="flex flex-1 items-center gap-4">
               <span
                 aria-hidden
-                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-ink-900 text-sm font-bold text-white"
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-ink-900 text-sm font-bold text-white dark:bg-white dark:text-ink-900"
               >
                 {r.initials}
               </span>
               <div>
-                <p className="text-[15px] font-bold text-ink-900">{r.jobTitle}</p>
-                <p className="text-[13px] text-ink-500">{r.company}</p>
+                <p className="text-[15px] font-bold text-ink-900 dark:text-ink-50">{r.jobTitle}</p>
+                <p className="text-[13px] text-ink-500 dark:text-ink-300">{r.company}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -227,7 +227,7 @@ function FilterSelect({ label, options }: { label: string; options: string[] }) 
       value={value}
       onChange={(e) => setValue(e.target.value)}
       aria-label={label}
-      className="h-[50px] cursor-pointer rounded-xl border border-ink-300 bg-white px-3 text-[14px] font-medium text-ink-700 focus:border-brand focus:outline-none"
+      className="h-[50px] cursor-pointer rounded-xl border border-ink-300 dark:border-ink-700 bg-white dark:bg-ink-900 px-3 text-[14px] font-medium text-ink-700 dark:text-ink-200 focus:border-brand focus:outline-none"
     >
       {options.map((o) => (
         <option key={o}>{o}</option>

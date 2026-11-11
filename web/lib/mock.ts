@@ -88,43 +88,6 @@ export const howItWorksSteps: Step[] = [
   },
 ];
 
-export interface Testimonial {
-  quote: string;
-  name: string;
-  role: string;
-  avatar: string;
-}
-
-export const testimonials: Testimonial[] = [
-  {
-    quote:
-      "Pacten helped us find the perfect UGC creators in under 24 hours. ROI was incredible.",
-    name: "Sarah K.",
-    role: "Head of Marketing at Flink",
-    avatar: "/assets/home/avatar-sarah.jpg",
-  },
-  {
-    quote:
-      "The matching algorithm is scary good. We doubled our engagement within the first campaign.",
-    name: "Tom R.",
-    role: "Growth Lead at Kota",
-    avatar: "/assets/home/avatar-tom.jpg",
-  },
-  {
-    quote:
-      "Pacten made it incredibly easy to find creators who were the right fit for our brand.",
-    name: "Emily R.",
-    role: "Brand Partnerships Manager at Nova",
-    avatar: "/assets/home/avatar-emily.jpg",
-  },
-];
-
-export const platformStats = [
-  { value: "50K+", label: "Verified Creators" },
-  { value: "10K+", label: "Campaigns Launched" },
-  { value: "98%", label: "Satisfaction Rate" },
-];
-
 export interface Professional {
   id: string;
   name: string;
@@ -277,6 +240,8 @@ export interface ProfessionalCardData {
   name: string;
   role: string;
   experience: string;
+  /** Hourly rate as displayed on the card ("$50/hr"), "" when unset. */
+  rate?: string;
   rating: string;
   category: string;
   photo: string;
@@ -931,97 +896,6 @@ export const discountHistory: { campaign: string; date: string; amount: string }
 /* Home page —  data from "destop home" (90:2).          */
 /* Home-specific: do NOT reuse `pricingTiers` (that feeds /pricing).    */
 /* ------------------------------------------------------------------ */
-
-export interface HomeCreator {
-  id: string;
-  name: string;
-  followers: string;
-  rating: string;
-  tags: string[];
-  photo: string;
-}
-
-export const homeCreators: HomeCreator[] = [
-  {
-    id: "theresa-webb",
-    name: "Theresa Webb",
-    followers: "12.4K followers",
-    rating: "4.9",
-    tags: ["Fashion", "Beauty"],
-    photo: "/assets/home/creator-1.jpg",
-  },
-  {
-    id: "maya-chen",
-    name: "Maya Chen",
-    followers: "89.2K followers",
-    rating: "4.9",
-    tags: ["Fashion", "Beauty"],
-    photo: "/assets/home/creator-2.jpg",
-  },
-  {
-    id: "kristin-watson",
-    name: "Kristin Watson",
-    followers: "34.7K followers",
-    rating: "4.8",
-    tags: ["Fashion"],
-    photo: "/assets/home/creator-3.jpg",
-  },
-  {
-    id: "dianne-russell",
-    name: "Dianne Russell",
-    followers: "21.1K followers",
-    rating: "4.9",
-    tags: ["Fashion", "Beauty"],
-    photo: "/assets/home/creator-4.jpg",
-  },
-];
-
-export interface HomeProfessional {
-  id: string;
-  name: string;
-  experience: string;
-  rating: string;
-  photo: string;
-}
-
-export const homeProfessionals: HomeProfessional[] = [
-  {
-    id: "sarah-collins",
-    name: "Sarah Collins",
-    experience: "5+ years of experience",
-    rating: "4.9",
-    photo: "/assets/home/pro-1.jpg",
-  },
-  {
-    id: "jenny-wilson",
-    name: "Jenny Wilson",
-    experience: "7+ years of experience",
-    rating: "4.9",
-    photo: "/assets/home/pro-2.jpg",
-  },
-  {
-    id: "avery-reed",
-    name: "Avery Reed",
-    experience: "2+ years of experience",
-    rating: "4.8",
-    photo: "/assets/home/pro-3.jpg",
-  },
-  {
-    id: "owen-reynolds",
-    name: "Owen Reynolds",
-    experience: "10+ years of experience",
-    rating: "4.9",
-    photo: "/assets/home/pro-4.jpg",
-  },
-];
-
-export const homeTrustedLogos = [
-  "HubSpot",
-  "Notion",
-  "Spotify",
-  "Nike",
-  "Shopify",
-];
 
 export interface HomePlan {
   name: string;

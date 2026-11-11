@@ -3,6 +3,8 @@ import {
   BadRequestException,
   NotFoundException,
   OnModuleInit,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Not, Repository } from 'typeorm';
@@ -25,13 +27,18 @@ import {
 } from './referral-payout.entity';
 import { User } from '../users/user.entity';
 import { EmailsService } from '../emails/emails.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationType } from '../notifications/notification.entity';
+import { StripeService } from '../payments/stripe.service';
 
 // ---- Client FINAL referral rules (Oct 2026, replaces the demo system) ----
 // - NO cash reward for a free signup alone.
 // - Referrer earns 20% of a referred user's first THREE subscription payments.
 // - Referrer earns 10% of Pacten's commission on the referred user's FIRST
 //   completed paid deal.
-// - $25 minimum withdrawal; payouts are manual (admin-recorded), monthly.
+// - $25 minimum withdrawal; payouts are approved manually by Admin,
+//   monthly. Approval initiates a Stripe transfer for payees with a
+//   connected account; otherwise the transfer stays manual/off-platform.
 // - No rewards on refunds / chargebacks / fraudulent referrals (reversals).
 const SUBSCRIPTION_EARNING_BPS = 2000; // 20%
 const DEAL_EARNING_BPS = 1000; // 10% of the platform commission
@@ -68,6 +75,11 @@ export class ReferralsService implements OnModuleInit {
     private readonly usersRepo: Repository<User>,
     private readonly config: ConfigService,
     private readonly emails: EmailsService,
+    private readonly notifications: NotificationsService,
+    // Circular (PaymentsModule <-> ReferralsModule) — forwardRef. Used
+    // ONLY for Connect transfer initiation in adminDecidePayout.
+    @Inject(forwardRef(() => StripeService))
+    private readonly stripe: StripeService,
   ) {}
 
   async onModuleInit() {
@@ -291,7 +303,7 @@ export class ReferralsService implements OnModuleInit {
       (amountCents * SUBSCRIPTION_EARNING_BPS) / 10000,
     );
     if (amount <= 0) return;
-    await this.earningsRepo.save(
+    const earning = await this.earningsRepo.save(
       this.earningsRepo.create({
         userId: referral.referrerId,
         referralId: referral.id,
@@ -301,6 +313,24 @@ export class ReferralsService implements OnModuleInit {
         sourceId,
       }),
     );
+    // In-app notification for the referrer (no email exists for earnings).
+    const referredUser = await this.usersRepo.findOne({
+      where: { id: referredUserId },
+    });
+    const referredName =
+      [referredUser?.firstName, referredUser?.lastName]
+        .filter(Boolean)
+        .join(' ') ||
+      referredUser?.email ||
+      'A referred user';
+    await this.notifications.create({
+      userId: referral.referrerId,
+      type: NotificationType.REFERRAL_EARNING,
+      title: 'Referral earning',
+      body: `You earned $${(amount / 100).toFixed(2)} from ${referredName}'s subscription payment.`,
+      link: '/dashboard/referrals',
+      relatedId: earning.id,
+    });
     await this.markSuccessful(referral);
   }
 
@@ -331,7 +361,7 @@ export class ReferralsService implements OnModuleInit {
 
     const amount = Math.round((commissionCents * DEAL_EARNING_BPS) / 10000);
     if (amount <= 0) return;
-    await this.earningsRepo.save(
+    const earning = await this.earningsRepo.save(
       this.earningsRepo.create({
         userId: referral.referrerId,
         referralId: referral.id,
@@ -341,6 +371,15 @@ export class ReferralsService implements OnModuleInit {
         sourceId: dealId,
       }),
     );
+    // In-app notification for the referrer (no email exists for earnings).
+    await this.notifications.create({
+      userId: referral.referrerId,
+      type: NotificationType.REFERRAL_EARNING,
+      title: 'Referral earning',
+      body: `You earned $${(amount / 100).toFixed(2)} — 10% of the commission on a referred user's first completed paid deal.`,
+      link: '/dashboard/referrals',
+      relatedId: earning.id,
+    });
     await this.markSuccessful(referral);
   }
 
@@ -434,6 +473,15 @@ export class ReferralsService implements OnModuleInit {
     } catch {
       // Email is best-effort.
     }
+    // In-app notification for the requester (same trigger as the email).
+    await this.notifications.create({
+      userId,
+      type: NotificationType.PAYOUT_REQUESTED,
+      title: 'Payout request received',
+      body: `Your referral payout request of $${(amountCents / 100).toFixed(2)} was received and is pending admin review.`,
+      link: '/dashboard/referrals',
+      relatedId: payout.id,
+    });
     return payout;
   }
 
@@ -466,9 +514,15 @@ export class ReferralsService implements OnModuleInit {
   }
 
   /**
-   * Manual admin decision on a cash payout (client rule: payouts are
-   * manually approved/recorded by Admin, monthly). Approved payouts are
-   * marked PAID here — the actual cash transfer happens off-platform.
+   * Admin decision on a cash payout (client rule: payouts are approved
+   * manually by Admin, monthly).
+   *
+   * Approved payouts are marked PAID here. When the payee has a connected
+   * Stripe account (and the API is not in demo mode), approval initiates
+   * the real transfer BEFORE anything is saved, so a transfer failure
+   * leaves the payout REQUESTED and retryable instead of recording a
+   * payment that never moved. Demo mode and unconnected payees keep the
+   * record-only behaviour — the cash transfer happens off-platform.
    */
   async adminDecidePayout(
     id: string,
@@ -481,9 +535,31 @@ export class ReferralsService implements OnModuleInit {
     if (payout.status !== ReferralPayoutStatus.REQUESTED) {
       throw new BadRequestException('Payout already decided');
     }
+
+    // Connect transfer (approved + live + connected payee only). Throws
+    // before any save on failure — the payout stays REQUESTED.
+    let transferInitiated = false;
+    let stripeTransferId: string | null = null;
+    if (approved && !this.stripe.isDemo()) {
+      const payee = await this.usersRepo.findOne({
+        where: { id: payout.userId },
+      });
+      if (payee?.stripeAccountId) {
+        const tr = await this.stripe.createTransfer({
+          amountCents: payout.amountCents,
+          currency: 'usd',
+          destination: payee.stripeAccountId,
+          metadata: { referralPayoutId: payout.id, userId: payout.userId },
+        });
+        stripeTransferId = tr.id;
+        transferInitiated = true;
+      }
+    }
+
     payout.status = approved
       ? ReferralPayoutStatus.PAID
       : ReferralPayoutStatus.REJECTED;
+    payout.stripeTransferId = stripeTransferId;
     payout.decidedById = adminId;
     payout.decidedAt = new Date();
     payout.notes = notes ?? null;
@@ -502,6 +578,19 @@ export class ReferralsService implements OnModuleInit {
     if (user) {
       await this.emails.sendPayoutDecided(user.email, payout.amountCents, approved);
     }
+    // In-app notification for the requester (same trigger as the email).
+    await this.notifications.create({
+      userId: payout.userId,
+      type: NotificationType.PAYOUT_DECIDED,
+      title: approved ? 'Payout approved' : 'Payout not approved',
+      body: approved
+        ? transferInitiated
+          ? `Your referral payout of $${(payout.amountCents / 100).toFixed(2)} was approved by admin. The transfer has been initiated to your connected Stripe account.`
+          : `Your referral payout of $${(payout.amountCents / 100).toFixed(2)} was approved by admin. The cash transfer will be processed manually.`
+        : `Your referral payout request of $${(payout.amountCents / 100).toFixed(2)} was not approved. Your referral balance has been restored.`,
+      link: '/dashboard/referrals',
+      relatedId: payout.id,
+    });
     return payout;
   }
 

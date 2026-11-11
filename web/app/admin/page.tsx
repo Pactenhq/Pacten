@@ -80,16 +80,16 @@ export default function AdminOverviewPage() {
       </div>
       {stats?.usersByRole && (
         <SectionCard title="Users by role" className="mt-6">
-          <ul className="divide-y divide-ink-100">
+          <ul className="divide-y divide-ink-100 dark:divide-ink-800">
             {stats.usersByRole.map((r: any) => (
               <li
                 key={r.role}
                 className="flex items-center justify-between py-2 text-[14px]"
               >
-                <span className="font-semibold capitalize text-ink-900">
+                <span className="font-semibold capitalize text-ink-900 dark:text-ink-50">
                   {r.role}
                 </span>
-                <span className="text-ink-500">{r.count}</span>
+                <span className="text-ink-500 dark:text-ink-300">{r.count}</span>
               </li>
             ))}
           </ul>

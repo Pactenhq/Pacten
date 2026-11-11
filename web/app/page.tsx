@@ -13,16 +13,7 @@ import { Reveal, Stagger } from "@/components/ui/Reveal";
 import { TiltCard } from "@/components/ui/TiltCard";
 import { GlowOrb } from "@/components/ui/Animated";
 import { cn } from "@/lib/cn";
-import {
-  testimonials,
-  platformStats,
-  homeCreators,
-  homeProfessionals,
-  homeTrustedLogos,
-  homePricingPlans,
-  homeSearchChips,
-  homeProChips,
-} from "@/lib/mock";
+import { homePricingPlans, homeSearchChips } from "@/lib/mock";
 
 // Home page sections in order.
 
@@ -37,80 +28,11 @@ function SparkleIcon({ className }: { className?: string }) {
   );
 }
 
-function VerifiedBadge({ className }: { className?: string }) {
-  return (
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden className={className}>
-      <path d="M11 1.8 13.6 4l3.2-.4 1 3.1 2.8 1.7-1.4 2.9 1.4 2.9-2.8 1.7-1 3.1-3.2-.4L11 20.2l-2.6-2.2-3.2.4-1-3.1-2.8-1.7L2.8 11 1.4 8.1l2.8-1.7 1-3.1 3.2.4L11 1.8Z" fill="#0c29ab" />
-      <path d="m7.8 11.2 2.3 2.3 4.2-4.7" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function StarIcon({ className }: { className?: string }) {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden className={className}>
-      <path d="M7 1.2 8.7 4.9 12.8 5.4 9.7 8.3 10.5 12.4 7 10.4 3.5 12.4 4.3 8.3 1.2 5.4 5.3 4.9 7 1.2Z" fill="currentColor" />
-    </svg>
-  );
-}
-
-function ArrowIcon({ className }: { className?: string }) {
-  return (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden className={className}>
-      <path d="M2.5 9h13m0 0-4.5-4.5M15.5 9 11 13.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function InstagramIcon({ className }: { className?: string }) {
-  return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden className={className}>
-      <rect x="2.5" y="2.5" width="15" height="15" rx="4.5" stroke="currentColor" strokeWidth="1.7" />
-      <circle cx="10" cy="10" r="3.6" stroke="currentColor" strokeWidth="1.7" />
-      <circle cx="14.6" cy="5.4" r="1.2" fill="currentColor" />
-    </svg>
-  );
-}
-
-function TikTokIcon({ className }: { className?: string }) {
-  return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden className={className}>
-      <path d="M13.5 3v9.8a3.9 3.9 0 1 1-3.9-3.9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      <path d="M13.5 3c.4 2.3 1.9 3.6 4 3.9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function EnvelopeIcon({ className }: { className?: string }) {
-  return (
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden className={className}>
-      <rect x="2.5" y="5" width="17" height="12" rx="2.5" stroke="currentColor" strokeWidth="1.7" />
-      <path d="m4.5 7.5 6.5 5 6.5-5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function HeartIcon({ className }: { className?: string }) {
-  return (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden className={className}>
-      <path d="M9 15.5S2.8 11.3 2.8 6.9A3.6 3.6 0 0 1 6.4 3.3c1.1 0 2 .6 2.6 1.4a3.6 3.6 0 0 1 2.6-1.4 3.6 3.6 0 0 1 3.6 3.6c0 4.4-6.2 8.6-6.2 8.6Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
 function CheckIcon({ className }: { className?: string }) {
   return (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden className={className}>
       <circle cx="9" cy="9" r="8" stroke="currentColor" strokeWidth="1.6" />
       <path d="m6 9.3 2.2 2.2L12.2 7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function QuoteIcon({ className }: { className?: string }) {
-  return (
-    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden className={className}>
-      <path d="M6 18.5c-1.8 0-3-1.4-3-3.2C3 10.8 6.6 7 11 5.4l.9 1.9C8.9 8.6 7 10.6 6.7 13H10v5.5H6Zm12 0c-1.8 0-3-1.4-3-3.2 0-4.5 3.6-8.3 8-9.9l.9 1.9c-3 1.3-4.9 3.3-5.2 5.7H22v5.5h-4Z" fill="currentColor" />
     </svg>
   );
 }
@@ -203,9 +125,9 @@ function Hero() {
       <h1 className="fade-up fade-up-2 mx-auto mt-6 max-w-[900px] break-words text-[28px] font-extrabold leading-[1.2] tracking-tight sm:text-5xl lg:text-[68px] lg:leading-[1.05]">
         <span className="text-gradient-blue text-gradient-animated">One marketplace.</span>
         <br />
-        <span className="text-ink-900">Every side of social.</span>
+        <span className="text-ink-900 dark:text-ink-50">Every side of social.</span>
       </h1>
-      <p className="fade-up fade-up-3 mx-auto mt-5 max-w-[990px] text-lg leading-relaxed text-ink-500">
+      <p className="fade-up fade-up-3 mx-auto mt-5 max-w-[990px] text-lg leading-relaxed text-ink-500 dark:text-ink-300">
         Connect with creators, social professionals, and business in one place.
         Discover new opportunities, find the right talent, launch campaigns,
         and build partnerships that grow.
@@ -225,7 +147,7 @@ function Hero() {
       </div>
 
       {/* search tab panel */}
-      <div className="fade-up fade-up-5 mx-auto mt-10 w-full max-w-[1248px] rounded-2xl border border-ink-200 bg-white p-4 text-left shadow-card sm:p-5">
+      <div className="fade-up fade-up-5 mx-auto mt-10 w-full max-w-[1248px] rounded-2xl border border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900 p-4 text-left shadow-card sm:p-5">
         <div className="grid gap-3 sm:grid-cols-3">
           {searchTabs.map((t, i) => (
             <button
@@ -234,16 +156,16 @@ function Hero() {
               className={cn(
                 "flex items-center gap-4 rounded-xl border p-4 text-left transition-colors",
                 i === tab
-                  ? "border-brand bg-white"
-                  : "border-ink-200 bg-white hover:border-ink-300"
+                  ? "border-brand bg-white dark:bg-ink-900"
+                  : "border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900 hover:border-ink-300 dark:hover:border-ink-700"
               )}
             >
-              <t.icon className={i === tab ? "text-brand" : "text-ink-900"} />
+              <t.icon className={i === tab ? "text-brand dark:text-brand-200" : "text-ink-900 dark:text-ink-50"} />
               <span>
-                <span className={cn("block text-[17px] font-bold", i === tab ? "text-brand" : "text-ink-900")}>
+                <span className={cn("block text-[17px] font-bold", i === tab ? "text-brand dark:text-brand-200" : "text-ink-900 dark:text-ink-50")}>
                   {t.title}
                 </span>
-                <span className="block text-sm text-ink-500">{t.sub}</span>
+                <span className="block text-sm text-ink-500 dark:text-ink-300">{t.sub}</span>
               </span>
             </button>
           ))}
@@ -256,7 +178,7 @@ function Hero() {
             onKeyDown={(e) => {
               if (e.key === "Enter") go();
             }}
-            className="h-[56px] w-full rounded-xl border border-ink-200 bg-white px-5 pr-[140px] text-[15px] text-ink-900 placeholder:text-ink-400 focus:border-brand focus:outline-none"
+            className="h-[56px] w-full rounded-xl border border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900 px-5 pr-[140px] text-[15px] text-ink-900 dark:text-ink-50 placeholder:text-ink-400 dark:placeholder:text-ink-300 focus:border-brand focus:outline-none"
           />
           <Button size="lg" onClick={() => go()} className="bottom-2 right-2 top-2 h-auto gap-2 px-6" style={{ position: "absolute" }}>
             Search
@@ -274,7 +196,7 @@ function Hero() {
                 "inline-flex h-9 items-center rounded-full px-4 text-sm font-medium transition-colors",
                 i === 0
                   ? "bg-brand text-white"
-                  : "border border-ink-300 bg-white text-ink-700 hover:border-brand hover:text-brand"
+                  : "border border-ink-300 dark:border-ink-700 bg-white dark:bg-ink-900 text-ink-700 dark:text-ink-200 hover:border-brand hover:text-brand dark:hover:text-brand-200"
               )}
             >
               {chip}
@@ -283,87 +205,26 @@ function Hero() {
         </div>
       </div>
 
-      {/* verified creator photo cards */}
-      <Stagger className="mx-auto mt-8 grid max-w-[1248px] gap-5 text-left sm:grid-cols-2 lg:grid-cols-4" from="scale">
-        {homeCreators.map((c) => (
-          <Card key={c.id} className="card-lift zoom-on-hover overflow-hidden p-0">
-            <div className="relative aspect-[282/320] w-full overflow-hidden">
-              <Image src={c.photo} alt={c.name} fill className="object-cover" sizes="(max-width: 1024px) 50vw, 25vw" />
-              <div className="absolute left-3 top-3 flex gap-2">
-                {c.tags.map((t) => (
-                  <span key={t} className="inline-flex h-8 items-center rounded-full border border-white/60 bg-black/20 px-3 text-[13px] font-medium text-white">
-                    {t}
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div className="p-5">
-              <p className="flex items-center gap-2 text-[19px] font-bold text-ink-900">
-                {c.name}
-                <VerifiedBadge />
-              </p>
-              <p className="mt-1 flex items-center justify-between text-sm text-ink-500">
-                {c.followers}
-                <span className="inline-flex items-center gap-1 font-medium text-ink-700">
-                  {c.rating}
-                  <StarIcon />
-                </span>
-              </p>
-              <div className="mt-4 flex items-center justify-between">
-                <Link
-                  href={`/creators?q=${encodeURIComponent(c.name.split(" ")[0])}`}
-                >
-                  <span className="inline-flex h-10 items-center gap-2 rounded-full bg-brand px-4 text-sm font-semibold text-white">
-                    View Profile
-                    <ArrowIcon />
-                  </span>
-                </Link>
-                <span className="flex items-center gap-2 text-ink-900">
-                  <InstagramIcon />
-                  <TikTokIcon />
-                </span>
-              </div>
-            </div>
-          </Card>
-        ))}
-      </Stagger>
+      {/* Extension point: homepage creator showcase cards lived here.
+          Genuine creator profiles belong on /creators (real API data).
+          Never render hardcoded names, follower counts, or ratings. */}
       </div>
     </section>
   );
 }
 
-/* --------------------------- trusted strip -------------------------- */
-
-function TrustedStrip() {
-  return (
-    <section className="mx-auto max-w-[1380px] px-6 py-16 text-center lg:px-12">
-      <p className="text-sm font-semibold uppercase tracking-[0.08em] text-ink-500">
-        Trusted by Teams at
-      </p>
-      <div className="mx-auto mt-8 grid max-w-[1100px] grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-        {homeTrustedLogos.map((b, i) => (
-          <div
-            key={b}
-            className="flex h-[120px] flex-col items-center justify-center gap-2 rounded-2xl bg-mist"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={`/assets/home/logos/logo-${i + 1}.svg`}
-              alt={b}
-              className="h-[64px] w-auto max-w-[120px] object-contain"
-            />
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
+/* ------------------------------------------------------------------ */
+/* Extension point (removed Nov 2026, client instruction): the
+ * "Trusted by" logo strip lived here. Genuine client logos may
+ * return here only with written permission and real usage —
+ * never hardcoded brand logos. See the M5 backlog pack README. */
+/* ------------------------------------------------------------------ */
 
 /* ------------------------------ pricing ----------------------------- */
 
 function PlanIcon({ icon }: { icon: "gift" | "star" | "briefcase" }) {
   return (
-    <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-brand">
+    <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 dark:bg-white/10 text-brand dark:text-brand-200">
       {icon === "gift" && <GiftIcon />}
       {icon === "star" && <StarPersonIcon />}
       {icon === "briefcase" && <BriefcaseIcon />}
@@ -387,21 +248,21 @@ function PricingSection() {
       <h2 className="mx-auto mt-6 max-w-[760px] text-4xl font-extrabold tracking-tight lg:text-[52px] lg:leading-[1.1]">
         <span className="text-gradient-blue text-gradient-animated">Simple pricing.</span>
         <br />
-        <span className="text-ink-900">Built for creators and brands.</span>
+        <span className="text-ink-900 dark:text-ink-50">Built for creators and brands.</span>
       </h2>
-      <p className="mx-auto mt-4 max-w-[640px] text-lg text-ink-500">
+      <p className="mx-auto mt-4 max-w-[640px] text-lg text-ink-500 dark:text-ink-300">
         Start for free and scale as you grow. No hidden fees. Cancel anytime.
       </p>
       </Reveal>
       <div className="mx-auto mt-8 flex max-w-full justify-start overflow-x-auto px-1 sm:justify-center">
-        <div className="inline-flex shrink-0 items-center gap-1 rounded-full border border-ink-200 bg-white p-1.5">
+        <div className="inline-flex shrink-0 items-center gap-1 rounded-full border border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900 p-1.5">
         {toggles.map((t, i) => (
           <button
             key={t}
             onClick={() => setActive(i)}
             className={cn(
               "h-10 shrink-0 rounded-full px-4 text-[13px] font-semibold transition-all duration-300 hover:scale-105 sm:px-5 sm:text-sm",
-              i === active ? "bg-brand text-white shadow-lg" : "text-ink-700 hover:text-ink-900"
+              i === active ? "bg-brand text-white shadow-lg" : "text-ink-700 dark:text-ink-200 hover:text-ink-900 dark:hover:text-ink-50"
             )}
           >
             {t}
@@ -419,13 +280,13 @@ function PricingSection() {
             )}
             <Card className={cn("card-lift h-full p-7", plan.filled && "border-2 border-brand")}>
               <PlanIcon icon={plan.icon} />
-              <p className="mt-5 text-[22px] font-extrabold text-ink-900">{plan.name}</p>
-              <p className="mt-1 text-[15px] font-bold text-brand">{plan.price}</p>
-              <div className="my-5 border-t border-ink-100" />
+              <p className="mt-5 text-[22px] font-extrabold text-ink-900 dark:text-ink-50">{plan.name}</p>
+              <p className="mt-1 text-[15px] font-bold text-brand dark:text-brand-200">{plan.price}</p>
+              <div className="my-5 border-t border-ink-100 dark:border-ink-800" />
               <ul className="space-y-3">
                 {plan.features.map((f) => (
-                  <li key={f} className="flex items-center gap-2.5 text-[15px] text-ink-700">
-                    <CheckIcon className="shrink-0 text-brand" />
+                  <li key={f} className="flex items-center gap-2.5 text-[15px] text-ink-700 dark:text-ink-200">
+                    <CheckIcon className="shrink-0 text-brand dark:text-brand-200" />
                     {f}
                   </li>
                 ))}
@@ -456,20 +317,20 @@ function MarketplaceSection() {
   return (
     <section className="mx-auto max-w-[1380px] px-4 py-16 sm:px-6 lg:px-12">
       <Reveal>
-      <div className="grid items-center gap-8 overflow-hidden rounded-[24px] bg-mist p-5 sm:p-8 lg:grid-cols-2 lg:gap-10 lg:p-14">
+      <div className="grid items-center gap-8 overflow-hidden rounded-[24px] bg-mist dark:bg-ink-950 p-5 sm:p-8 lg:grid-cols-2 lg:gap-10 lg:p-14">
         <div className="min-w-0">
           <h2 className="break-words text-[28px] font-extrabold leading-[1.2] tracking-tight sm:text-4xl lg:text-[52px] lg:leading-[1.1]">
-            <span className="text-ink-900">More than a</span>
+            <span className="text-ink-900 dark:text-ink-50">More than a</span>
             <br />
             <span className="text-gradient-blue text-gradient-animated">marketplace.</span>
           </h2>
-          <p className="mt-6 max-w-full break-words text-[16px] leading-relaxed text-ink-700 sm:max-w-[560px] sm:text-[17px]">
+          <p className="mt-6 max-w-full break-words text-[16px] leading-relaxed text-ink-700 dark:text-ink-200 sm:max-w-[560px] sm:text-[17px]">
             The way people discover, create, and grow online is constantly
             changing. Creators are building businesses from their content,
             brands are looking for authentic voices, and social professionals
             are helping turn ideas into meaningful campaigns.
           </p>
-          <p className="mt-4 max-w-full break-words text-[16px] leading-relaxed text-ink-700 sm:max-w-[560px] sm:text-[17px]">
+          <p className="mt-4 max-w-full break-words text-[16px] leading-relaxed text-ink-700 dark:text-ink-200 sm:max-w-[560px] sm:text-[17px]">
             Pacten brings these communities together in one place — making it
             easier to discover the right people, find new opportunities, build
             genuine partnerships, and create work that delivers real value.
@@ -520,20 +381,20 @@ function HowItWorks() {
         </Tag>
       </div>
       <h2 className="mx-auto mt-6 max-w-[800px] text-4xl font-extrabold tracking-tight lg:text-[52px] lg:leading-[1.1]">
-        <span className="text-ink-900">Launch your next campaign</span>
+        <span className="text-ink-900 dark:text-ink-50">Launch your next campaign</span>
         <br />
         <span className="text-gradient-blue text-gradient-animated">in 3 simple steps</span>
       </h2>
       </Reveal>
       <div className="mx-auto mt-8 flex max-w-full justify-start overflow-x-auto px-1 sm:justify-center">
-        <div className="inline-flex shrink-0 items-center gap-1 rounded-full border border-ink-200 bg-white p-1.5">
+        <div className="inline-flex shrink-0 items-center gap-1 rounded-full border border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900 p-1.5">
         {toggles.map((t, i) => (
           <button
             key={t}
             onClick={() => setActive(i)}
             className={cn(
               "h-10 shrink-0 rounded-full px-4 text-[13px] font-semibold transition-colors sm:px-5 sm:text-sm",
-              i === active ? "bg-brand text-white" : "text-ink-700 hover:text-ink-900"
+              i === active ? "bg-brand text-white" : "text-ink-700 dark:text-ink-200 hover:text-ink-900 dark:hover:text-ink-50"
             )}
           >
             {t}
@@ -549,24 +410,24 @@ function HowItWorks() {
             <span className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-brand text-lg font-extrabold text-white">
               01
             </span>
-            <h3 className="mt-5 text-2xl font-extrabold text-ink-900">Post Your Brief</h3>
-            <p className="mt-2 max-w-[420px] text-[15px] leading-relaxed text-ink-500">
+            <h3 className="mt-5 text-2xl font-extrabold text-ink-900 dark:text-ink-50">Post Your Brief</h3>
+            <p className="mt-2 max-w-[420px] text-[15px] leading-relaxed text-ink-500 dark:text-ink-300">
               Describe your campaign goals, budget, and the type of creator
               you&apos;re looking for.
             </p>
           </div>
-          <div className="relative rounded-2xl border border-ink-100 bg-white p-5 shadow-card">
+          <div className="relative rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 p-5 shadow-card">
             <div className="flex items-center gap-1.5">
               <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
               <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
               <span className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
             </div>
-            <p className="mt-4 text-xs font-semibold text-ink-700">Campaign Goal</p>
-            <div className="mt-1.5 rounded-lg border border-ink-200 px-3 py-2.5 text-[13px] text-ink-700">
+            <p className="mt-4 text-xs font-semibold text-ink-700 dark:text-ink-200">Campaign Goal</p>
+            <div className="mt-1.5 rounded-lg border border-ink-200 dark:border-ink-700 px-3 py-2.5 text-[13px] text-ink-700 dark:text-ink-200">
               Increase brand awareness
             </div>
-            <p className="mt-3 text-xs font-semibold text-ink-700">Budget</p>
-            <div className="mt-1.5 rounded-lg border border-ink-200 px-3 py-2.5 text-[13px] text-ink-700">
+            <p className="mt-3 text-xs font-semibold text-ink-700 dark:text-ink-200">Budget</p>
+            <div className="mt-1.5 rounded-lg border border-ink-200 dark:border-ink-700 px-3 py-2.5 text-[13px] text-ink-700 dark:text-ink-200">
               $ 5,000
             </div>
             <Button className="mt-4 w-full" size="md">
@@ -586,11 +447,11 @@ function HowItWorks() {
         <div className="mt-5 grid gap-5 lg:grid-cols-2">
           {/* step 02 */}
           <Card className="card-lift p-8">
-            <span className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-brand-50 text-lg font-extrabold text-brand">
+            <span className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-brand-50 dark:bg-white/10 text-lg font-extrabold text-brand dark:text-brand-200">
               02
             </span>
-            <h3 className="mt-5 text-2xl font-extrabold text-ink-900">Match with Creators</h3>
-            <p className="mt-2 max-w-[420px] text-[15px] leading-relaxed text-ink-500">
+            <h3 className="mt-5 text-2xl font-extrabold text-ink-900 dark:text-ink-50">Match with Creators</h3>
+            <p className="mt-2 max-w-[420px] text-[15px] leading-relaxed text-ink-500 dark:text-ink-300">
               Browse verified creator profiles or let our smart matching
               surface the best fits.
             </p>
@@ -609,28 +470,28 @@ function HowItWorks() {
             <span className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-brand text-lg font-extrabold text-white">
               03
             </span>
-            <h3 className="mt-5 text-2xl font-extrabold text-ink-900">Launch &amp; Measure</h3>
-            <p className="mt-2 max-w-[420px] text-[15px] leading-relaxed text-ink-500">
+            <h3 className="mt-5 text-2xl font-extrabold text-ink-900 dark:text-ink-50">Launch &amp; Measure</h3>
+            <p className="mt-2 max-w-[420px] text-[15px] leading-relaxed text-ink-500 dark:text-ink-300">
               Collaborate, approve content, and track real-time campaign
               performance.
             </p>
             <div className="mt-6 grid grid-cols-2 gap-3">
-              <div className="rounded-xl border border-ink-100 p-4">
-                <p className="text-[11px] font-medium text-ink-500">Performance Overview</p>
-                <p className="mt-1 text-2xl font-extrabold text-ink-900">128K</p>
-                <p className="text-[11px] text-ink-500">Views</p>
+              <div className="rounded-xl border border-ink-100 dark:border-ink-800 p-4">
+                <p className="text-[11px] font-medium text-ink-500 dark:text-ink-300">Performance Overview</p>
+                <p className="mt-1 text-2xl font-extrabold text-ink-900 dark:text-ink-50">128K</p>
+                <p className="text-[11px] text-ink-500 dark:text-ink-300">Views</p>
                 <svg width="100%" height="44" viewBox="0 0 120 44" fill="none" aria-hidden className="mt-2">
                   <path d="M2 36 18 30l14-10 16 8 18-14 16 6 18-10 18 4" stroke="#0c29ab" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
-              <div className="flex flex-col items-center justify-center rounded-xl border border-ink-100 p-4">
-                <p className="text-[11px] font-medium text-ink-500">Engagement</p>
+              <div className="flex flex-col items-center justify-center rounded-xl border border-ink-100 dark:border-ink-800 p-4">
+                <p className="text-[11px] font-medium text-ink-500 dark:text-ink-300">Engagement</p>
                 <div className="relative mt-2 h-20 w-20">
                   <svg viewBox="0 0 80 80" className="h-20 w-20 -rotate-90">
                     <circle cx="40" cy="40" r="34" fill="none" stroke="#e8edfd" strokeWidth="9" />
                     <circle cx="40" cy="40" r="34" fill="none" stroke="#0c29ab" strokeWidth="9" strokeLinecap="round" strokeDasharray="213.6" strokeDashoffset="200" />
                   </svg>
-                  <span className="absolute inset-0 flex items-center justify-center text-sm font-extrabold text-ink-900">
+                  <span className="absolute inset-0 flex items-center justify-center text-sm font-extrabold text-ink-900 dark:text-ink-50">
                     4.8%
                   </span>
                 </div>
@@ -654,12 +515,12 @@ function CtaBanner() {
           <div>
             <p className="text-2xl font-extrabold text-white">Ready to get started?</p>
             <p className="mt-1 text-[15px] text-brand-100">
-              Join thousands of brands and creators growing together.
+              Join brands and creators growing together.
             </p>
           </div>
         </div>
         <Link href="/signup/brand">
-          <Button size="lg" className="shrink-0 bg-white text-brand hover:bg-brand-50">
+          <Button size="lg" className="shrink-0 bg-white dark:bg-ink-900 text-brand dark:text-brand-200 hover:bg-brand-50 dark:hover:bg-white/10">
             Get Started
           </Button>
         </Link>
@@ -671,136 +532,46 @@ function CtaBanner() {
 /* ---------------------------- professionals ------------------------- */
 
 function Professionals() {
-  const chips = homeProChips;
   return (
     <section className="mx-auto max-w-[1380px] px-6 py-16 lg:px-12">
       <Reveal>
-      <div className="flex justify-start">
-        <Tag>
-          <SparkleIcon />
-          Featured Creators
-        </Tag>
-      </div>
-      <h2 className="mt-6 max-w-[700px] text-4xl font-extrabold tracking-tight lg:text-[52px] lg:leading-[1.1]">
-        <span className="text-ink-900">Work with the world&apos;s</span>
-        <br />
-        <span className="text-gradient-blue text-gradient-animated">best Professionals</span>
-      </h2>
-      </Reveal>
-      <div className="mt-6 flex flex-wrap gap-2">
-        {chips.map((chip, i) => (
-          <button
-            key={chip}
-            className={cn(
-              "inline-flex h-9 items-center rounded-full px-4 text-sm font-medium transition-all duration-300 hover:scale-105",
-              i === 0
-                ? "bg-brand text-white shadow-md"
-                : "border border-ink-300 bg-white text-ink-700 hover:border-brand hover:text-brand"
-            )}
-          >
-            {chip}
-          </button>
-        ))}
-      </div>
-      <Stagger className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4" from="scale">
-        {homeProfessionals.map((p) => (
-          <Card key={p.id} className="card-lift zoom-on-hover overflow-hidden p-0">
-            <div className="relative aspect-[290/303] w-full overflow-hidden">
-              <Image src={p.photo} alt={p.name} fill className="object-cover" sizes="(max-width: 1024px) 50vw, 25vw" />
-              <span className="absolute left-3 top-3 inline-flex h-8 items-center rounded-full border border-white/60 bg-black/20 px-3 text-[13px] font-medium text-white">
-                Editors
-              </span>
-              <span className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/60 bg-black/20 text-white">
-                <HeartIcon />
-              </span>
-            </div>
-            <div className="p-5">
-              <p className="flex items-center gap-2 text-[19px] font-bold text-ink-900">
-                {p.name}
-                <VerifiedBadge />
-              </p>
-              <p className="mt-1 flex items-center justify-between text-sm text-ink-500">
-                {p.experience}
-                <span className="inline-flex items-center gap-1 font-medium text-ink-700">
-                  {p.rating}
-                  <StarIcon />
-                </span>
-              </p>
-              <div className="mt-4 flex items-center justify-between">
-                <Link
-                  href={`/professionals?q=${encodeURIComponent(p.name.split(" ")[0])}`}
-                >
-                  <span className="inline-flex h-10 items-center gap-2 rounded-full bg-brand px-4 text-sm font-semibold text-white">
-                    View Profile
-                    <ArrowIcon />
-                  </span>
-                </Link>
-                <span className="text-ink-900">
-                  <EnvelopeIcon />
-                </span>
-              </div>
-            </div>
-          </Card>
-        ))}
-      </Stagger>
-      <Reveal className="mt-8" from="up">
-        <Button size="lg" className="min-w-[200px]">
-          View All Profiles
-        </Button>
+        <div className="flex justify-start">
+          <Tag>
+            <SparkleIcon />
+            Professionals
+          </Tag>
+        </div>
+        <h2 className="mt-6 max-w-[700px] text-4xl font-extrabold tracking-tight lg:text-[52px] lg:leading-[1.1]">
+          <span className="text-ink-900 dark:text-ink-50">Find social media professionals</span>
+          <br />
+          <span className="text-gradient-blue text-gradient-animated">for brand collaborations</span>
+        </h2>
+        <p className="mt-4 max-w-[640px] text-lg leading-relaxed text-ink-500 dark:text-ink-300">
+          Browse the professional marketplace to find editors, designers,
+          strategists and copywriters for influencer marketing and creator
+          campaigns.
+        </p>
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Link href="/professionals">
+            <Button size="lg">Browse Professionals</Button>
+          </Link>
+          <Link href="/signup/professional">
+            <Button size="lg" variant="outline">
+              Join as a Professional
+            </Button>
+          </Link>
+        </div>
       </Reveal>
     </section>
   );
 }
 
-/* ----------------------------- testimonials ------------------------- */
-
-function Testimonials() {
-  return (
-    <section className="mx-auto max-w-[1380px] px-6 py-16 lg:px-12">
-      <Reveal>
-      <div className="flex justify-center">
-        <Tag>
-          <SparkleIcon />
-          Trusted by brands
-        </Tag>
-      </div>
-      <h2 className="mx-auto mt-6 text-center text-4xl font-extrabold tracking-tight text-ink-900 lg:text-[52px]">
-        Brands love Pacten
-      </h2>
-      </Reveal>
-      <div className="mx-auto mt-12 grid max-w-[1100px] gap-5 lg:grid-cols-[1fr_1.6fr]">
-        <Stagger className="grid gap-5" from="up">
-          {platformStats.map((s) => (
-            <Card key={s.label} className="card-lift p-8 text-center">
-              <p className="text-5xl font-extrabold tracking-tight text-brand">
-                {s.value}
-              </p>
-              <p className="mt-2 text-[15px] text-ink-500">{s.label}</p>
-            </Card>
-          ))}
-        </Stagger>
-        <Stagger className="grid gap-5" from="up" stagger={0.15}>
-          {testimonials.map((t) => (
-            <div key={t.name} className="card-lift rounded-2xl bg-mist p-7">
-              <QuoteIcon className="text-brand" />
-              <p className="mt-3 text-[16px] leading-relaxed text-ink-900">
-                &ldquo;{t.quote}&rdquo;
-              </p>
-              <div className="mt-5 flex items-center gap-3">
-                <span className="relative block h-11 w-11 overflow-hidden rounded-full">
-                  <Image src={t.avatar} alt={t.name} fill className="object-cover" sizes="44px" />
-                </span>
-                <p className="text-sm font-semibold text-ink-900">
-                  {t.name}, {t.role}
-                </p>
-              </div>
-            </div>
-          ))}
-        </Stagger>
-      </div>
-    </section>
-  );
-}
+/* ------------------------------------------------------------------ */
+/* Extension point (removed Nov 2026, client instruction): the
+ * client-stories and platform-numbers section lived here. Genuine
+ * stories and numbers may return here only from real users and real
+ * platform data — never hardcoded. See the M5 backlog pack README. */
+/* ------------------------------------------------------------------ */
 
 /* ----------------------------- bottom CTA --------------------------- */
 
@@ -816,7 +587,7 @@ function BottomCta() {
       </p>
       <div className="mt-8 flex flex-wrap gap-3 lg:flex-nowrap lg:mt-[2.2cqi]">
         <Link href="/signup/creator">
-          <Button size="lg" className="bg-white text-brand hover:bg-brand-50 lg:px-[3.04cqi]">
+          <Button size="lg" className="bg-white dark:bg-ink-900 text-brand dark:text-brand-200 hover:bg-brand-50 dark:hover:bg-white/10 lg:px-[3.04cqi]">
             Join as a Creator
           </Button>
         </Link>
@@ -830,7 +601,7 @@ function BottomCta() {
           </Button>
         </Link>
         <Link href="/signup/professional">
-          <Button size="lg" className="bg-white text-brand hover:bg-brand-50 lg:px-[3.04cqi]">
+          <Button size="lg" className="bg-white dark:bg-ink-900 text-brand dark:text-brand-200 hover:bg-brand-50 dark:hover:bg-white/10 lg:px-[3.04cqi]">
             Join as a Professional
           </Button>
         </Link>
@@ -873,7 +644,7 @@ function BottomCta() {
         </p>
         <div className="mt-6 flex items-stretch justify-center gap-3">
           <Link href="/signup/creator" className="flex-1">
-            <Button className="h-[52px] w-full bg-white px-4 text-[15px] font-semibold text-brand hover:bg-brand-50">
+            <Button className="h-[52px] w-full bg-white dark:bg-ink-900 px-4 text-[15px] font-semibold text-brand dark:text-brand-200 hover:bg-brand-50 dark:hover:bg-white/10">
               Join as a Creator
             </Button>
           </Link>
@@ -908,13 +679,11 @@ export default function HomePage() {
       <Navbar />
       <main>
         <Hero />
-        <TrustedStrip />
         <PricingSection />
         <MarketplaceSection />
         <HowItWorks />
         <CtaBanner />
         <Professionals />
-        <Testimonials />
         <BottomCta />
       </main>
       <Footer logoTone="brand" />

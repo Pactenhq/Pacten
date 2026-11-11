@@ -126,15 +126,15 @@ export default function ProfessionalDashboardPage() {
           title="Welcome back"
           subtitle="Manage your profile, services and hiring requests."
           action={
-            <label className="flex cursor-pointer items-center gap-3 text-[14px] font-medium text-ink-700">
+            <label className="flex cursor-pointer items-center gap-3 text-[14px] font-medium text-ink-700 dark:text-ink-200">
               Availability
               <span
                 role="switch"
                 aria-checked="false"
                 tabIndex={0}
-                className="relative inline-flex h-6 w-11 items-center rounded-full bg-ink-200"
+                className="relative inline-flex h-6 w-11 items-center rounded-full bg-ink-200 dark:bg-ink-700"
               >
-                <span className="absolute left-0.5 h-5 w-5 rounded-full bg-white shadow" />
+                <span className="absolute left-0.5 h-5 w-5 rounded-full bg-white dark:bg-ink-900 shadow" />
               </span>
             </label>
           }
@@ -149,7 +149,7 @@ export default function ProfessionalDashboardPage() {
         </div>
 
         <section>
-          <h2 className="text-[22px] font-extrabold text-ink-900">
+          <h2 className="text-[22px] font-extrabold text-ink-900 dark:text-ink-50">
             Hiring Requests
           </h2>
           <div className="mt-4 flex flex-col gap-4">

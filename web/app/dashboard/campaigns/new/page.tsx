@@ -52,23 +52,23 @@ export default function CampaignRequestPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-white">
+    <div className="flex min-h-screen flex-col bg-white dark:bg-ink-900">
       <Navbar />
       <main className="mx-auto w-full max-w-[1200px] flex-1 px-6 py-12">
-        <h1 className="text-[40px] font-extrabold tracking-tight text-ink-900">
+        <h1 className="text-[40px] font-extrabold tracking-tight text-ink-900 dark:text-ink-50">
           Create a Campaign
         </h1>
-        <p className="mt-2 text-[16px] text-ink-500">
+        <p className="mt-2 text-[16px] text-ink-500 dark:text-ink-300">
           Fill in the details below and publish your campaign — creators can
           then discover it and apply.
         </p>
 
         {sent ? (
           <Card className="mt-8 p-10 text-center">
-            <p className="text-[22px] font-extrabold text-ink-900">
+            <p className="text-[22px] font-extrabold text-ink-900 dark:text-ink-50">
               Campaign published
             </p>
-            <p className="mx-auto mt-2 max-w-md text-[15px] text-ink-500">
+            <p className="mx-auto mt-2 max-w-md text-[15px] text-ink-500 dark:text-ink-300">
               Your campaign is now live — creators can discover it and apply.
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
@@ -102,7 +102,7 @@ export default function CampaignRequestPage() {
               <div>
                 <label
                   htmlFor="req-description"
-                  className="mb-1.5 block text-sm font-medium text-ink-900"
+                  className="mb-1.5 block text-sm font-medium text-ink-900 dark:text-ink-50"
                 >
                   Campaign Description
                 </label>
@@ -112,7 +112,7 @@ export default function CampaignRequestPage() {
                   rows={5}
                   required
                   placeholder="Describe your campaign, brand, and what you'd like the creator to do..."
-                  className="w-full rounded-xl border border-ink-300 bg-white px-4 py-3 text-[15px] text-ink-900 placeholder:text-ink-400 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand-100"
+                  className="w-full rounded-xl border border-ink-300 dark:border-ink-700 bg-white dark:bg-ink-900 px-4 py-3 text-[15px] text-ink-900 dark:text-ink-50 placeholder:text-ink-400 dark:placeholder:text-ink-300 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand-100"
                 />
               </div>
               <TextField
@@ -136,7 +136,7 @@ export default function CampaignRequestPage() {
               <div>
                 <label
                   htmlFor="req-notes"
-                  className="mb-1.5 block text-sm font-medium text-ink-900"
+                  className="mb-1.5 block text-sm font-medium text-ink-900 dark:text-ink-50"
                 >
                   Additional Notes
                 </label>
@@ -145,7 +145,7 @@ export default function CampaignRequestPage() {
                   name="notes"
                   rows={5}
                   placeholder="Anything else the creator should know?"
-                  className="w-full rounded-xl border border-ink-300 bg-white px-4 py-3 text-[15px] text-ink-900 placeholder:text-ink-400 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand-100"
+                  className="w-full rounded-xl border border-ink-300 dark:border-ink-700 bg-white dark:bg-ink-900 px-4 py-3 text-[15px] text-ink-900 dark:text-ink-50 placeholder:text-ink-400 dark:placeholder:text-ink-300 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand-100"
                 />
               </div>
 

@@ -7,7 +7,6 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Navbar } from "@/components/ui/Navbar";
 import { Footer } from "@/components/ui/Footer";
-import { campaignListings } from "@/lib/mock";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -15,7 +14,8 @@ import { useAuth } from "@/components/auth/AuthProvider";
 // Public campaign detail — opened by the "View Details" button on
 // marketplace cards. Same visual language as /campaigns (Navbar/Footer,
 // Card, meta pills). No Figma frame exists for this view; layout reuses
-// existing components only. Data comes from the real API with mock fallback.
+// existing components only. Data comes from the real API only; an
+// unknown id or an unreachable API shows "Campaign not found".
 function CampaignDetailContent() {
   const { id } = useParams() as { id: string };
   const { user } = useAuth();
@@ -57,9 +57,9 @@ function CampaignDetailContent() {
         }
       })
       .catch(() => {
-        // API unavailable — fall back to mock listing
-        const mock = campaignListings.find((c) => c.id === id);
-        if (mock) setCampaign(mock);
+        // API unavailable — leave the campaign unset so the
+        // "Campaign not found" state renders. Never show a fabricated
+        // campaign listing.
       })
       .finally(() => setLoading(false));
   }, [id]);
@@ -105,7 +105,7 @@ function CampaignDetailContent() {
         <div className="mx-auto mt-10 max-w-[1380px] px-6 lg:px-12">
           <Link
             href="/campaigns"
-            className="inline-flex items-center gap-2 text-sm font-medium text-ink-600 hover:text-brand"
+            className="inline-flex items-center gap-2 text-sm font-medium text-ink-600 dark:text-ink-300 hover:text-brand dark:hover:text-brand-200"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
               <path
@@ -120,18 +120,18 @@ function CampaignDetailContent() {
           </Link>
 
           {loading ? (
-            <p className="mt-8 text-ink-500">Loading campaign...</p>
+            <p className="mt-8 text-ink-500 dark:text-ink-300">Loading campaign...</p>
           ) : !campaign ? (
-            <div className="mt-8 rounded-2xl border border-ink-100 bg-white p-12 text-center shadow-card">
-              <p className="text-lg font-medium text-ink-900">Campaign not found</p>
-              <p className="mt-2 text-[15px] text-ink-600">
+            <div className="mt-8 rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 p-12 text-center shadow-card">
+              <p className="text-lg font-medium text-ink-900 dark:text-ink-50">Campaign not found</p>
+              <p className="mt-2 text-[15px] text-ink-600 dark:text-ink-300">
                 This campaign may have been removed.
               </p>
             </div>
           ) : (
-            <div className="mt-6 rounded-2xl border border-ink-100 bg-white p-6 shadow-card lg:p-10">
+            <div className="mt-6 rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 p-6 shadow-card lg:p-10">
               <div className="flex items-start gap-4">
-                <span className="inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand">
+                <span className="inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-brand-50 dark:bg-white/10 text-brand dark:text-brand-200">
                   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden>
                     <circle cx="12" cy="12" r="2.2" fill="currentColor" />
                     <ellipse cx="12" cy="12" rx="9.5" ry="3.8" stroke="currentColor" strokeWidth="1.6" />
@@ -140,10 +140,10 @@ function CampaignDetailContent() {
                   </svg>
                 </span>
                 <div className="min-w-0">
-                  <h1 className="text-2xl font-bold text-ink-900 lg:text-3xl">
+                  <h1 className="text-2xl font-bold text-ink-900 dark:text-ink-50 lg:text-3xl">
                     {campaign.title}
                   </h1>
-                  <p className="mt-1 text-[15px] text-ink-600">{campaign.brand}</p>
+                  <p className="mt-1 text-[15px] text-ink-600 dark:text-ink-300">{campaign.brand}</p>
                 </div>
               </div>
 
@@ -152,7 +152,7 @@ function CampaignDetailContent() {
                   {pills.map((m: string) => (
                     <span
                       key={m}
-                      className="inline-flex h-9 items-center rounded-full border border-ink-300 bg-white px-4 text-[13px] font-medium text-ink-700"
+                      className="inline-flex h-9 items-center rounded-full border border-ink-300 dark:border-ink-700 bg-white dark:bg-ink-900 px-4 text-[13px] font-medium text-ink-700 dark:text-ink-200"
                     >
                       {m}
                     </span>
@@ -165,7 +165,7 @@ function CampaignDetailContent() {
                   {campaign.niches.map((n: string) => (
                     <span
                       key={n}
-                      className="inline-flex h-8 items-center rounded-full bg-brand-50 px-3 text-[13px] font-medium text-brand"
+                      className="inline-flex h-8 items-center rounded-full bg-brand-50 dark:bg-white/10 px-3 text-[13px] font-medium text-brand dark:text-brand-200"
                     >
                       {n}
                     </span>
@@ -174,16 +174,16 @@ function CampaignDetailContent() {
               )}
 
               <div className="mt-8">
-                <h2 className="text-lg font-bold text-ink-900">About this campaign</h2>
-                <p className="mt-3 text-[15px] leading-relaxed text-ink-900">
+                <h2 className="text-lg font-bold text-ink-900 dark:text-ink-50">About this campaign</h2>
+                <p className="mt-3 text-[15px] leading-relaxed text-ink-900 dark:text-ink-50">
                   {campaign.description}
                 </p>
               </div>
 
               {campaign.deliverables && (
                 <div className="mt-8">
-                  <h2 className="text-lg font-bold text-ink-900">Deliverables</h2>
-                  <p className="mt-3 text-[15px] leading-relaxed text-ink-900">
+                  <h2 className="text-lg font-bold text-ink-900 dark:text-ink-50">Deliverables</h2>
+                  <p className="mt-3 text-[15px] leading-relaxed text-ink-900 dark:text-ink-50">
                     {campaign.deliverables}
                   </p>
                 </div>
@@ -191,43 +191,43 @@ function CampaignDetailContent() {
 
               {campaign.notes && (
                 <div className="mt-8">
-                  <h2 className="text-lg font-bold text-ink-900">Notes</h2>
-                  <p className="mt-3 text-[15px] leading-relaxed text-ink-900">
+                  <h2 className="text-lg font-bold text-ink-900 dark:text-ink-50">Notes</h2>
+                  <p className="mt-3 text-[15px] leading-relaxed text-ink-900 dark:text-ink-50">
                     {campaign.notes}
                   </p>
                 </div>
               )}
 
               {campaign.postedAt && (
-                <p className="mt-8 text-sm text-ink-400">
+                <p className="mt-8 text-sm text-ink-400 dark:text-ink-300">
                   Posted {campaign.postedAt}
                 </p>
               )}
 
               {/* Apply to this campaign — creators & professionals only */}
               {canApply && (
-                <div className="mt-8 rounded-2xl border border-brand/25 bg-brand-50/50 p-6">
+                <div className="mt-8 rounded-2xl border border-brand/25 bg-brand-50/50 dark:bg-white/10 p-6">
                   {applySuccess || alreadyApplied ? (
                     <div>
-                      <h2 className="text-lg font-bold text-ink-900">
+                      <h2 className="text-lg font-bold text-ink-900 dark:text-ink-50">
                         {applySuccess ? "Application sent!" : "Already applied"}
                       </h2>
-                      <p className="mt-2 text-[15px] text-ink-600">
+                      <p className="mt-2 text-[15px] text-ink-600 dark:text-ink-300">
                         {applySuccess
                           ? "The brand has received your application and will review it shortly."
                           : "You have already applied to this campaign. The brand will review it shortly."}
                       </p>
                       <Link
                         href="/dashboard/applications"
-                        className="mt-4 inline-block text-sm font-semibold text-brand hover:underline"
+                        className="mt-4 inline-block text-sm font-semibold text-brand dark:text-brand-200 hover:underline"
                       >
                         View my applications
                       </Link>
                     </div>
                   ) : applyOpen ? (
                     <form onSubmit={submitApplication}>
-                      <h2 className="text-lg font-bold text-ink-900">Apply to this campaign</h2>
-                      <p className="mt-2 text-[15px] text-ink-600">
+                      <h2 className="text-lg font-bold text-ink-900 dark:text-ink-50">Apply to this campaign</h2>
+                      <p className="mt-2 text-[15px] text-ink-600 dark:text-ink-300">
                         Tell the brand why you&apos;re a great fit.
                       </p>
                       <textarea
@@ -235,7 +235,7 @@ function CampaignDetailContent() {
                         onChange={(e) => setCoverLetter(e.target.value)}
                         placeholder="Write a short cover letter (optional)..."
                         rows={4}
-                        className="mt-4 w-full resize-none rounded-xl border border-ink-300 bg-white px-4 py-3 text-[15px] text-ink-900 placeholder:text-ink-400 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand-100"
+                        className="mt-4 w-full resize-none rounded-xl border border-ink-300 dark:border-ink-700 bg-white dark:bg-ink-900 px-4 py-3 text-[15px] text-ink-900 dark:text-ink-50 placeholder:text-ink-400 dark:placeholder:text-ink-300 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand-100"
                       />
                       {applyError && (
                         <p className="mt-2 text-sm font-medium text-red-600">{applyError}</p>
@@ -256,10 +256,10 @@ function CampaignDetailContent() {
                   ) : (
                     <div className="flex flex-wrap items-center justify-between gap-4">
                       <div>
-                        <h2 className="text-lg font-bold text-ink-900">
+                        <h2 className="text-lg font-bold text-ink-900 dark:text-ink-50">
                           Interested in this campaign?
                         </h2>
-                        <p className="mt-1 text-[15px] text-ink-600">
+                        <p className="mt-1 text-[15px] text-ink-600 dark:text-ink-300">
                           Send the brand your application in one click.
                         </p>
                       </div>
@@ -271,10 +271,10 @@ function CampaignDetailContent() {
                 </div>
               )}
               {!user && (
-                <div className="mt-8 rounded-2xl border border-ink-100 bg-white p-6 text-center shadow-card">
-                  <p className="text-[15px] text-ink-600">
+                <div className="mt-8 rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 p-6 text-center shadow-card">
+                  <p className="text-[15px] text-ink-600 dark:text-ink-300">
                     Want to apply?{" "}
-                    <Link href="/login" className="font-semibold text-brand hover:underline">
+                    <Link href="/login" className="font-semibold text-brand dark:text-brand-200 hover:underline">
                       Log in
                     </Link>{" "}
                     as a creator or professional to send your application.
@@ -298,7 +298,7 @@ export default function CampaignDetailPage() {
           <Navbar />
           <main className="pb-20">
             <div className="mx-auto mt-10 max-w-[1380px] px-6 lg:px-12">
-              <p className="text-ink-500">Loading campaign...</p>
+              <p className="text-ink-500 dark:text-ink-300">Loading campaign...</p>
             </div>
           </main>
           <Footer />
