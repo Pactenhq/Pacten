@@ -45,7 +45,11 @@ function CampaignDetailContent() {
             // GAP-4: the status pill used to show the raw enum value
             // ("open"). It now uses the shared canonical label so it
             // matches My Campaigns and the brand dashboard overview.
+            // Follow-up fix (Nov 12): keep the RAW status too — the
+            // Apply gate below needs it (a closed campaign must not
+            // offer "Apply Now"; the label alone can't be compared).
             type: campaignStatusLabel(data.status),
+            status: data.status ?? "",
             location: "",
             postedAt: data.createdAt
               ? new Date(data.createdAt).toLocaleDateString("en-US", {
@@ -81,6 +85,12 @@ function CampaignDetailContent() {
   }, [user, id]);
 
   const canApply = !!user && (user.role === "creator" || user.role === "professional");
+  // Follow-up fix (Nov 12): a Closed campaign must not offer "Apply
+  // Now" or the application form — the server already blocks the
+  // submit ("Campaign is not open for applications"), but the button
+  // was still offered (browser-verified). Raw status is draft | open |
+  // closed | completed; only "open" accepts applications.
+  const isOpen = String(campaign?.status ?? "").toLowerCase() === "open";
 
   const submitApplication = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -208,8 +218,20 @@ function CampaignDetailContent() {
                 </p>
               )}
 
-              {/* Apply to this campaign — creators & professionals only */}
-              {canApply && (
+              {/* Apply to this campaign — creators & professionals only,
+                  open campaigns only (follow-up fix Nov 12: a closed
+                  campaign shows this note instead of "Apply Now"). */}
+              {campaign && !isOpen && (
+                <div className="mt-8 rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 p-6">
+                  <h2 className="text-lg font-bold text-ink-900 dark:text-ink-50">
+                    This campaign is closed
+                  </h2>
+                  <p className="mt-2 text-[15px] text-ink-600 dark:text-ink-300">
+                    This campaign is no longer accepting applications.
+                  </p>
+                </div>
+              )}
+              {canApply && isOpen && (
                 <div className="mt-8 rounded-2xl border border-brand/25 bg-brand-50/50 dark:bg-white/10 p-6">
                   {applySuccess || alreadyApplied ? (
                     <div>
@@ -274,7 +296,8 @@ function CampaignDetailContent() {
                   )}
                 </div>
               )}
-              {!user && (
+              {/* Closed campaigns don't invite a login to apply either. */}
+              {!user && isOpen && (
                 <div className="mt-8 rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 p-6 text-center shadow-card">
                   <p className="text-[15px] text-ink-600 dark:text-ink-300">
                     Want to apply?{" "}

@@ -99,7 +99,11 @@ export default function ProfessionalsPage() {
 
   // Arriving from the home-page hero search (?q=...) — start filtered.
   useEffect(() => {
-    const q = new URLSearchParams(window.location.search).get("q");
+    // Follow-up fix (Nov 12): ?search= also populates the box — the
+    // browser-verified defect was /creators?search=... leaving the
+    // box empty. ?q= (hero search) still wins when both are present.
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get("q") ?? params.get("search");
     if (q) {
       setSearchQuery(q);
       setPage(1);
@@ -184,7 +188,7 @@ export default function ProfessionalsPage() {
           <div className="flex gap-8">
             <aside className="hidden w-[300px] shrink-0 lg:block">
               <div className="sticky top-24 rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 p-5 shadow-card">
-                <FilterPanel kind="professionals" skillOptions={skillOptions} languageOptions={languageOptions} industryOptions={industryOptions} onProfessionalFilterChange={handleFilter} />
+                <FilterPanel kind="professionals" skillOptions={skillOptions} languageOptions={languageOptions} industryOptions={industryOptions} onProfessionalFilterChange={handleFilter} onClearSearch={() => setSearchQuery("")} />
               </div>
             </aside>
             <div className="min-w-0 flex-1">
@@ -236,7 +240,7 @@ export default function ProfessionalsPage() {
         onClose={() => setDrawerOpen(false)}
         title="Filters"
       >
-        <FilterPanel kind="professionals" skillOptions={skillOptions} languageOptions={languageOptions} industryOptions={industryOptions} onProfessionalFilterChange={handleFilter} />
+        <FilterPanel kind="professionals" skillOptions={skillOptions} languageOptions={languageOptions} industryOptions={industryOptions} onProfessionalFilterChange={handleFilter} onClearSearch={() => setSearchQuery("")} />
       </Drawer>
     </>
   );

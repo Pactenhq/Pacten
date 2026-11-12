@@ -46,9 +46,13 @@ export function MarketplaceHero({
   defaultQuery?: string;
 }) {
   const [query, setQuery] = useState(defaultQuery ?? "");
-  // Keep the box in sync when the page's term arrives from the URL (?q=...).
+  // Keep the box in sync when the page's term changes externally
+  // (?q=... on load, or "Clear all" resetting it to "").
+  // Follow-up fix (Nov 12): the old guard `if (defaultQuery)` never
+  // cleared the box when the parent reset the term to "" — the keyword
+  // stayed visible after "Clear all".
   useEffect(() => {
-    if (defaultQuery) setQuery(defaultQuery);
+    setQuery(defaultQuery ?? "");
   }, [defaultQuery]);
   const submit = () => onSearch?.(query);
   return (

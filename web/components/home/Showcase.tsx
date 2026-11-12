@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   CreatorCard,
   ProfessionalCard,
@@ -78,6 +79,24 @@ function ProfessionalsShowcase() {
 }
 
 export function HomeShowcase() {
+  // Follow-up fix (Nov 12, USER ORDER): the showcase is OFF on staging
+  // and ON at production. The gate is the hostname — only the
+  // production domain shows cards. Staging (pacten-pacten1.vercel.app,
+  // pacten-theta.vercel.app), localhost and any other host render
+  // NOTHING: no cards, no sections, no empty-state boxes, no headings.
+  // No code change is needed at production deploy — the same build
+  // turns the showcase on the moment it runs on pacten.net. Default
+  // OFF until the client-side hostname check runs (SSR has no window,
+  // and staging must never flash cards). The excludeTest wiring stays
+  // intact underneath, so even on production only real (non-test-
+  // domain) users appear. If production ever uses another domain, add
+  // it to this list — one place, no other change.
+  const PRODUCTION_HOSTNAMES = ["pacten.net", "www.pacten.net"];
+  const [enabled, setEnabled] = useState(false);
+  useEffect(() => {
+    setEnabled(PRODUCTION_HOSTNAMES.includes(window.location.hostname));
+  }, []);
+  if (!enabled) return null;
   return (
     <>
       <CreatorsShowcase />

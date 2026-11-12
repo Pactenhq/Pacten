@@ -79,6 +79,12 @@ export default function DealDetailPage() {
       await api.fileDispute(id, disputeReason, disputeDesc.trim());
       setDisputeDesc("");
       setDisputeMsg("Dispute filed — our team will review it.");
+      // Follow-up fix (Nov 12): the backend moves the deal to DISPUTED
+      // on filing (API-verified), but the page only refreshed the
+      // disputes list — the header status stayed "Active" until a
+      // manual reload. Re-read the deal too, same pattern as
+      // updateStatus above, so the header flips to DISPUTED in place.
+      await refreshDeal();
       refreshDisputes();
     } catch (e: any) {
       setDisputeMsg(e?.message || "Could not file dispute.");

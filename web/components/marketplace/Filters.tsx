@@ -388,6 +388,7 @@ export function FilterPanel({
   onFilterChange,
   onCreatorFilterChange,
   onProfessionalFilterChange,
+  onClearSearch,
 }: {
   kind: FilterKind;
   /** Distinct real skills across the loaded rows; feeds the Skills dropdown. */
@@ -399,6 +400,11 @@ export function FilterPanel({
   onFilterChange?: (filters: CampaignFilters) => void;
   onCreatorFilterChange?: (filters: CreatorFilters) => void;
   onProfessionalFilterChange?: (filters: ProfessionalFilters) => void;
+  // Follow-up fix (Nov 12): "Clear all" used to reset only the panel
+  // filters — the search keyword (owned by the parent page) stayed in
+  // the box. The parent passes its search reset here so Clear all
+  // clears everything, including the keyword.
+  onClearSearch?: () => void;
 }) {
   const [resetKey, setResetKey] = useState(0);
   const filtersRef = useRef<CampaignFilters>({
@@ -439,6 +445,8 @@ export function FilterPanel({
     onFilterChange?.(filtersRef.current);
     onCreatorFilterChange?.(creatorRef.current);
     onProfessionalFilterChange?.(professionalRef.current);
+    // Follow-up fix (Nov 12): Clear all also clears the search keyword.
+    onClearSearch?.();
     setResetKey((k) => k + 1);
   };
 

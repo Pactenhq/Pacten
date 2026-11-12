@@ -48,7 +48,12 @@ function PhotoTags({ tags }: { tags: string[] }) {
       {tags.map((t) => (
         <span
           key={t}
-          className="inline-flex h-8 items-center rounded-full border border-white/60 bg-white/20 px-3.5 text-[13px] font-medium text-white backdrop-blur-sm"
+          // Follow-up fix (Nov 12): the old pill was bg-white/20 +
+          // text-white over the photo — white-on-white and unreadable
+          // on light photos (browser-verified: "Gaming" only visible
+          // in an enlarged crop). Solid dark scrim reads on light AND
+          // dark photos, in light AND dark mode.
+          className="inline-flex h-8 items-center rounded-full border border-black/10 bg-black/60 px-3.5 text-[13px] font-medium text-white backdrop-blur-sm"
         >
           {t}
         </span>

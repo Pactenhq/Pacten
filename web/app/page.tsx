@@ -31,11 +31,17 @@ function SparkleIcon({ className }: { className?: string }) {
 }
 
 function RocketIcon({ className }: { className?: string }) {
+  // Follow-up fix (Nov 12, user order): the old icon was a stroke-only
+  // scribble that did not read as a rocket. This is a proper solid
+  // silhouette — pointed nose, body, round window (punched through
+  // with fill-rule evenodd so the banner blue shows as the window),
+  // fins and flame — white via currentColor, same 40px placement.
   return (
-    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden className={className}>
-      <path d="M20 4c5 4.5 7.5 10.5 7.5 17l-4.5 4.5c-1.5-1-2.5-2.5-3-4.5-2 0-3.5 1.5-4.5 3L11 20c6.5 0 12.5-2.5 17-7.5" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="20" cy="15" r="2.6" stroke="currentColor" strokeWidth="2.2" />
-      <path d="M11 20 6.5 25.5M27.5 25.5 32 30M20 30v6" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+    <svg width="40" height="40" viewBox="0 0 40 40" fill="currentColor" aria-hidden className={className}>
+      <path
+        fillRule="evenodd"
+        d="M20 2C24 6.5 27 11.5 27 18.5V24L33.5 30.5 27 28.5V30H13V28.5L6.5 30.5 13 24V18.5C13 11.5 16 6.5 20 2ZM20 31C22.5 33 23.5 35 20 38.5 16.5 35 17.5 33 20 31ZM16.8 15a3.2 3.2 0 1 0 6.4 0 3.2 3.2 0 1 0-6.4 0Z"
+      />
     </svg>
   );
 }
