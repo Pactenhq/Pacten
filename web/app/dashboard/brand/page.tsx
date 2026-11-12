@@ -111,9 +111,13 @@ export default function BrandDashboardPage() {
               // application was accepted and turned into a deal, and
               // the deal itself is only proposed. It is an ACCEPTED
               // request; the deal's own status lives on the deals page.
-              a.status === "converted_to_deal"
+              // LABEL fix (Nov 12): a plain ACCEPTED application (no
+              // deal yet) used to read "Active" — the previous round
+              // only covered the converted row. Accepted is accepted,
+              // with or without a deal.
+              a.status === "converted_to_deal" || a.status === "accepted"
                 ? "Accepted"
-                : a.status === "accepted" || a.status === "shortlisted"
+                : a.status === "shortlisted"
                   ? "Active"
                   : "Submitted",
             date: fmtDate(a.createdAt),

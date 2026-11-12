@@ -18,6 +18,18 @@ import { EmailsService } from '../emails/emails.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationType } from '../notifications/notification.entity';
 
+/**
+ * M-1: a non-UUID id in a :id route is a client error (400), not a
+ * server error — without this, Postgres rejects the uuid comparison
+ * and Nest returns 500. Same guard class as D-3 (deals, profiles).
+ */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+function assertUuid(id: string): void {
+  if (!id || !UUID_RE.test(id)) {
+    throw new BadRequestException('Invalid id format');
+  }
+}
+
 @Injectable()
 export class DisputesService {
   constructor(
@@ -118,6 +130,7 @@ export class DisputesService {
   }
 
   async getDispute(userId: string, role: string, id: string) {
+    assertUuid(id);
     const dispute = await this.disputesRepo.findOne({ where: { id } });
     if (!dispute) throw new NotFoundException('Dispute not found');
     const deal = await this.getDealOrThrow(dispute.dealId);
@@ -139,6 +152,7 @@ export class DisputesService {
     outcome: 'resolved' | 'rejected',
     resolution: string,
   ) {
+    assertUuid(id);
     const dispute = await this.disputesRepo.findOne({ where: { id } });
     if (!dispute) throw new NotFoundException('Dispute not found');
     if (

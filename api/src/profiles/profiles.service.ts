@@ -56,6 +56,7 @@ export class ProfilesService {
   }
 
   async getPublicCreatorProfile(id: string) {
+    assertUuid(id);
     const profile = await this.creatorRepo.findOne({
       where: { id },
     });
@@ -69,6 +70,7 @@ export class ProfilesService {
   }
 
   async getPublicProfessionalProfile(id: string) {
+    assertUuid(id);
     const profile = await this.professionalRepo.findOne({
       where: { id },
     });

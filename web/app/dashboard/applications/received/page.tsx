@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { brandNav, dashboardUser } from "@/lib/mock";
 import { api } from "@/lib/api";
+import { applicationStatusLabel } from "@/lib/campaignStatus";
 
 // Brand "My Applications" — review creator applications.
 // Real API with mock fallback. Accept/Reject updates status via API.
@@ -146,14 +147,20 @@ export default function BrandApplicationsPage() {
                     <div className="flex flex-col items-end gap-2">
                       <span
                         className={
-                          a.status === "accepted"
+                          a.status === "accepted" ||
+                          a.status === "converted_to_deal"
                             ? "rounded-full bg-green-100 px-3 py-1 text-[13px] font-semibold text-green-700"
                             : a.status === "rejected"
                               ? "rounded-full bg-red-100 px-3 py-1 text-[13px] font-semibold text-red-700"
                               : "rounded-full bg-amber-100 px-3 py-1 text-[13px] font-semibold text-amber-700"
                         }
                       >
-                        {a.status}
+                        {/* LABEL fix (Nov 12): the pill used to render
+                            the raw enum — a converted application showed
+                            the literal "converted_to_deal". Human label
+                            via applicationStatusLabel; converted stays
+                            green like accepted. */}
+                        {applicationStatusLabel(a.status)}
                       </span>
                       {a.status === "pending" && (
                         <div className="flex gap-2">

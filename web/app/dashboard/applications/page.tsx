@@ -45,13 +45,21 @@ export default function CreatorApplicationsPage() {
               jobType: "Contract",
               location: "Remote",
               status:
-                a.status === "pending"
+                // LABEL fix (Nov 12): the fallback rendered the raw
+                // enum — a converted application showed the literal
+                // "converted_to_deal". Every enum value now maps
+                // explicitly; the existing labels are unchanged.
+                a.status === "pending" || a.status === "under_review"
                   ? "Under Review"
-                  : a.status === "accepted"
+                  : a.status === "accepted" || a.status === "shortlisted"
                     ? "Shortlisted"
                     : a.status === "rejected"
                       ? "Rejected"
-                      : a.status,
+                      : a.status === "converted_to_deal"
+                        ? "Converted"
+                        : a.status === "withdrawn"
+                          ? "Withdrawn"
+                          : a.status,
               dateApplied: new Date(a.createdAt).toLocaleDateString(),
               id: a.id,
               campaignId: a.campaign?.id,

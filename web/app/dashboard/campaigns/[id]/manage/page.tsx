@@ -11,7 +11,7 @@ import { Tag } from "@/components/ui/Tag";
 import { Button } from "@/components/ui/Button";
 import { MessagePanel } from "@/components/campaigns/MessagePanel";
 import { api } from "@/lib/api";
-import { campaignStatusLabel } from "@/lib/campaignStatus";
+import { campaignStatusLabel, applicationStatusLabel } from "@/lib/campaignStatus";
 import { manageNav } from "@/lib/mock-campaigns";
 import { dashboardUser } from "@/lib/mock";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -206,7 +206,10 @@ export default function ManageCampaignPage() {
                         <p className="text-[15px] font-bold text-ink-900 dark:text-ink-50">
                           {[a.applicant?.firstName, a.applicant?.lastName].filter(Boolean).join(" ") || "Applicant"}
                         </p>
-                        {a.status ? <Tag tone="neutral">{a.status}</Tag> : null}
+                        {/* LABEL fix (Nov 12): the Tag used to render
+                            the raw enum — a converted application showed
+                            the literal "converted_to_deal". */}
+                        {a.status ? <Tag tone="neutral">{applicationStatusLabel(a.status)}</Tag> : null}
                       </div>
                       {a.coverLetter ? (
                         <p className="mt-1 text-[14px] text-ink-700 dark:text-ink-200">{a.coverLetter}</p>

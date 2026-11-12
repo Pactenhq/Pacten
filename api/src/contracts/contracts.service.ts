@@ -48,6 +48,18 @@ function normalizeTransactionType(raw: unknown): TransactionType | null {
   return null;
 }
 
+/**
+ * M-1: a non-UUID id in a :id route is a client error (400), not a
+ * server error — without this, Postgres rejects the uuid comparison
+ * and Nest returns 500. Same guard class as D-3 (deals, profiles).
+ */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+function assertUuid(id: string): void {
+  if (!id || !UUID_RE.test(id)) {
+    throw new BadRequestException('Invalid id format');
+  }
+}
+
 @Injectable()
 export class ContractsService {
   constructor(
@@ -441,6 +453,7 @@ export class ContractsService {
   }
 
   async findOne(contractId: string, userId: string): Promise<Contract> {
+    assertUuid(contractId);
     const contract = await this.contractsRepo.findOne({
       where: { id: contractId },
     });

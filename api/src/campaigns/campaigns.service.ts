@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ForbiddenException,
   ConflictException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -20,6 +21,18 @@ import { NotificationType } from '../notifications/notification.entity';
 import { PlanLimitsService } from '../common/plan-limits/plan-limits.service';
 import { BrandProfile } from '../profiles/brand-profile.entity';
 import { In } from 'typeorm';
+
+/**
+ * M-1: a non-UUID id in a :id route is a client error (400), not a
+ * server error — without this, Postgres rejects the uuid comparison
+ * and Nest returns 500. Same guard class as D-3 (deals, profiles).
+ */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+function assertUuid(id: string): void {
+  if (!id || !UUID_RE.test(id)) {
+    throw new BadRequestException('Invalid id format');
+  }
+}
 
 @Injectable()
 export class CampaignsService {
@@ -103,6 +116,7 @@ export class CampaignsService {
   }
 
   async findOne(id: string): Promise<Campaign> {
+    assertUuid(id);
     const campaign = await this.campaigns.findOne({
       where: { id },
       relations: { brand: true, applications: true },
@@ -328,6 +342,7 @@ export class CampaignsService {
     brandId: string,
     status: ApplicationStatus,
   ): Promise<Application> {
+    assertUuid(applicationId);
     const application = await this.applications.findOne({
       where: { id: applicationId },
       relations: { campaign: true },
@@ -363,6 +378,7 @@ export class CampaignsService {
     applicationId: string,
     userId: string,
   ): Promise<Application> {
+    assertUuid(applicationId);
     const application = await this.applications.findOne({
       where: { id: applicationId },
     });
