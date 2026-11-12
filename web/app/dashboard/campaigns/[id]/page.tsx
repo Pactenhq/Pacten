@@ -10,7 +10,7 @@ import { Card } from "@/components/ui/Card";
 import { Tag } from "@/components/ui/Tag";
 import { Button } from "@/components/ui/Button";
 import { MessagePanel } from "@/components/campaigns/MessagePanel";
-import { campaignNav } from "@/lib/mock-campaigns";
+import { campaignNavFor } from "@/lib/mock-campaigns";
 import { dashboardUser } from "@/lib/mock";
 import { api } from "@/lib/api";
 
@@ -62,7 +62,7 @@ export default function CampaignDetailsPage() {
   if (!detail) {
     return (
       <DashboardShell
-        nav={campaignNav}
+        nav={campaignNavFor(id)}
         userName={dashboardUser.name}
         userInitials={dashboardUser.initials}
       >
@@ -85,7 +85,7 @@ export default function CampaignDetailsPage() {
 
   return (
     <DashboardShell
-      nav={campaignNav}
+      nav={campaignNavFor(id)}
       userName={dashboardUser.name}
       userInitials={dashboardUser.initials}
     >

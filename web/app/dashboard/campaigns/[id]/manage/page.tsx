@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/Button";
 import { MessagePanel } from "@/components/campaigns/MessagePanel";
 import { api } from "@/lib/api";
 import { campaignStatusLabel, applicationStatusLabel } from "@/lib/campaignStatus";
-import { manageNav } from "@/lib/mock-campaigns";
+import { manageNavFor } from "@/lib/mock-campaigns";
 import { dashboardUser } from "@/lib/mock";
 import { useAuth } from "@/components/auth/AuthProvider";
 
@@ -96,7 +96,7 @@ export default function ManageCampaignPage() {
 
   return (
     <DashboardShell
-      nav={manageNav}
+      nav={manageNavFor(id)}
       userName={dashboardUser.name}
       userInitials={dashboardUser.initials}
     >

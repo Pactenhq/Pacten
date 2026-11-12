@@ -8,30 +8,63 @@
 
 import type { DashboardNavItem } from "./mock";
 
-/** Campaign sub-navigation, exactly as  campaign frames. */
+/** Campaign sub-navigation, exactly as  campaign frames.
+ * NOTE (Nov 12): Details/Management are "#" here — the My Campaigns LIST
+ * page has no campaign in context, so there is no id to build the hrefs
+ * from. Pages that know the id must use campaignNavFor(id) below. */
 export const campaignNav: DashboardNavItem[] = [
   { label: "My Campaigns", href: "/dashboard/campaigns", icon: "megaphone" },
   { label: "Affiliate", href: "#", icon: "gift" },
-  { label: "Details", href: "/dashboard/campaigns/summer-glow", icon: "file" },
+  { label: "Details", href: "#", icon: "file" },
   {
     label: "Management",
-    href: "/dashboard/campaigns/summer-glow/manage",
+    href: "#",
     icon: "briefcase",
   },
   { label: "Reporting", href: "#", icon: "chart" },
 ];
 
-/** Management workspace sidebar: no Reporting item (416:64240). */
+/** Management workspace sidebar: no Reporting item (416:64240).
+ * Same "#" note as campaignNav above — use manageNavFor(id) on pages
+ * that know the campaign id. */
 export const manageNav: DashboardNavItem[] = [
   { label: "My Campaigns", href: "/dashboard/campaigns", icon: "megaphone" },
   { label: "Affiliate", href: "#", icon: "gift" },
-  { label: "Details", href: "/dashboard/campaigns/summer-glow", icon: "file" },
+  { label: "Details", href: "#", icon: "file" },
   {
     label: "Management",
-    href: "/dashboard/campaigns/summer-glow/manage",
+    href: "#",
     icon: "briefcase",
   },
 ];
+
+/**
+ * Per-campaign variants of the nav arrays above. The static arrays use
+ * "#" for Details/Management (the list page has no campaign in context).
+ * Pages that know the campaign id must use these instead: Details ->
+ * /dashboard/campaigns/${id}, Management ->
+ * /dashboard/campaigns/${id}/manage. Every other item (labels, icons,
+ * "#" placeholders, order) is copied unchanged from the static arrays.
+ */
+export function campaignNavFor(campaignId: string): DashboardNavItem[] {
+  return campaignNav.map((item) =>
+    item.label === "Details"
+      ? { ...item, href: `/dashboard/campaigns/${campaignId}` }
+      : item.label === "Management"
+        ? { ...item, href: `/dashboard/campaigns/${campaignId}/manage` }
+        : item
+  );
+}
+
+export function manageNavFor(campaignId: string): DashboardNavItem[] {
+  return manageNav.map((item) =>
+    item.label === "Details"
+      ? { ...item, href: `/dashboard/campaigns/${campaignId}` }
+      : item.label === "Management"
+        ? { ...item, href: `/dashboard/campaigns/${campaignId}/manage` }
+        : item
+  );
+}
 
 export type CampaignTab = "requests" | "active" | "completed";
 

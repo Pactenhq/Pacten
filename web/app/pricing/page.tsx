@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { Reveal, Stagger } from "@/components/ui/Reveal";
 import { PricingCards } from "@/components/pricing/PricingCards";
 import { pricingComparison, pricingFaqs, rateCalculatorTiers } from "@/lib/mock-billing";
+import { parseBudgetNumber } from "@/lib/budget";
 import { cn } from "@/lib/cn";
 
 // 
@@ -211,7 +212,7 @@ function RateCalculator() {
   const [tiers, setTiers] = useState<[string, string, string] | null>(null);
   const [confidence, setConfidence] = useState<number | null>(null);
 
-  const num = (s: string) => parseFloat(s.replace(/[^0-9.]/g, "")) || 0;
+  const num = (s: string) => parseBudgetNumber(s) ?? 0;
 
   const calculate = () => {
     const f = num(followers);

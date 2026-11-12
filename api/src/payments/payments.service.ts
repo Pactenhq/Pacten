@@ -24,6 +24,7 @@ import {
 } from '../subscriptions/subscription.entity';
 import { SubscriptionPlan } from '../subscriptions/subscription-plan.entity';
 import { StripeService } from './stripe.service';
+import { parseBudgetNumber } from './budget.util';
 import { CreateUpfrontPaymentDto } from './dto/payments.dto';
 import { ReferralsService } from '../referrals/referrals.service';
 
@@ -129,8 +130,8 @@ export class PaymentsService implements OnModuleInit {
 
   private parseBudgetToCents(budget: string): number | null {
     if (!budget) return null;
-    const num = parseFloat(budget.replace(/[^0-9.]/g, ''));
-    if (isNaN(num) || num <= 0) return null;
+    const num = parseBudgetNumber(budget);
+    if (num === null || num <= 0) return null;
     return Math.round(num * 100);
   }
 

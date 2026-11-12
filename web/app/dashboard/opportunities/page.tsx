@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/Card";
 import { brandNav, creatorNav, professionalNav, dashboardUser } from "@/lib/mock";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { api } from "@/lib/api";
+import { parseBudgetNumber } from "@/lib/budget";
 
 // Direct opportunities (M2): brand → creator/professional.
 // Role-aware single page: brands see what they sent,
@@ -102,11 +103,9 @@ export default function OpportunitiesPage() {
               personName ||
               other?.email ||
               "Unknown";
-            const budgetNum = Number(
-              String(o.budget ?? "").replace(/[^0-9.]/g, "")
-            );
+            const budgetNum = parseBudgetNumber(o.budget);
             const budgetLabel =
-              o.budget && Number.isFinite(budgetNum) && budgetNum > 0
+              o.budget && budgetNum !== null && budgetNum > 0
                 ? `$${budgetNum.toLocaleString()}`
                 : o.budget;
             return (

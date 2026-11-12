@@ -12,6 +12,7 @@ import { PlatformCommission } from './platform-commission.entity';
 import { Deal } from '../deals/deal.entity';
 import { User } from '../users/user.entity';
 import { StripeService } from './stripe.service';
+import { parseBudgetNumber } from './budget.util';
 import { ReferralsService } from '../referrals/referrals.service';
 
 /**
@@ -69,8 +70,8 @@ export class PayoutsService {
       if (payment) {
         grossCents = payment.amountCents;
       } else if (deal.agreedBudget) {
-        const num = parseFloat(deal.agreedBudget.replace(/[^0-9.]/g, ''));
-        grossCents = isNaN(num) ? 0 : Math.round(num * 100);
+        const num = parseBudgetNumber(deal.agreedBudget);
+        grossCents = num === null ? 0 : Math.round(num * 100);
       }
 
       payout = await this.payoutsRepo.save(
