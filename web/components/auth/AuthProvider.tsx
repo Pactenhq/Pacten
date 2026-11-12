@@ -31,7 +31,7 @@ type AuthContextValue = {
   user: AuthUser;
   profile: any;
   loading: boolean;
-  login: (email: string, password: string) => Promise<AuthUser>;
+  login: (email: string, password: string, remember?: boolean) => Promise<AuthUser>;
   signup: (d: {
     email: string;
     password: string;
@@ -90,18 +90,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     refresh();
   }, [refresh]);
 
-  const login = useCallback(async (email: string, password: string) => {
-    const data = await api.login({ email, password });
-    setToken(data.accessToken);
-    const u = data.user as AuthUser;
-    setUser(u);
-    try {
-      setProfile(await api.myProfile());
-    } catch {
-      setProfile(null);
-    }
-    return u;
-  }, []);
+  // B-1: `remember` selects the token store — true (default) writes
+  // localStorage, false writes sessionStorage (see lib/api.ts).
+  const login = useCallback(
+    async (email: string, password: string, remember = true) => {
+      const data = await api.login({ email, password });
+      setToken(data.accessToken, remember);
+      const u = data.user as AuthUser;
+      setUser(u);
+      try {
+        setProfile(await api.myProfile());
+      } catch {
+        setProfile(null);
+      }
+      return u;
+    },
+    []
+  );
 
   const signup = useCallback(
     async (d: {

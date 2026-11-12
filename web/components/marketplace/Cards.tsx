@@ -60,7 +60,18 @@ function PhotoTags({ tags }: { tags: string[] }) {
 //: photo with niche tags
 // overlaid, name + verified badge, followers + rating, "View Profile"
 // pill button and platform glyphs.
-export function CreatorCard({ creator }: { creator: CreatorCardData & { isVerified?: boolean } }) {
+// F-2 (Nov 12, user order): the small label at the TOP of each card
+// comes from the user's own Industries field — first entry of
+// industriesList — NOT niches/skills. Empty industries => NO label at
+// all (never an empty pill, never a fallback). These are SHARED
+// components, so the label corrects on the homepage showcase AND on
+// the /creators + /professionals marketplace lists.
+function industryLabel(industriesList?: string[]): string[] {
+  const first = (industriesList ?? []).find((i) => i?.trim());
+  return first ? [first] : [];
+}
+
+export function CreatorCard({ creator }: { creator: CreatorCardData & { isVerified?: boolean; industriesList?: string[] } }) {
   return (
     <Card className="card-lift zoom-on-hover overflow-hidden p-0">
       <div className="relative h-[200px] w-full overflow-hidden bg-ink-50 dark:bg-ink-900 sm:h-[300px]">
@@ -77,7 +88,7 @@ export function CreatorCard({ creator }: { creator: CreatorCardData & { isVerifi
             <Avatar name={creator.name} size="lg" />
           </div>
         )}
-        <PhotoTags tags={creator.niches} />
+        <PhotoTags tags={industryLabel(creator.industriesList)} />
       </div>
       <div className="p-3 sm:p-5">
         <div className="flex items-center gap-1.5">
@@ -122,7 +133,7 @@ export function CreatorCard({ creator }: { creator: CreatorCardData & { isVerifi
 export function ProfessionalCard({
   professional,
 }: {
-  professional: ProfessionalCardData & { isVerified?: boolean };
+  professional: ProfessionalCardData & { isVerified?: boolean; industriesList?: string[] };
 }) {
   return (
     <Card className="card-lift zoom-on-hover overflow-hidden p-0">
@@ -140,7 +151,9 @@ export function ProfessionalCard({
             <Avatar name={professional.name} size="lg" />
           </div>
         )}
-        <PhotoTags tags={[professional.category]} />
+        {/* F-2: top label is industriesList[0], NOT category (first
+            skill). Empty industries => PhotoTags renders no pill. */}
+        <PhotoTags tags={industryLabel(professional.industriesList)} />
         <button
           type="button"
           aria-label="Save"

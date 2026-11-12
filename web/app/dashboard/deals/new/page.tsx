@@ -13,7 +13,67 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { api } from "@/lib/api";
 
 // NOTE: No Figma design exists for New Deal — basic functional form.
-type CreatorOption = { id: string; name: string };
+type CreatorOption = { id: string; name: string; email?: string | null; detail?: string };
+
+// D1: the form draft is preserved in sessionStorage so typed input
+// survives any remount — the creator list resolving, navigating away
+// and back, or an auth re-check. Plain direct deals only: conversion
+// flows (?applicationId / ?opportunityId) have their own prefill and
+// never read or write the draft, so a stale draft can never hijack a
+// conversion.
+const DRAFT_KEY = "pacten-new-deal-draft-v1";
+
+type DealDraft = {
+  form: {
+    title: string;
+    description: string;
+    creatorId: string;
+    agreedBudget: string;
+    deadline: string;
+    deliverables: string;
+    terms: string;
+  };
+  manualCreator: boolean;
+};
+
+function loadDraft(): DealDraft | null {
+  try {
+    const raw = window.sessionStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<DealDraft>;
+    if (!parsed || typeof parsed.form !== "object" || !parsed.form) return null;
+    const f = parsed.form;
+    if (
+      typeof f.title !== "string" ||
+      typeof f.description !== "string" ||
+      typeof f.creatorId !== "string"
+    ) {
+      return null;
+    }
+    return {
+      form: {
+        title: f.title,
+        description: f.description,
+        creatorId: f.creatorId,
+        agreedBudget: typeof f.agreedBudget === "string" ? f.agreedBudget : "",
+        deadline: typeof f.deadline === "string" ? f.deadline : "",
+        deliverables: typeof f.deliverables === "string" ? f.deliverables : "",
+        terms: typeof f.terms === "string" ? f.terms : "",
+      },
+      manualCreator: parsed.manualCreator === true,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function clearDraft() {
+  try {
+    window.sessionStorage.removeItem(DRAFT_KEY);
+  } catch {
+    /* storage unavailable */
+  }
+}
 
 function NewDealForm() {
   const router = useRouter();
@@ -21,16 +81,24 @@ function NewDealForm() {
   const applicationId = searchParams.get("applicationId");
   const opportunityId = searchParams.get("opportunityId");
   const creatorParam = searchParams.get("creatorId");
-  const [form, setForm] = useState({
-    title: "",
-    description: "",
-    creatorId: creatorParam ?? "",
-    agreedBudget: "",
-    deadline: "",
-    deliverables: "",
-    terms: "",
-    applicationId: applicationId ?? "",
-    opportunityId: opportunityId ?? "",
+  // Conversion/direct-link visits prefill from the server instead and
+  // never restore a draft (see DRAFT_KEY note above).
+  const hasPrefillParams = Boolean(applicationId || opportunityId || creatorParam);
+  const [form, setForm] = useState(() => {
+    const base = {
+      title: "",
+      description: "",
+      creatorId: creatorParam ?? "",
+      agreedBudget: "",
+      deadline: "",
+      deliverables: "",
+      terms: "",
+      applicationId: applicationId ?? "",
+      opportunityId: opportunityId ?? "",
+    };
+    if (hasPrefillParams) return base;
+    const draft = loadDraft();
+    return draft ? { ...base, ...draft.form } : base;
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -44,29 +112,66 @@ function NewDealForm() {
   // only carries the top 100 by rating, so without this toggle a
   // brand-new creator (or any creator past the 100th) could never be
   // selected for a direct deal once the directory grew past 100.
-  const [manualCreator, setManualCreator] = useState(false);
+  const [manualCreator, setManualCreator] = useState(() => {
+    if (hasPrefillParams) return false;
+    return loadDraft()?.manualCreator ?? false;
+  });
+
+  // D1: persist the draft on every change so a remount restores it.
+  useEffect(() => {
+    if (hasPrefillParams) return;
+    try {
+      const { applicationId: _a, opportunityId: _o, ...rest } = form;
+      window.sessionStorage.setItem(
+        DRAFT_KEY,
+        JSON.stringify({ form: rest, manualCreator })
+      );
+    } catch {
+      /* storage unavailable */
+    }
+  }, [form, manualCreator, hasPrefillParams]);
 
   useEffect(() => {
+    // D2 (dropdown disambiguation): prefer the brand-only directory
+    // WITH emails, so two creators sharing a display name are
+    // distinguishable. Fall back to the public list (name + location /
+    // rate as the distinguishing detail) if the authed call fails.
+    const toOption = (c: any): CreatorOption => ({
+      id: String(c.userId),
+      name: c.displayName ?? "Creator",
+      email: c.email ?? null,
+      detail: [c.location, c.rate].filter(Boolean).join(" · ") || undefined,
+    });
     api
-      .creators("?limit=100")
+      .creatorsForDeal("?limit=100")
       .then((data) => {
         if (Array.isArray(data)) {
           setCreators(
-            data
-              .filter((c: any) => c?.userId)
-              .map((c: any) => ({
-                id: String(c.userId),
-                name: c.displayName ?? "Creator",
-              }))
+            data.filter((c: any) => c?.userId).map(toOption)
           );
         } else {
           setCreators([]);
         }
       })
-      .catch(() => {
-        // API unavailable — fall back to manual UUID entry
-        setCreators([]);
-      });
+      .catch(() =>
+        api
+          .creators("?limit=100")
+          .then((data) => {
+            if (Array.isArray(data)) {
+              setCreators(
+                data
+                  .filter((c: any) => c?.userId)
+                  .map(toOption)
+              );
+            } else {
+              setCreators([]);
+            }
+          })
+          .catch(() => {
+            // API unavailable — fall back to manual UUID entry
+            setCreators([]);
+          })
+      );
   }, []);
 
   // Pre-fill from an accepted application (application-to-deal conversion)
@@ -123,6 +228,9 @@ function NewDealForm() {
       if (!payload.applicationId) delete payload.applicationId;
       if (!payload.opportunityId) delete payload.opportunityId;
       const deal = await api.createDeal(payload);
+      // Success: the draft is spent — clear it before leaving so a
+      // later New Deal visit starts empty instead of resurrecting it.
+      clearDraft();
       // Success: show a message AND leave the form — redirect to the
       // created deal (its page repeats the message via ?created=1).
       // Guard the id: if the response ever carries none, fall back to
@@ -180,6 +288,7 @@ function NewDealForm() {
               {creators.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
+                  {c.email ? ` — ${c.email}` : c.detail ? ` — ${c.detail}` : ""}
                 </option>
               ))}
             </select>
@@ -193,7 +302,11 @@ function NewDealForm() {
           </>
         ) : (
           <>
-            <input className={inputCls} value={form.creatorId} onChange={set("creatorId")} required placeholder="Creator's user UUID" />
+            <input className={inputCls} value={form.creatorId} onChange={set("creatorId")} required placeholder="Creator user ID or profile ID" />
+            <p className="mt-1 text-xs text-gray-500 dark:text-ink-300">
+              Paste the creator&apos;s user ID or profile ID — both work.
+              The profile ID is the one in the creator&apos;s page address.
+            </p>
             {creators.length > 0 && (
               <button
                 type="button"
@@ -249,7 +362,7 @@ function NewDealForm() {
         <Button type="submit" disabled={saving}>
           {saving ? "Creating..." : "Create Deal"}
         </Button>
-        <Link href="/dashboard/deals">
+        <Link href="/dashboard/deals" onClick={clearDraft}>
           <Button variant="outline" type="button">Cancel</Button>
         </Link>
       </div>

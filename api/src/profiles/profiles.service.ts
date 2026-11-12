@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BrandProfile } from './brand-profile.entity';
@@ -83,6 +83,7 @@ export class ProfilesService {
   // /professionals/[id] are keyed by profile id. Same privacy rule as
   // the by-profile endpoints above: never include the linked user row.
   async getPublicCreatorProfileByUserId(userId: string) {
+    assertUuid(userId);
     const profile = await this.creatorRepo.findOne({
       where: { userId },
     });
@@ -92,6 +93,7 @@ export class ProfilesService {
   }
 
   async getPublicProfessionalProfileByUserId(userId: string) {
+    assertUuid(userId);
     const profile = await this.professionalRepo.findOne({
       where: { userId },
     });
@@ -100,7 +102,7 @@ export class ProfilesService {
     return publicProfile;
   }
 
-  async searchCreators(filters: { niche?: string; skill?: string; platform?: string; query?: string; limit?: number; offset?: number; sort?: string }) {
+  async searchCreators(filters: { niche?: string; skill?: string; language?: string; industry?: string; platform?: string; query?: string; limit?: number; offset?: number; sort?: string; excludeTest?: boolean | string }) {
     const qb = this.creatorRepo.createQueryBuilder('c')
       .where('c.availableNow = :available', { available: true });
 
@@ -113,11 +115,31 @@ export class ProfilesService {
     if (filters.skill) {
       qb.andWhere(':skill = ANY(c.skills)', { skill: filters.skill });
     }
+    // D-1: server-side language + industry filtering, mirroring the
+    // skill clause above (both are text arrays on the profile). The
+    // web previously filtered these client-side over the loaded page
+    // only, so matches beyond page 1 were never found.
+    if (filters.language) {
+      qb.andWhere(':language = ANY(c.languages)', { language: filters.language });
+    }
+    if (filters.industry) {
+      qb.andWhere(':industry = ANY(c.industries)', { industry: filters.industry });
+    }
     if (filters.platform) {
       qb.andWhere(':platform = ANY(c.platforms)', { platform: filters.platform });
     }
     if (filters.query) {
       qb.andWhere('(c.displayName ILIKE :q OR c.bio ILIKE :q)', { q: `%${filters.query}%` });
+    }
+    // F-1 (showcase): opt-in exclusion of test/demo-domain owners.
+    // Raw EXISTS subquery (not a join) so the linked user row is never
+    // loaded into — or leaked by — this public response. Default OFF:
+    // /creators, /professionals, search and for-deal are unchanged.
+    if (isTruthy(filters.excludeTest)) {
+      qb.andWhere(
+        `NOT EXISTS (SELECT 1 FROM "users" "u" WHERE "u"."id" = "c"."userId" AND (LOWER("u"."email") LIKE :exTest OR LOWER("u"."email") LIKE :exExample OR LOWER("u"."email") LIKE :exDemo))`,
+        { exTest: '%@test.com', exExample: '%@example.com', exDemo: '%@pacten.demo' },
+      );
     }
 
     // Default ordering is UNCHANGED: rating DESC (verified in the query
@@ -138,18 +160,32 @@ export class ProfilesService {
     return qb.getMany();
   }
 
-  async searchProfessionals(filters: { skill?: string; platform?: string; query?: string; limit?: number; offset?: number; sort?: string }) {
+  async searchProfessionals(filters: { skill?: string; language?: string; industry?: string; platform?: string; query?: string; limit?: number; offset?: number; sort?: string; excludeTest?: boolean | string }) {
     const qb = this.professionalRepo.createQueryBuilder('p')
       .where('p.availableNow = :available', { available: true });
 
     if (filters.skill) {
       qb.andWhere(':skill = ANY(p.skills)', { skill: filters.skill });
     }
+    // D-1: server-side language + industry filtering, mirroring skill.
+    if (filters.language) {
+      qb.andWhere(':language = ANY(p.languages)', { language: filters.language });
+    }
+    if (filters.industry) {
+      qb.andWhere(':industry = ANY(p.industries)', { industry: filters.industry });
+    }
     if (filters.platform) {
       qb.andWhere(':platform = ANY(p.platforms)', { platform: filters.platform });
     }
     if (filters.query) {
       qb.andWhere('(p.displayName ILIKE :q OR p.bio ILIKE :q OR p.title ILIKE :q)', { q: `%${filters.query}%` });
+    }
+    // F-1 (showcase): same opt-in test-domain exclusion as creators.
+    if (isTruthy(filters.excludeTest)) {
+      qb.andWhere(
+        `NOT EXISTS (SELECT 1 FROM "users" "u" WHERE "u"."id" = "p"."userId" AND (LOWER("u"."email") LIKE :exTest OR LOWER("u"."email") LIKE :exExample OR LOWER("u"."email") LIKE :exDemo))`,
+        { exTest: '%@test.com', exExample: '%@example.com', exDemo: '%@pacten.demo' },
+      );
     }
 
     // Same default as creators: rating DESC, unchanged. `sort` opt-in.
@@ -165,6 +201,53 @@ export class ProfilesService {
 
     return qb.getMany();
   }
+
+  // D2 (dropdown disambiguation): creator directory WITH the linked
+  // user's email, for the New Deal form's creator dropdown. The public
+  // /creators list deliberately omits emails (privacy — see
+  // getPublicCreatorProfile); this method is only ever served behind
+  // the brand-only /creators/for-deal route, so a brand hiring a
+  // creator can tell two same-named creators apart. Only the fields
+  // the dropdown needs are selected — no user row is ever returned
+  // whole.
+  async searchCreatorsForDeal(limit?: number) {
+    const rows = await this.creatorRepo
+      .createQueryBuilder('c')
+      .leftJoin('c.user', 'u')
+      .where('c.availableNow = :available', { available: true })
+      .orderBy('c.rating', 'DESC')
+      .limit(Math.min(Math.max(limit || 100, 1), 100))
+      .select(['c.id', 'c.userId', 'c.displayName', 'c.location', 'c.rate', 'u.email'])
+      .getMany();
+    return rows.map((r: any) => ({
+      id: r.id,
+      userId: r.userId,
+      displayName: r.displayName,
+      location: r.location ?? null,
+      rate: r.rate ?? null,
+      email: r.user?.email ?? null,
+    }));
+  }
+}
+
+/**
+ * D-3: a non-UUID id in a by-user lookup is a client error (400), not a
+ * server error — without this, Postgres rejects the uuid comparison
+ * and Nest returns 500.
+ */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+function assertUuid(id: string): void {
+  if (!id || !UUID_RE.test(id)) {
+    throw new BadRequestException('Invalid id format');
+  }
+}
+
+/**
+ * F-1: query params arrive as strings — 'true'/'1' opt in, anything
+ * else (including 'false' and absent) leaves the default behaviour.
+ */
+function isTruthy(v: boolean | string | undefined): boolean {
+  return v === true || v === 'true' || v === '1';
 }
 
 /**

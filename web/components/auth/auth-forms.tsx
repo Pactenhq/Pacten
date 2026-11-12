@@ -53,6 +53,9 @@ export function useLoginForm() {
   const [values, setValues] = useState<FieldBag>({ email: "", password: "" });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  // B-1: "Remember me" — checked by default (the pre-fix behaviour
+  // always persisted the token), unchecked = session-only token.
+  const [remember, setRemember] = useState(true);
 
   const field = (name: string) => ({
     name,
@@ -71,7 +74,7 @@ export function useLoginForm() {
     setError(null);
     setLoading(true);
     try {
-      const u = await login(values.email.trim(), values.password);
+      const u = await login(values.email.trim(), values.password, remember);
       router.push(dashboardPathForRole(u?.role ?? ""));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed.");
@@ -80,7 +83,7 @@ export function useLoginForm() {
     }
   };
 
-  return { field, submit, error, loading, verifiedNotice };
+  return { field, submit, error, loading, verifiedNotice, remember, setRemember };
 }
 
 export function useSignupForm(role: Role) {

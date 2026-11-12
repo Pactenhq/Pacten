@@ -18,7 +18,7 @@ import {
 // Password fields, Remember me checkbox, left-aligned "Log In" button.
 // Now wired to the real auth API.
 function LoginForm() {
-  const { field, submit, error, loading, verifiedNotice } = useLoginForm();
+  const { field, submit, error, loading, verifiedNotice, remember, setRemember } = useLoginForm();
   return (
     <form className="mt-8 flex flex-col gap-5" onSubmit={submit}>
       <AuthNotice message={verifiedNotice} />
@@ -43,6 +43,9 @@ function LoginForm() {
         <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-ink-700 dark:text-ink-200">
           <input
             type="checkbox"
+            data-testid="remember-me"
+            checked={remember}
+            onChange={(e) => setRemember(e.target.checked)}
             className="h-5 w-5 rounded border-ink-300 dark:border-ink-700 accent-[#0c29ab]"
           />
           Remember me

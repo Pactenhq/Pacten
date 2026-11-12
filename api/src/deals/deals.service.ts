@@ -9,6 +9,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Deal, DealStatus } from './deal.entity';
 import { DealVersion } from './deal-version.entity';
+import { User, UserRole } from '../users/user.entity';
+import { CreatorProfile } from '../profiles/creator-profile.entity';
+import { ProfessionalProfile } from '../profiles/professional-profile.entity';
 import {
   Application,
   ApplicationStatus,
@@ -26,7 +29,7 @@ import { PayoutsService } from '../payments/payouts.service';
 import { PlanLimitsService } from '../common/plan-limits/plan-limits.service';
 
 // Valid state transitions for the deal state machine
-const VALID_TRANSITIONS: Record<DealStatus, DealStatus[]> = {
+export const VALID_TRANSITIONS: Record<DealStatus, DealStatus[]> = {
   [DealStatus.PROPOSED]: [DealStatus.NEGOTIATING, DealStatus.CANCELLED],
   [DealStatus.NEGOTIATING]: [
     DealStatus.AGREED,
@@ -50,6 +53,19 @@ const VALID_TRANSITIONS: Record<DealStatus, DealStatus[]> = {
   [DealStatus.DISPUTED]: [DealStatus.ACTIVE, DealStatus.CANCELLED],
 };
 
+// Same 500-vs-400 class as D-3 (by-user endpoints): a non-UUID deal id
+// in a :id route is a client error (400), not a server error — without
+// this, Postgres rejects the uuid comparison and Nest returns 500.
+// Every :id method funnels through findOne, so one check covers them all
+// (GET /:id, PATCH /:id, PATCH /:id/status, POST /:id/submit|approve,
+// GET /:id/versions).
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+function assertUuid(id: string): void {
+  if (!id || !UUID_RE.test(id)) {
+    throw new BadRequestException('Invalid id format');
+  }
+}
+
 @Injectable()
 export class DealsService {
   constructor(
@@ -61,9 +77,57 @@ export class DealsService {
     private applicationsRepo: Repository<Application>,
     @InjectRepository(Opportunity)
     private opportunitiesRepo: Repository<Opportunity>,
+    // D2: resolving a manually typed creator id (user id or profile id).
+    @InjectRepository(User)
+    private usersRepo: Repository<User>,
+    @InjectRepository(CreatorProfile)
+    private creatorProfilesRepo: Repository<CreatorProfile>,
+    // Payee fix (Nov 12): professionals are valid deal payees too
+    // (commission rules define professional tiers; m3fa expects an
+    // Elite professional deal at 5%), so a professional profile id
+    // must resolve the same way a creator profile id does.
+    @InjectRepository(ProfessionalProfile)
+    private professionalProfilesRepo: Repository<ProfessionalProfile>,
     private payoutsService: PayoutsService,
     private planLimits: PlanLimitsService,
   ) {}
+
+  // D2: the manual-ID field accepts EITHER id a brand can plausibly
+  // paste — the payee's USER id (what the dropdown sends) or the
+  // payee's PROFILE id (the id in /creators/[id] or /professionals/[id]
+  // URLs). Without this resolution, any id that is not a user row hit
+  // the deals.creatorId foreign key and surfaced as a bare 500
+  // "Internal server error". Runs FIRST so application/opportunity
+  // conversion checks compare against the resolved user id too.
+  // Payee fix (Nov 12): the payee may be a creator OR a professional —
+  // commission rules define professional tiers and m3fa expects an
+  // Elite professional deal at 5%. Only brands (and other non-payee
+  // roles) are rejected here.
+  private async resolveCreatorUserId(creatorId: string): Promise<string> {
+    const user = await this.usersRepo.findOne({ where: { id: creatorId } });
+    if (user) {
+      if (
+        user.role !== UserRole.CREATOR &&
+        user.role !== UserRole.PROFESSIONAL
+      ) {
+        throw new BadRequestException(
+          'The selected user is not a creator or professional',
+        );
+      }
+      return user.id;
+    }
+    const profile = await this.creatorProfilesRepo.findOne({
+      where: { id: creatorId },
+    });
+    if (profile) return profile.userId;
+    const proProfile = await this.professionalProfilesRepo.findOne({
+      where: { id: creatorId },
+    });
+    if (proProfile) return proProfile.userId;
+    throw new NotFoundException(
+      'Creator or professional not found — check the ID and try again',
+    );
+  }
 
   // Snapshot the deal's current terms + status as a new DealVersion.
   private async snapshot(deal: Deal, changedById: string): Promise<void> {
@@ -88,6 +152,10 @@ export class DealsService {
     brandId: string,
     dto: CreateDealDto,
   ): Promise<Deal> {
+    // D2: resolve the creator reference up front — a manually typed
+    // profile id or unknown id must never reach the INSERT (FK 500).
+    dto = { ...dto, creatorId: await this.resolveCreatorUserId(dto.creatorId) };
+
     // PRD: application-to-deal conversion — the application must exist,
     // belong to this brand's campaign and be ACCEPTED.
     let application: Application | null = null;
@@ -188,6 +256,7 @@ export class DealsService {
   }
 
   async findOne(dealId: string, userId: string): Promise<Deal> {
+    assertUuid(dealId);
     const deal = await this.dealsRepo.findOne({
       where: { id: dealId },
     });

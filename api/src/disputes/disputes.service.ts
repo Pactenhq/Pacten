@@ -11,7 +11,8 @@ import {
   DisputeReason,
   DisputeStatus,
 } from './dispute.entity';
-import { Deal } from '../deals/deal.entity';
+import { Deal, DealStatus } from '../deals/deal.entity';
+import { VALID_TRANSITIONS } from '../deals/deals.service';
 import { User, UserRole } from '../users/user.entity';
 import { EmailsService } from '../emails/emails.service';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -80,6 +81,16 @@ export class DisputesService {
         description: description.trim(),
       }),
     );
+    // D-2: filing moves the deal to DISPUTED — but only where the
+    // backend state machine allows it (ACTIVE / SUBMITTED / APPROVED
+    // per VALID_TRANSITIONS, which is NOT changed here). A deal still
+    // in PROPOSED / NEGOTIATING / AGREED keeps its status: filing is
+    // not rejected, matching the existing suite that files on a freshly
+    // created (PROPOSED) deal — the dispute is recorded either way.
+    if ((VALID_TRANSITIONS[deal.status] || []).includes(DealStatus.DISPUTED)) {
+      deal.status = DealStatus.DISPUTED;
+      await this.dealsRepo.save(deal);
+    }
     const filer = await this.usersRepo.findOne({ where: { id: userId } });
     if (filer) await this.emails.sendDisputeFiled(filer.email, dispute.id, dealId);
     // In-app notification for the filer (same trigger as the email).

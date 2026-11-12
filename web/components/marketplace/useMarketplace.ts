@@ -136,12 +136,18 @@ export interface MarketplaceListOptions {
   sort?: string;
   /** Max rows to fetch. Defaults to 100 — the exact current behavior. */
   limit?: number;
+  /** F-1: pass excludeTest=true to the API so test/demo-domain owners
+   *  are left out. Opt-in and OFF by default — /creators,
+   *  /professionals, search and for-deal are UNCHANGED. Only the
+   *  homepage showcase passes it. */
+  excludeTest?: boolean;
 }
 
 function buildListParams(options?: MarketplaceListOptions): string {
   const params = new URLSearchParams();
   params.set("limit", String(options?.limit ?? 100));
   if (options?.sort) params.set("sort", options.sort);
+  if (options?.excludeTest) params.set("excludeTest", "true");
   return `?${params.toString()}`;
 }
 
@@ -157,11 +163,12 @@ export function useMarketplaceCreators(options?: MarketplaceListOptions): Creato
   // linked to profile pages that do not exist.
   const sort = options?.sort;
   const limit = options?.limit;
+  const excludeTest = options?.excludeTest;
   const [list, setList] = useState<CreatorFilterData[]>([]);
   useEffect(() => {
     let alive = true;
     api
-      .creators(buildListParams({ sort, limit }))
+      .creators(buildListParams({ sort, limit, excludeTest }))
       .then((rows) => {
         if (alive && Array.isArray(rows)) {
           setList(rows.map(mapCreator));
@@ -173,18 +180,19 @@ export function useMarketplaceCreators(options?: MarketplaceListOptions): Creato
     return () => {
       alive = false;
     };
-  }, [sort, limit]);
+  }, [sort, limit, excludeTest]);
   return list;
 }
 
 export function useMarketplaceProfessionals(options?: MarketplaceListOptions): ProfessionalFilterData[] {
   const sort = options?.sort;
   const limit = options?.limit;
+  const excludeTest = options?.excludeTest;
   const [list, setList] = useState<ProfessionalFilterData[]>([]);
   useEffect(() => {
     let alive = true;
     api
-      .professionals(buildListParams({ sort, limit }))
+      .professionals(buildListParams({ sort, limit, excludeTest }))
       .then((rows) => {
         if (alive && Array.isArray(rows)) {
           setList(rows.map(mapProfessional));
@@ -196,6 +204,6 @@ export function useMarketplaceProfessionals(options?: MarketplaceListOptions): P
     return () => {
       alive = false;
     };
-  }, [sort, limit]);
+  }, [sort, limit, excludeTest]);
   return list;
 }

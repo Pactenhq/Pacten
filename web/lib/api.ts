@@ -6,20 +6,42 @@ const API_BASE =
 
 const TOKEN_KEY = "pacten_token";
 
+// B-1 (Nov 12): "Remember me" wiring. The token lives in exactly one
+// store: localStorage when the user checked Remember me (survives tab
+// close / browser restart), sessionStorage when unchecked (session-only:
+// a new tab starts logged out; a same-tab reload keeps the session,
+// which is sessionStorage semantics — it is NOT cleared by reload).
+// getToken reads localStorage first, then sessionStorage, so a token
+// stored by either login path — and any legacy localStorage token —
+// is honoured by every caller (apiFetch, AuthProvider, ProtectedRoute,
+// ConversationPanel socket auth).
 export function getToken(): string | null {
   if (typeof window === "undefined") return null;
   try {
-    return window.localStorage.getItem(TOKEN_KEY);
+    return (
+      window.localStorage.getItem(TOKEN_KEY) ??
+      window.sessionStorage.getItem(TOKEN_KEY)
+    );
   } catch {
     return null;
   }
 }
 
-export function setToken(token: string | null) {
+export function setToken(token: string | null, remember = true) {
   if (typeof window === "undefined") return;
   try {
-    if (token) window.localStorage.setItem(TOKEN_KEY, token);
-    else window.localStorage.removeItem(TOKEN_KEY);
+    if (token) {
+      if (remember) {
+        window.localStorage.setItem(TOKEN_KEY, token);
+        window.sessionStorage.removeItem(TOKEN_KEY);
+      } else {
+        window.sessionStorage.setItem(TOKEN_KEY, token);
+        window.localStorage.removeItem(TOKEN_KEY);
+      }
+    } else {
+      window.localStorage.removeItem(TOKEN_KEY);
+      window.sessionStorage.removeItem(TOKEN_KEY);
+    }
   } catch {
     /* storage unavailable */
   }
@@ -105,6 +127,12 @@ export const api = {
     apiFetch<any>("/profiles/me", { method: "PATCH", body: d, auth: true }),
 
   creators: (params = "") => apiFetch<any[]>(`/profiles/creators${params}`),
+
+  // Brand-only creator directory WITH emails, for the New Deal form's
+  // creator dropdown (D2 disambiguation: two same-named creators must
+  // be tellable apart). The public /creators list stays email-free.
+  creatorsForDeal: (params = "") =>
+    apiFetch<any[]>(`/profiles/creators/for-deal${params}`, { auth: true }),
 
   creatorProfile: (id: string) => apiFetch<any>(`/profiles/creators/${id}`),
 

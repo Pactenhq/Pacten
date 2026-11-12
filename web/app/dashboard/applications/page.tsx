@@ -6,6 +6,7 @@ import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { StatCard, WelcomeHeader } from "@/components/dashboard/widgets";
 import { CreatorApplicationsTable } from "@/components/campaigns/ApplicationTables";
 import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
 import { creatorNav, dashboardUser } from "@/lib/mock";
 import { api } from "@/lib/api";
 
@@ -27,6 +28,9 @@ export default function CreatorApplicationsPage() {
   // the zeroed stat cards above them).
   const [rows, setRows] = useState<any[]>([]);
   const [stats, setStats] = useState(statCards);
+  // B-2: loading flag so the empty state below never flashes while the
+  // API is still answering — it renders only once zero rows is real.
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     api
@@ -70,7 +74,8 @@ export default function CreatorApplicationsPage() {
       })
       .catch(() => {
         // API unavailable — keep the (empty) real state
-      });
+      })
+      .finally(() => setLoading(false));
   }, []);
   return (
     <DashboardShell
@@ -96,7 +101,30 @@ export default function CreatorApplicationsPage() {
           ))}
         </div>
 
-        <CreatorApplicationsTable rows={rows} />
+        {/* B-2: matching empty state to the brand-side received-
+            applications page ("No applications yet…") — previously a
+            creator with zero applications saw 0-stat cards above an
+            empty table and no message at all. */}
+        {loading ? (
+          <p className="text-ink-500 dark:text-ink-300">Loading applications...</p>
+        ) : rows.length === 0 ? (
+          <Card className="p-10 text-center">
+            <div data-testid="my-applications-empty">
+              <p className="text-lg font-semibold text-ink-900 dark:text-ink-50">
+                No applications yet.
+              </p>
+              <p className="mx-auto mt-2 max-w-[420px] text-[15px] text-ink-500 dark:text-ink-300">
+                Browse campaigns and apply — your applications will show up
+                here.
+              </p>
+              <Link href="/campaigns" className="mt-6 inline-block">
+                <Button size="lg">Browse Campaigns</Button>
+              </Link>
+            </div>
+          </Card>
+        ) : (
+          <CreatorApplicationsTable rows={rows} />
+        )}
       </div>
     </DashboardShell>
   );
