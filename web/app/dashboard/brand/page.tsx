@@ -106,8 +106,13 @@ export default function BrandDashboardPage() {
               : "@user",
             campaign: a.campaign?.title ?? "Campaign",
             status:
+              // FINAL fix (Nov 12): a converted application used to
+              // read "Completed" — but nothing is complete: the
+              // application was accepted and turned into a deal, and
+              // the deal itself is only proposed. It is an ACCEPTED
+              // request; the deal's own status lives on the deals page.
               a.status === "converted_to_deal"
-                ? "Completed"
+                ? "Accepted"
                 : a.status === "accepted" || a.status === "shortlisted"
                   ? "Active"
                   : "Submitted",

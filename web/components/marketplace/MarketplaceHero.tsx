@@ -36,6 +36,7 @@ export function MarketplaceHero({
   placeholder,
   onSearch,
   defaultQuery,
+  clearSignal,
 }: {
   eyebrow: string;
   titleBlue: string;
@@ -44,6 +45,15 @@ export function MarketplaceHero({
   placeholder: string;
   onSearch?: (query: string) => void;
   defaultQuery?: string;
+  /** FINAL fix (Nov 12): incremented by the parent page whenever
+   *  "Clear all" is clicked. The box holds a DRAFT value that only
+   *  reaches the parent when Search is clicked — so when nothing was
+   *  applied yet, Clear all's setSearchQuery("") is a no-op at the
+   *  parent (already "") and the draft never cleared (staging-verified:
+   *  type "TikTok", Clear all, "TikTok" stayed). The signal forces the
+   *  box to re-sync to the parent term even when the parent term did
+   *  not change. */
+  clearSignal?: number;
 }) {
   const [query, setQuery] = useState(defaultQuery ?? "");
   // Keep the box in sync when the page's term changes externally
@@ -51,9 +61,12 @@ export function MarketplaceHero({
   // Follow-up fix (Nov 12): the old guard `if (defaultQuery)` never
   // cleared the box when the parent reset the term to "" — the keyword
   // stayed visible after "Clear all".
+  // FINAL fix (Nov 12): also re-sync when the parent's clear signal
+  // fires — the parent term may already be "" (nothing applied yet),
+  // so the term alone does not change and this effect would not run.
   useEffect(() => {
     setQuery(defaultQuery ?? "");
-  }, [defaultQuery]);
+  }, [defaultQuery, clearSignal]);
   const submit = () => onSearch?.(query);
   return (
     <section className="mx-auto max-w-[1380px] px-6 pt-12 text-center lg:px-12 lg:pt-16">

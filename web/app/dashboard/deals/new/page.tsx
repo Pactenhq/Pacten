@@ -102,6 +102,16 @@ function NewDealForm() {
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  // FINAL fix (Nov 12): the conversion pre-fill below fetches its
+  // source async — on slow staging the form used to look ready (and
+  // the banner already claimed "details pre-filled") while the fetch
+  // was still in flight, so a deal could be submitted before the
+  // values ever landed. While the source loads, the submit stays
+  // disabled. True only for conversion visits (applicationId /
+  // opportunityId); a plain direct deal never fetches.
+  const [prefillLoading, setPrefillLoading] = useState(
+    Boolean(applicationId || opportunityId)
+  );
   // Set on successful creation: shows a success banner with a link to
   // the created deal even if the redirect below ever fails to navigate,
   // so the form never silently sits there after the deal exists.
@@ -177,29 +187,48 @@ function NewDealForm() {
   // Pre-fill from an accepted application (application-to-deal conversion)
   useEffect(() => {
     if (!applicationId) return;
+    let alive = true;
     api
       .receivedApplications()
       .then((apps: any[]) => {
+        if (!alive) return;
         const app = (Array.isArray(apps) ? apps : []).find((a: any) => a.id === applicationId);
         if (!app) return;
         setForm((f) => ({
           ...f,
           title: app.campaign?.title ? app.campaign.title : f.title,
           creatorId: app.applicantId ?? f.creatorId,
-          agreedBudget: app.proposedBudget ?? f.agreedBudget,
+          // FINAL fix (Nov 12): the budget used to come only from
+          // app.proposedBudget — but the apply form never sends one
+          // (it posts only { coverLetter }), so it was always empty
+          // and the created deal showed Agreed Budget "-". The
+          // campaign's own budget is the real source; the deadline
+          // and deliverables come from the campaign too
+          // (receivedApplications attaches the full campaign object).
+          agreedBudget: app.proposedBudget || app.campaign?.budget || f.agreedBudget,
+          deadline: app.campaign?.deadline || f.deadline,
+          deliverables: app.campaign?.deliverables || f.deliverables,
           description: app.coverLetter ?? f.description,
           applicationId,
         }));
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => {
+        if (alive) setPrefillLoading(false);
+      });
+    return () => {
+      alive = false;
+    };
   }, [applicationId]);
 
   // Pre-fill from an accepted opportunity (opportunity-to-deal progression)
   useEffect(() => {
     if (!opportunityId) return;
+    let alive = true;
     api
       .sentOpportunities()
       .then((opps: any[]) => {
+        if (!alive) return;
         const opp = (Array.isArray(opps) ? opps : []).find((o: any) => o.id === opportunityId);
         if (!opp) return;
         setForm((f) => ({
@@ -209,9 +238,20 @@ function NewDealForm() {
           agreedBudget: opp.budget ?? f.agreedBudget,
           description: opp.description ?? f.description,
           opportunityId,
+          // NOTE (Nov 12): an opportunity carries NO deadline — the
+          // entity, the DTO and the send form have no deadline field
+          // anywhere. The deadline input stays empty by design (never
+          // a fake value); the banner below says exactly what IS
+          // pre-filled instead of claiming "details pre-filled".
         }));
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => {
+        if (alive) setPrefillLoading(false);
+      });
+    return () => {
+      alive = false;
+    };
   }, [opportunityId]);
 
   const set =
@@ -261,7 +301,14 @@ function NewDealForm() {
       )}
       {opportunityId && (
         <p className="rounded-lg bg-blue-50 px-4 py-2 text-sm text-blue-800">
-          Creating deal from an accepted opportunity — details pre-filled.
+          Creating deal from an accepted opportunity — title, creator and
+          budget pre-filled. An opportunity has no deadline, so add one
+          below if needed.
+        </p>
+      )}
+      {prefillLoading && (
+        <p className="rounded-lg bg-amber-50 px-4 py-2 text-sm text-amber-800">
+          Loading pre-filled details…
         </p>
       )}
       {creatorParam && !applicationId && !opportunityId && (
@@ -359,8 +406,8 @@ function NewDealForm() {
       )}
 
       <div className="flex gap-3">
-        <Button type="submit" disabled={saving}>
-          {saving ? "Creating..." : "Create Deal"}
+        <Button type="submit" disabled={saving || prefillLoading}>
+          {saving ? "Creating..." : prefillLoading ? "Loading details…" : "Create Deal"}
         </Button>
         <Link href="/dashboard/deals" onClick={clearDraft}>
           <Button variant="outline" type="button">Cancel</Button>

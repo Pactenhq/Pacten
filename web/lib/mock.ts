@@ -252,7 +252,10 @@ export interface RequestRow {
   name: string;
   handle: string;
   campaign: string;
-  status: "Active" | "Submitted" | "Completed";
+  // FINAL fix (Nov 12): "Accepted" is a request status — an application
+  // converted to a deal is accepted, not "Completed" (nothing is
+  // complete; the deal is only proposed).
+  status: "Active" | "Submitted" | "Completed" | "Accepted";
   date: string;
 }
 

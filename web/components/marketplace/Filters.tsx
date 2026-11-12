@@ -78,6 +78,21 @@ function RangeSlider({
   };
   const toValue = (pct: number) =>
     Math.round(scaleOf(min) + (pct / 100) * (scaleOf(max) - scaleOf(min)));
+  // FINAL fix (Nov 12): the slider's values are percents (0-100) but
+  // its labels claim the real scale (0..10M / 0..100K), so a probe
+  // reading the slider saw "max 100" next to a "10M" label. Format the
+  // scaled value compactly for the readout and the accessible value.
+  const formatCompact = (n: number) => {
+    if (n >= 1e6) {
+      const v = n / 1e6;
+      return `${Number.isInteger(v) ? v : v.toFixed(1)}M`;
+    }
+    if (n >= 1e3) {
+      const v = n / 1e3;
+      return `${Number.isInteger(v) ? v : v.toFixed(1)}K`;
+    }
+    return String(Math.round(n));
+  };
   const commit = (loPct: number, hiPct: number) =>
     onChange?.([toValue(loPct), toValue(hiPct)]);
 
@@ -124,7 +139,10 @@ function RangeSlider({
           <span
             role="slider"
             aria-label={`${label} minimum`}
-            aria-valuenow={Math.round(lo)}
+            aria-valuemin={toValue(0)}
+            aria-valuemax={toValue(100)}
+            aria-valuenow={toValue(lo)}
+            aria-valuetext={formatCompact(toValue(lo))}
             tabIndex={0}
             className={thumb}
             style={{ left: `${lo}%` }}
@@ -148,7 +166,10 @@ function RangeSlider({
           <span
             role="slider"
             aria-label={`${label} maximum`}
-            aria-valuenow={Math.round(hi)}
+            aria-valuemin={toValue(0)}
+            aria-valuemax={toValue(100)}
+            aria-valuenow={toValue(hi)}
+            aria-valuetext={formatCompact(toValue(hi))}
             tabIndex={0}
             className={thumb}
             style={{ left: `${hi}%` }}
@@ -172,6 +193,13 @@ function RangeSlider({
         </div>
         <div className="mt-1.5 flex items-center justify-between text-xs text-ink-500 dark:text-ink-300">
           <span>{min}</span>
+          {/* FINAL fix (Nov 12): show the currently selected range in
+              the labelled scale, so what the slider commits is visible
+              — previously only the end labels (0 / 10M) showed and the
+              slider's own value read 100 (percent). */}
+          <span className="font-semibold text-ink-900 dark:text-ink-50">
+            {formatCompact(toValue(lo))} – {formatCompact(toValue(hi))}
+          </span>
           <span>{max}</span>
         </div>
       </div>

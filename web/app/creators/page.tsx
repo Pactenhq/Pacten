@@ -58,6 +58,15 @@ export default function CreatorsPage() {
     return () => clearTimeout(t);
   }, []);
   const [searchQuery, setSearchQuery] = useState("");
+  // FINAL fix (Nov 12): "Clear all" must also clear the hero box's
+  // DRAFT value (see MarketplaceHero clearSignal). The parent term
+  // alone cannot signal the clear — it may already be "".
+  const [clearKey, setClearKey] = useState(0);
+  const handleClearSearch = () => {
+    setSearchQuery("");
+    setClearKey((k) => k + 1);
+    setPage(1);
+  };
   const [activeTab, setActiveTab] = useState("All");
   const [filters, setFilters] = useState<CreatorFilters>({
     category: "All",
@@ -101,6 +110,9 @@ export default function CreatorsPage() {
   );
 
   // Arriving from the home-page hero search (?q=...) — start filtered.
+  // FINAL fix (Nov 12): ?page= also initialises the page on load
+  // (staging-verified: /creators?page=2 rendered page 1). A search
+  // term wins and resets to page 1; a bare ?page= keeps its page.
   useEffect(() => {
     // Follow-up fix (Nov 12): ?search= also populates the box — the
     // browser-verified defect was /creators?search=... leaving the
@@ -110,7 +122,10 @@ export default function CreatorsPage() {
     if (q) {
       setSearchQuery(q);
       setPage(1);
+      return;
     }
+    const p = parseInt(params.get("page") ?? "", 10);
+    if (!Number.isNaN(p) && p > 1) setPage(p);
   }, []);
 
   const filtered = allCreators.filter((c) => {
@@ -162,6 +177,15 @@ export default function CreatorsPage() {
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
+  // FINAL fix (Nov 12): a ?page= past the last page (or a page that
+  // shrinks away when filters change) must clamp to the last page
+  // instead of rendering an empty list — but ONLY once the list has
+  // settled. On first render totalPages is 1 (empty list), so an
+  // unguarded clamp would clobber ?page=2 before the list loads.
+  useEffect(() => {
+    if (listSettled && page > totalPages) setPage(totalPages);
+  }, [totalPages, listSettled]);
+
   const handleSearch = (q: string) => {
     setSearchQuery(q);
     setPage(1);
@@ -187,6 +211,7 @@ export default function CreatorsPage() {
           placeholder="Search creators, niches or platforms..."
           onSearch={handleSearch}
           defaultQuery={searchQuery}
+          clearSignal={clearKey}
         />
         <PlatformTabs
           tabs={["All", "TikTok", "Instagram", "YouTube", "Twitch", "LinkedIn"]}
@@ -203,7 +228,7 @@ export default function CreatorsPage() {
           <div className="flex gap-8">
             <aside className="hidden w-[300px] shrink-0 lg:block">
               <div className="sticky top-24 rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 p-5 shadow-card">
-                <FilterPanel kind="creators" languageOptions={languageOptions} industryOptions={industryOptions} skillOptions={skillOptions} onCreatorFilterChange={handleFilter} onClearSearch={() => setSearchQuery("")} />
+                <FilterPanel kind="creators" languageOptions={languageOptions} industryOptions={industryOptions} skillOptions={skillOptions} onCreatorFilterChange={handleFilter} onClearSearch={handleClearSearch} />
               </div>
             </aside>
             <div className="min-w-0 flex-1">
@@ -237,7 +262,7 @@ export default function CreatorsPage() {
         onClose={() => setDrawerOpen(false)}
         title="Filters"
       >
-        <FilterPanel kind="creators" languageOptions={languageOptions} industryOptions={industryOptions} skillOptions={skillOptions} onCreatorFilterChange={handleFilter} onClearSearch={() => setSearchQuery("")} />
+        <FilterPanel kind="creators" languageOptions={languageOptions} industryOptions={industryOptions} skillOptions={skillOptions} onCreatorFilterChange={handleFilter} onClearSearch={handleClearSearch} />
       </Drawer>
     </>
   );
