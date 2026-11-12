@@ -260,7 +260,9 @@ export interface DashboardCampaign {
   title: string;
   handle: string;
   budget: string;
-  status: "Active" | "Completed";
+  // GAP-4: was "Active" | "Completed" — the row status now carries the
+  // shared canonical campaign label ("Open" / "Completed" / "Closed").
+  status: string;
   deadline: string;
   submitted: string;
 }

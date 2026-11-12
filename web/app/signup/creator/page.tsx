@@ -4,7 +4,6 @@ import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { TextField } from "@/components/ui/TextField";
 import { Button } from "@/components/ui/Button";
-import { Stepper } from "@/components/auth/Stepper";
 import {
   AuthError,
   CheckEmailNotice,
@@ -12,10 +11,12 @@ import {
 } from "@/components/auth/auth-forms";
 
 //
-// Copy, stepper and layout matched verbatim from the frame.
-// Now wired to the real auth API.
-const STEPS = ["Account", "Profile", "Platforms", "Portfolio", "Services"];
-
+// Copy and layout matched from the frame, wired to the real auth API.
+// NOTE: the frame drew a 5-step wizard (Account/Profile/Platforms/
+// Portfolio/Services) but signup is a single step — the account is
+// created here and profile completion happens later in Settings — so no
+// stepper is shown: showing steps that never happen misled users into
+// waiting for a step 2.
 function CreatorSignupForm() {
   const { field, submit, error, loading, checkEmail, email } =
     useSignupForm("creator");
@@ -72,7 +73,7 @@ function CreatorSignupForm() {
           </div>
           <div>
             <Button type="submit" size="lg" disabled={loading}>
-              {loading ? "Creating account…" : "Continue"}
+              {loading ? "Creating account…" : "Create account"}
             </Button>
           </div>
         </>
@@ -85,7 +86,6 @@ export default function CreatorSignupPage() {
   return (
     <main className="bg-mist/50 dark:bg-ink-950/50">
       <div className="mx-auto max-w-[1380px] px-6 py-14 lg:px-12 lg:py-20">
-        <Stepper steps={STEPS} activeIndex={0} />
         <div className="mt-10 flex justify-center">
           <Card className="fade-up fade-up-2 w-full max-w-[662px] p-6 shadow-pop sm:p-10">
             <h1 className="text-3xl font-extrabold tracking-tight text-ink-900 dark:text-ink-50 lg:text-4xl">

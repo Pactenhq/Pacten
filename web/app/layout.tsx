@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { AuthProvider } from "@/components/auth/AuthProvider";
+import { ScrollToTop } from "@/components/ui/ScrollToTop";
 import { routeMetadata } from "@/lib/seo";
 
 const inter = Inter({
@@ -54,6 +55,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen bg-white dark:bg-ink-950 font-sans text-ink-900 dark:text-ink-50 antialiased">
+        <ScrollToTop />
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>

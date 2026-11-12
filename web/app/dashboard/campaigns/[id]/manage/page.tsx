@@ -11,6 +11,7 @@ import { Tag } from "@/components/ui/Tag";
 import { Button } from "@/components/ui/Button";
 import { MessagePanel } from "@/components/campaigns/MessagePanel";
 import { api } from "@/lib/api";
+import { campaignStatusLabel } from "@/lib/campaignStatus";
 import { manageNav } from "@/lib/mock-campaigns";
 import { dashboardUser } from "@/lib/mock";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -147,7 +148,9 @@ export default function ManageCampaignPage() {
                     <h1 className="text-[28px] font-extrabold tracking-tight text-ink-900 dark:text-ink-50">
                       {campaign.title}
                     </h1>
-                    {campaign.status ? <Tag tone="warning">{campaign.status}</Tag> : null}
+                    {/* GAP-4: same shared label as My Campaigns /
+                        brand dashboard / public detail (was raw "open"). */}
+                    {campaign.status ? <Tag tone="warning">{campaignStatusLabel(campaign.status)}</Tag> : null}
                   </div>
                   <p className="mt-2 text-[14px] text-ink-500 dark:text-ink-300">
                     {campaign.createdAt
@@ -179,7 +182,7 @@ export default function ManageCampaignPage() {
                 </div>
                 <div className="rounded-xl border border-ink-100 dark:border-ink-800 p-4">
                   <p className="text-[13px] font-medium text-ink-500 dark:text-ink-300">Status</p>
-                  <p className="mt-0.5 text-[15px] font-bold text-ink-900 dark:text-ink-50">{campaign.status || "—"}</p>
+                  <p className="mt-0.5 text-[15px] font-bold text-ink-900 dark:text-ink-50">{campaignStatusLabel(campaign.status)}</p>
                 </div>
                 <div className="rounded-xl border border-ink-100 dark:border-ink-800 p-4">
                   <p className="text-[13px] font-medium text-ink-500 dark:text-ink-300">Deadline</p>

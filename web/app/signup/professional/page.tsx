@@ -4,7 +4,6 @@ import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { TextField } from "@/components/ui/TextField";
 import { Button } from "@/components/ui/Button";
-import { Stepper } from "@/components/auth/Stepper";
 import {
   AuthError,
   CheckEmailNotice,
@@ -18,8 +17,11 @@ import {
 // professional copy, so this page now uses that copy on all viewports,
 // with the same single-step account form and submit behaviour as the
 // other role signups.
-const STEPS = ["Account", "Profile", "Expertise", "Confirm"];
-
+// NOTE: the frame also drew a 4-step wizard (Account/Profile/Expertise/
+// Confirm) but signup is a single step — the account is created here
+// and profile completion happens later in Settings — so no stepper is
+// shown: showing steps that never happen misled users into waiting
+// for a step 2.
 function ProfessionalForm() {
   const { field, submit, error, loading, checkEmail, email } =
     useSignupForm("professional");
@@ -83,7 +85,7 @@ function ProfessionalForm() {
             </div>
             <div>
               <Button type="submit" size="lg" disabled={loading}>
-                {loading ? "Creating account…" : "Continue"}
+                {loading ? "Creating account…" : "Create account"}
               </Button>
             </div>
           </>
@@ -103,9 +105,6 @@ export default function ProfessionalSignupPage() {
   return (
     <main className="bg-mist/50 dark:bg-ink-950/50">
       <div className="mx-auto max-w-[1380px] px-6 py-14 lg:px-12 lg:py-20">
-        <div className="hidden lg:block">
-          <Stepper steps={STEPS} activeIndex={0} />
-        </div>
         <div className="mt-10 flex justify-center">
           <Card className="fade-up fade-up-2 w-full max-w-[662px] p-6 shadow-pop lg:p-10">
             <ProfessionalForm />

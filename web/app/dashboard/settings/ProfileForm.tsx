@@ -29,7 +29,11 @@ export function SettingsProfileForm() {
     skills: "",
     platforms: "",
     // Creator-only: niches feed the Category pills; rate is the
-    // "Typical rate" the public profile shows.
+    // "Typical rate" the public profile shows. For professionals the
+    // same `rate` form state carries `hourlyRate` — the professional
+    // profile has no `rate` column, only `hourlyRate` (rendered as
+    // "$X/hr" on the public profile), and the API allowlist accepts
+    // `hourlyRate` for professionals.
     niches: "",
     rate: "",
   });
@@ -55,7 +59,13 @@ export function SettingsProfileForm() {
         skills: Array.isArray(p.skills) ? p.skills.join(", ") : "",
         platforms: Array.isArray(p.platforms) ? p.platforms.join(", ") : "",
         niches: Array.isArray(p.niches) ? p.niches.join(", ") : "",
-        rate: p.rate != null ? String(p.rate) : "",
+        // Creators store `rate`; professionals store `hourlyRate`.
+        rate:
+          p.rate != null
+            ? String(p.rate)
+            : p.hourlyRate != null
+              ? String(p.hourlyRate)
+              : "",
       });
       setInitials(
         name
@@ -111,6 +121,10 @@ export function SettingsProfileForm() {
         if (user.role === "creator") {
           payload.niches = parseList(values.niches);
           payload.rate = values.rate.trim();
+        } else if (user.role === "professional") {
+          // Professional profiles carry `hourlyRate`, not `rate` —
+          // the API allowlist accepts it for professionals.
+          payload.hourlyRate = values.rate.trim();
         }
       }
       await api.updateProfile(payload);
@@ -212,6 +226,14 @@ export function SettingsProfileForm() {
                 {...field("rate")}
               />
             </>
+          )}
+          {user?.role === "professional" && (
+            <TextField
+              label="Hourly Rate"
+              placeholder="50"
+              hint="Your hourly rate, e.g. 50 — shown on your public profile as $50/hr."
+              {...field("rate")}
+            />
           )}
         </div>
         <div className="flex w-full flex-col gap-1.5">

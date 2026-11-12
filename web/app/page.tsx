@@ -220,9 +220,10 @@ function Hero() {
         </div>
       </div>
 
-      {/* Homepage showcase (Nov 2026): real creator/professional
-          profiles now render between Hero and Pricing via
-          components/home/Showcase.tsx (newest first, real API data).
+      {/* Homepage showcase (Nov 2026, REDESIGN Nov 12): real
+          creator/professional cards render directly below the hero
+          search bar, exactly like Figma — no section headings, no
+          Browse-all links, newest first, at most 4 cards per rail.
           Never render hardcoded names, follower counts, or ratings. */}
       </div>
     </section>
@@ -741,9 +742,30 @@ function BottomCta() {
   );
 }
 
+/* ------------------------- homepage scroll -------------------------- */
+
+// Homepage scroll-to-top (Nov 2026, fix 8): this Next.js version's
+// <Link> default is to MAINTAIN scroll position across client-side
+// navigation (see node_modules/next/dist/docs Link `scroll`), so
+// returning to '/' from another page landed mid-page (logo click landed
+// at scrollY 4677 of 6115 in the repro) instead of the top. Every
+// return to '/' must land at the top, so the homepage scrolls itself
+// to the top on mount — immediately and once more on the next frame,
+// because the router's scroll handling can land after the first paint.
+// Homepage-scoped only: no other page is touched and no global router
+// behaviour changes.
+function useScrollToTopOnMount() {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    const raf = requestAnimationFrame(() => window.scrollTo(0, 0));
+    return () => cancelAnimationFrame(raf);
+  }, []);
+}
+
 /* -------------------------------- page ------------------------------ */
 
 export default function HomePage() {
+  useScrollToTopOnMount();
   return (
     <>
       <Navbar />

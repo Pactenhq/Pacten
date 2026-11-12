@@ -8,6 +8,7 @@ import { useParams } from "next/navigation";
 import { Navbar } from "@/components/ui/Navbar";
 import { Footer } from "@/components/ui/Footer";
 import { api } from "@/lib/api";
+import { campaignStatusLabel } from "@/lib/campaignStatus";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/components/auth/AuthProvider";
 
@@ -41,7 +42,10 @@ function CampaignDetailContent() {
             description: data.description ?? "",
             budget: data.budget ?? "",
             timeline: data.deadline ?? "",
-            type: data.status ?? "",
+            // GAP-4: the status pill used to show the raw enum value
+            // ("open"). It now uses the shared canonical label so it
+            // matches My Campaigns and the brand dashboard overview.
+            type: campaignStatusLabel(data.status),
             location: "",
             postedAt: data.createdAt
               ? new Date(data.createdAt).toLocaleDateString("en-US", {

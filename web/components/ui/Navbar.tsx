@@ -185,7 +185,16 @@ export function Navbar() {
     <header className={`sticky top-0 z-40 border-b border-ink-100 dark:border-ink-800 bg-white/95 dark:bg-ink-900/95 backdrop-blur transition-all duration-300 ${scrolled ? "navbar-scrolled" : ""}`}>
       <nav className="mx-auto flex h-[72px] max-w-[1380px] items-center justify-between px-6 lg:px-12">
         <div className="flex shrink-0 items-center gap-8">
-          <Link href="/" className="flex shrink-0 items-center" aria-label="Pacten home">
+          {/* Clicking the logo while already on '/' is a same-route click,
+              which Next does not navigate — so scroll to the top here
+              directly. Returns from other pages are handled by
+              ScrollToTop in the root layout. */}
+          <Link
+            href="/"
+            onClick={() => window.scrollTo(0, 0)}
+            className="flex shrink-0 items-center"
+            aria-label="Pacten home"
+          >
             <PactenLogo className="h-9 w-auto" />
           </Link>
           <div
@@ -215,7 +224,21 @@ export function Navbar() {
         </div>
         <div className="hidden shrink-0 items-center gap-2 pl-2 xl:flex">
           <ThemeToggle />
-          {loggedIn ? (
+          {loading ? (
+            // Neutral header while the session resolves: rendering the
+            // logged-out Login/Join buttons here flashed them to every
+            // signed-in user on each public-page load (AuthProvider
+            // starts loading=true with user=null until /auth/me returns).
+            // Skeleton bars hold the space without implying either state.
+            <div
+              aria-hidden="true"
+              data-testid="navbar-auth-loading"
+              className="flex items-center gap-2"
+            >
+              <span className="h-9 w-24 animate-pulse rounded-lg bg-ink-100 dark:bg-ink-800" />
+              <span className="h-9 w-32 animate-pulse rounded-lg bg-ink-100 dark:bg-ink-800" />
+            </div>
+          ) : loggedIn ? (
             <>
               <span className="mr-2 max-w-[180px] truncate whitespace-nowrap text-[15px] font-semibold text-ink-900 dark:text-ink-50">
                 {displayName}
@@ -296,7 +319,16 @@ export function Navbar() {
               {label}
             </Link>
           ))}
-          {loggedIn ? (
+          {loading ? (
+            // Neutral while the session resolves — same reason as the
+            // desktop cluster above: no Login/Join flash for signed-in
+            // users who open the mobile menu during load.
+            <span
+              aria-hidden="true"
+              data-testid="navbar-auth-loading"
+              className="mt-2 h-5 w-24 animate-pulse rounded bg-ink-100 dark:bg-ink-800"
+            />
+          ) : loggedIn ? (
             <>
               <span className="mt-2 text-[15px] font-semibold text-ink-900 dark:text-ink-50">
                 {displayName}

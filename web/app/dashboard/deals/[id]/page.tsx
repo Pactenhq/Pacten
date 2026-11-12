@@ -54,6 +54,8 @@ export default function DealDetailPage() {
   const [disputeDesc, setDisputeDesc] = useState("");
   const [disputeBusy, setDisputeBusy] = useState(false);
   const [disputeMsg, setDisputeMsg] = useState<string | null>(null);
+  // Shown when arriving from the New Deal form (?created=1).
+  const [createdNotice, setCreatedNotice] = useState(false);
 
   const refreshDisputes = async () => {
     try {
@@ -131,6 +133,16 @@ export default function DealDetailPage() {
     const returnState = new URLSearchParams(window.location.search).get(
       "payment"
     );
+    // New-deal return (?created=1): show the success message the form
+    // promised, then strip the param so a reload doesn't repeat it.
+    // (Skipped when a Stripe return is also present — that path owns
+    // the URL cleanup below.)
+    if (
+      new URLSearchParams(window.location.search).get("created") === "1"
+    ) {
+      setCreatedNotice(true);
+      if (!returnState) router.replace(`/dashboard/deals/${id}`);
+    }
     if (returnState === "success" || returnState === "cancelled") {
       (async () => {
         if (returnState === "success") {
@@ -178,6 +190,28 @@ export default function DealDetailPage() {
     }
     await refreshM4();
   };
+
+  // GAP-3: the deal's status (and its contract) can also change
+  // elsewhere — the other party signing the contract on the contract
+  // page, or an action taken in another tab. This page previously
+  // refetched only after its OWN actions, so those changes stayed
+  // invisible until a manual reload. Refetch whenever the page regains
+  // focus or becomes visible again, on top of refresh-after-action.
+  useEffect(() => {
+    const onFocus = () => {
+      void refreshDeal();
+    };
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void refreshDeal();
+    };
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   const m4action = async (fn: () => Promise<any>, failMsg: string) => {
     setM4busy(true);
@@ -298,6 +332,14 @@ export default function DealDetailPage() {
       userInitials={dashboardUser.initials}
     >
       <div className="flex flex-col gap-8">
+        {createdNotice && (
+          <div
+            role="status"
+            className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700"
+          >
+            Deal created successfully.
+          </div>
+        )}
         <div className="flex flex-wrap items-start justify-between gap-4">
           <WelcomeHeader
             title={String(deal.title ?? "").replace(/^Deal:\s*/i, "")}

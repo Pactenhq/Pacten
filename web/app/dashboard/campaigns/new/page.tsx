@@ -17,14 +17,33 @@ import { api } from "@/lib/api";
 export default function CampaignRequestPage() {
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<{
+    title?: string;
+    description?: string;
+  }>({});
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
-    setLoading(true);
+    // In-page validation: the form carries noValidate so the browser's
+    // native bubble ("Please fill out this field") never blocks the
+    // submit — empty required fields surface as visible errors on the
+    // page itself instead.
     const form = new FormData(e.currentTarget);
+    const title = ((form.get("title") as string) ?? "").trim();
+    const description = ((form.get("description") as string) ?? "").trim();
+    const errs: { title?: string; description?: string } = {};
+    if (!title) errs.title = "Campaign title is required.";
+    if (!description)
+      errs.description = "Campaign description is required.";
+    if (Object.keys(errs).length > 0) {
+      setFieldErrors(errs);
+      return;
+    }
+    setFieldErrors({});
+    setLoading(true);
     try {
       await api.createCampaign({
         title: form.get("title") as string,
@@ -100,6 +119,7 @@ export default function CampaignRequestPage() {
             <form
               className="flex flex-col gap-5"
               onSubmit={handleSubmit}
+              noValidate
             >
               {error && (
                 <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
@@ -110,7 +130,10 @@ export default function CampaignRequestPage() {
                 label="Campaign Title"
                 name="title"
                 placeholder="e.g. Summer Collection Launch"
-                required
+                error={fieldErrors.title}
+                onChange={() =>
+                  setFieldErrors((f) => ({ ...f, title: undefined }))
+                }
               />
               <div>
                 <label
@@ -123,10 +146,21 @@ export default function CampaignRequestPage() {
                   id="req-description"
                   name="description"
                   rows={5}
-                  required
                   placeholder="Describe your campaign, brand, and what you'd like the creator to do..."
-                  className="w-full rounded-xl border border-ink-300 dark:border-ink-700 bg-white dark:bg-ink-900 px-4 py-3 text-[15px] text-ink-900 dark:text-ink-50 placeholder:text-ink-400 dark:placeholder:text-ink-300 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand-100"
+                  onChange={() =>
+                    setFieldErrors((f) => ({ ...f, description: undefined }))
+                  }
+                  className={`w-full rounded-xl border bg-white dark:bg-ink-900 px-4 py-3 text-[15px] text-ink-900 dark:text-ink-50 placeholder:text-ink-400 dark:placeholder:text-ink-300 focus:outline-none focus:ring-2 ${
+                    fieldErrors.description
+                      ? "border-danger focus:border-danger focus:ring-danger-bg"
+                      : "border-ink-300 dark:border-ink-700 focus:border-brand focus:ring-brand-100"
+                  }`}
                 />
+                {fieldErrors.description && (
+                  <p className="mt-1.5 text-xs text-danger dark:text-danger-bright">
+                    {fieldErrors.description}
+                  </p>
+                )}
               </div>
               <TextField
                 label="Deliverables Needed"

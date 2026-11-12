@@ -20,6 +20,7 @@ import {
   type RequestRow,
 } from "@/lib/mock";
 import { api } from "@/lib/api";
+import { campaignStatusLabel } from "@/lib/campaignStatus";
 
 // desktop + "mob Brand dashboard"
 // (344:11945) mobile. Welcome header with "+ Create Campaign", three stat
@@ -41,7 +42,11 @@ function personName(u: any): string {
   return n || u.email || "User";
 }
 
-function toCampaignCard(c: any, status: "Active" | "Completed"): DashboardCampaign {
+// GAP-4: the row status used to be hardcoded "Active" for every open
+// campaign while My Campaigns showed "Pending" and the public detail
+// showed raw "open". It now comes from the shared
+// campaignStatusLabel() helper, so all three surfaces agree.
+function toCampaignCard(c: any): DashboardCampaign {
   const rawBudget = c.budget != null ? String(c.budget).trim() : "";
   return {
     title: c.title ?? "Campaign",
@@ -51,7 +56,7 @@ function toCampaignCard(c: any, status: "Active" | "Completed"): DashboardCampai
         ? rawBudget
         : `$${rawBudget}`
       : "—",
-    status,
+    status: campaignStatusLabel(c.status),
     deadline: fmtDate(c.deadline),
     submitted: fmtDate(c.createdAt),
   };
@@ -71,8 +76,8 @@ export default function BrandDashboardPage() {
         const open = data.filter((c) => c.status === "open");
         const done = data.filter((c) => c.status === "completed");
         setStats((s) => ({ ...s, active: open.length, completed: done.length }));
-        setActiveCampaigns(open.map((c) => toCampaignCard(c, "Active")));
-        setCompletedCampaigns(done.map((c) => toCampaignCard(c, "Completed")));
+        setActiveCampaigns(open.map((c) => toCampaignCard(c)));
+        setCompletedCampaigns(done.map((c) => toCampaignCard(c)));
       })
       .catch(() => {});
     api

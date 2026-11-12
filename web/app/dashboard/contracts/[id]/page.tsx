@@ -42,6 +42,29 @@ export default function ContractDetailPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
+  // GAP-3: the other party can sign while this page is open (or in
+  // another tab); the signature block would stay stale until a manual
+  // reload. Refetch when the page regains focus or becomes visible
+  // again, on top of the refetch-after-accept in act().
+  useEffect(() => {
+    const refetch = () => {
+      api
+        .contractDetail(id)
+        .then(setContract)
+        .catch(() => {});
+    };
+    const onFocus = () => refetch();
+    const onVisible = () => {
+      if (document.visibilityState === "visible") refetch();
+    };
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [id]);
+
   // Prefill the signatory name from the viewer's display name (the user
   // confirms or edits it — display names are never recorded as legal
   // names without confirmation).

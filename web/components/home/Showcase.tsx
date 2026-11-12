@@ -3,8 +3,6 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
-import { Tag } from "@/components/ui/Tag";
-import { Reveal } from "@/components/ui/Reveal";
 import {
   CreatorCard,
   ProfessionalCard,
@@ -14,14 +12,18 @@ import {
   useMarketplaceProfessionals,
 } from "@/components/marketplace/useMarketplace";
 
-// Homepage showcase (Nov 2026): real creator + professional profiles
-// from the API, newest first — no hardcoded names, counts or ratings.
-// Only the first 4 cards render here (4 on desktop, fewer on smaller
-// screens via the responsive grid); the rest live on /creators and
-// /professionals behind the browse-all links. Cards are the same
-// CreatorCard / ProfessionalCard the marketplace pages use, so they
-// link to the same profile pages. There is no public brand/business
-// profile page, so the showcase covers creators + professionals only.
+// Homepage showcase (Nov 2026, REDESIGN Nov 12 — user order, supersedes
+// the Nov 11 headed rails): real creator + professional profiles from
+// the API, newest first — no hardcoded names, counts or ratings. The
+// cards render DIRECTLY below the hero search bar, exactly like Figma:
+// NO section headings ("Newest creators/professionals" removed) and NO
+// Browse-all links. Only the first 4 cards per rail render here (4 on
+// desktop, fewer on smaller screens via the responsive grid); the rest
+// live on /creators and /professionals, reached from the hero search
+// tabs and the nav. Cards are the same CreatorCard / ProfessionalCard
+// the marketplace pages use, so they link to the same profile pages.
+// There is no public brand/business profile page, so the showcase
+// covers creators + professionals only.
 
 const SHOWCASE_LIMIT = 4;
 
@@ -40,31 +42,6 @@ function useSettled(ms = 2500): boolean {
   return settled;
 }
 
-function BrowseAllLink({
-  href,
-  label,
-  testId,
-}: {
-  href: string;
-  label: string;
-  testId: string;
-}) {
-  return (
-    <div className="mt-8 flex justify-center">
-      <Link
-        href={href}
-        data-testid={testId}
-        className="inline-flex items-center gap-2 text-[15px] font-semibold text-brand dark:text-brand-200 hover:underline"
-      >
-        {label}
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
-          <path d="M2 8h11M9 3.5 13.5 8 9 12.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </Link>
-    </div>
-  );
-}
-
 function CreatorsShowcase() {
   const creators = useMarketplaceCreators({
     sort: "createdAt:desc",
@@ -74,30 +51,16 @@ function CreatorsShowcase() {
   return (
     <section
       data-testid="home-showcase-creators"
-      className="mx-auto max-w-[1380px] px-6 py-16 lg:px-12"
+      className="mx-auto max-w-[1380px] px-6 pb-4 pt-8 lg:px-12"
     >
-      <Reveal>
-        <div className="flex justify-start">
-          <Tag>Creators</Tag>
-        </div>
-        <h2 className="mt-6 max-w-[700px] text-4xl font-extrabold tracking-tight lg:text-[52px] lg:leading-[1.1]">
-          <span className="text-ink-900 dark:text-ink-50">Newest creators</span>
-          <br />
-          <span className="text-gradient-blue text-gradient-animated">on Pacten</span>
-        </h2>
-        <p className="mt-4 max-w-[640px] text-lg leading-relaxed text-ink-500 dark:text-ink-300">
-          Creators who recently joined the marketplace — browse their
-          profiles and start a collaboration.
-        </p>
-      </Reveal>
       {creators.length > 0 ? (
-        <div className="mt-10 grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
           {creators.map((c) => (
             <CreatorCard key={c.id} creator={c} />
           ))}
         </div>
       ) : settled ? (
-        <div className="mt-10 rounded-2xl border border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900 p-10 text-center shadow-card">
+        <div className="rounded-2xl border border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900 p-10 text-center shadow-card">
           <p className="text-lg font-semibold text-ink-900 dark:text-ink-50">
             No creator profiles yet — be the first to join
           </p>
@@ -109,11 +72,6 @@ function CreatorsShowcase() {
           </Link>
         </div>
       ) : null}
-      <BrowseAllLink
-        href="/creators"
-        label="Browse all creators"
-        testId="browse-all-creators"
-      />
     </section>
   );
 }
@@ -127,30 +85,16 @@ function ProfessionalsShowcase() {
   return (
     <section
       data-testid="home-showcase-professionals"
-      className="mx-auto max-w-[1380px] px-6 py-16 lg:px-12"
+      className="mx-auto max-w-[1380px] px-6 pb-16 pt-4 lg:px-12"
     >
-      <Reveal>
-        <div className="flex justify-start">
-          <Tag>Professionals</Tag>
-        </div>
-        <h2 className="mt-6 max-w-[700px] text-4xl font-extrabold tracking-tight lg:text-[52px] lg:leading-[1.1]">
-          <span className="text-ink-900 dark:text-ink-50">Newest professionals</span>
-          <br />
-          <span className="text-gradient-blue text-gradient-animated">on Pacten</span>
-        </h2>
-        <p className="mt-4 max-w-[640px] text-lg leading-relaxed text-ink-500 dark:text-ink-300">
-          Social media professionals who recently joined — find editors,
-          designers, strategists and copywriters for your next campaign.
-        </p>
-      </Reveal>
       {professionals.length > 0 ? (
-        <div className="mt-10 grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
           {professionals.map((p) => (
             <ProfessionalCard key={p.id} professional={p} />
           ))}
         </div>
       ) : settled ? (
-        <div className="mt-10 rounded-2xl border border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900 p-10 text-center shadow-card">
+        <div className="rounded-2xl border border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900 p-10 text-center shadow-card">
           <p className="text-lg font-semibold text-ink-900 dark:text-ink-50">
             No professional profiles yet — be the first to join
           </p>
@@ -162,11 +106,6 @@ function ProfessionalsShowcase() {
           </Link>
         </div>
       ) : null}
-      <BrowseAllLink
-        href="/professionals"
-        label="Browse all professionals"
-        testId="browse-all-professionals"
-      />
     </section>
   );
 }

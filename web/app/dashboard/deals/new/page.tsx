@@ -34,6 +34,10 @@ function NewDealForm() {
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  // Set on successful creation: shows a success banner with a link to
+  // the created deal even if the redirect below ever fails to navigate,
+  // so the form never silently sits there after the deal exists.
+  const [createdDealId, setCreatedDealId] = useState<string | null>(null);
   // null = loading, [] = fetch failed/empty -> fall back to manual UUID entry
   const [creators, setCreators] = useState<CreatorOption[] | null>(null);
   // Manual entry lets a brand hire ANY creator by user ID. The dropdown
@@ -119,7 +123,17 @@ function NewDealForm() {
       if (!payload.applicationId) delete payload.applicationId;
       if (!payload.opportunityId) delete payload.opportunityId;
       const deal = await api.createDeal(payload);
-      router.push(`/dashboard/deals/${deal.id}`);
+      // Success: show a message AND leave the form — redirect to the
+      // created deal (its page repeats the message via ?created=1).
+      // Guard the id: if the response ever carries none, fall back to
+      // the Deals list instead of pushing to /deals/undefined.
+      const dealId = (deal as any)?.id ? String((deal as any).id) : null;
+      if (dealId) setCreatedDealId(dealId);
+      if (dealId) {
+        router.push(`/dashboard/deals/${dealId}?created=1`);
+      } else {
+        router.push(`/dashboard/deals?created=1`);
+      }
     } catch (err: any) {
       setError(err?.message ?? "Failed to create deal");
     } finally {
@@ -215,6 +229,21 @@ function NewDealForm() {
       </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
+
+      {createdDealId && (
+        <p
+          role="status"
+          className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700"
+        >
+          Deal created successfully.{" "}
+          <Link
+            href={`/dashboard/deals/${createdDealId}`}
+            className="font-semibold underline"
+          >
+            View deal
+          </Link>
+        </p>
+      )}
 
       <div className="flex gap-3">
         <Button type="submit" disabled={saving}>

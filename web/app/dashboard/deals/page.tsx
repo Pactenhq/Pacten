@@ -24,8 +24,17 @@ export default function DealsPage() {
         : brandNav;
   const [deals, setDeals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  // Shown when arriving from the New Deal form without a deal id
+  // (?created=1 fallback path).
+  const [createdNotice, setCreatedNotice] = useState(false);
 
   useEffect(() => {
+    if (
+      typeof window !== "undefined" &&
+      new URLSearchParams(window.location.search).get("created") === "1"
+    ) {
+      setCreatedNotice(true);
+    }
     api
       .deals()
       .then((data) => {
@@ -63,6 +72,14 @@ export default function DealsPage() {
       userInitials={dashboardUser.initials}
     >
       <div className="flex flex-col gap-8">
+        {createdNotice && (
+          <div
+            role="status"
+            className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700"
+          >
+            Deal created successfully.
+          </div>
+        )}
         <div className="flex flex-wrap items-start justify-between gap-4">
           <WelcomeHeader
             title="Deals"

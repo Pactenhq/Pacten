@@ -4,37 +4,42 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/cn";
 import { Card } from "@/components/ui/Card";
 import { myCampaignPills } from "@/lib/mock-campaigns";
+import { campaignStatusLabel } from "@/lib/campaignStatus";
 import { api } from "@/lib/api";
 
 // Rebuilt from the  (319:12842) verbatim:
 // "My Campaigns" heading, subtitle, "+ Create Campaign", filter pills
-// All / Pending / Accepted / Completed / Declined / Cancelled, and the
+// All / Open / Completed / Closed, and the
 // campaign rows: icon, "New Product Launch" / "@sophie.c", Budget /
-// Status / Deadline / Submitted columns and a kebab menu. Statuses are
-// had a "Deciilned" typo — corrected to "Declined".
+// Status / Deadline / Submitted columns and a kebab menu.
+//
+// GAP-4: the status shown here used to be a second, invented mapping
+// (open -> "Pending", closed -> "Declined") while the brand dashboard
+// showed "Active" and the public detail showed the raw "open". The row
+// status now comes from the shared campaignStatusLabel() helper, and
+// the pills filter on those same canonical labels, so all three
+// surfaces agree.
 const pillToStatus: Record<string, string[]> = {
   All: [],
-  Pending: ["Pending"],
-  Accepted: ["Accepted"],
+  Open: ["Open"],
   Completed: ["Completed"],
-  Declined: ["Declined"],
-  Cancelled: [],
+  Closed: ["Closed"],
 };
 
 function StatusIcon({ status }: { status: string }) {
-  const isPending = status === "Pending";
-  const isDeclined = status === "Declined";
+  const isOpen = status === "Open";
+  const isClosed = status === "Closed";
   return (
     <span
       aria-hidden
       className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-brand-50 dark:bg-white/10 text-brand dark:text-brand-200"
     >
-      {isPending ? (
+      {isOpen ? (
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
           <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8" />
           <path d="M12 7v5l3.5 2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
-      ) : isDeclined ? (
+      ) : isClosed ? (
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
           <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8" />
           <path d="m9 9 6 6m0-6-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
@@ -68,14 +73,7 @@ export function CampaignTabs() {
               title: c.title,
               handle: `@${c.brand?.email?.split("@")[0] ?? "brand"}`,
               budget: c.budget ?? "—",
-              status:
-                c.status === "open"
-                  ? "Pending"
-                  : c.status === "completed"
-                    ? "Completed"
-                    : c.status === "closed"
-                      ? "Declined"
-                      : "Pending",
+              status: campaignStatusLabel(c.status),
               deadline: c.deadline ?? "—",
               submitted: new Date(c.createdAt).toLocaleDateString(),
               id: c.id,
@@ -96,7 +94,7 @@ export function CampaignTabs() {
       await api.updateCampaign(id, { status: "closed" });
       setRows((rs) =>
         rs.map((r: any) =>
-          r.id === id ? { ...r, status: "Declined", rawStatus: "closed" } : r
+          r.id === id ? { ...r, status: "Closed", rawStatus: "closed" } : r
         )
       );
     } catch {

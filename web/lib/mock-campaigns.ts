@@ -51,7 +51,7 @@ export interface MyCampaignRow {
 }
 
 /** Five identical rows. had a "Deciilned" typo — corrected. */
-export const myCampaignPills = ["All", "Pending", "Accepted", "Completed", "Declined", "Cancelled"];
+export const myCampaignPills = ["All", "Open", "Completed", "Closed"];
 
 export interface CampaignListItem {
   title: string;
