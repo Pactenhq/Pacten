@@ -85,6 +85,16 @@ export class Deal {
   @Column({ nullable: true })
   proposedById: string;
 
+  // TOS §6.8 auto-completion clock: stamped whenever the deal enters
+  // SUBMITTED (re-submission re-starts the clock).
+  @Column({ nullable: true })
+  submittedAt: Date;
+
+  // TOS §6.8: stamped when the deal was auto-completed by the
+  // 14-working-day rule (null for manual completions).
+  @Column({ nullable: true })
+  autoCompletedAt: Date;
+
   @CreateDateColumn()
   createdAt: Date;
 
