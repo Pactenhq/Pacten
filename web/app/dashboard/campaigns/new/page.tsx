@@ -50,6 +50,7 @@ export default function CampaignRequestPage() {
         description: form.get("description") as string,
         deliverables: form.get("deliverables") as string,
         budget: form.get("budget") as string,
+        type: form.get("type") as string,
         deadline: form.get("deadline") as string,
         notes: form.get("notes") as string,
       });
@@ -167,6 +168,24 @@ export default function CampaignRequestPage() {
                 name="deliverables"
                 placeholder="e.g. 2× TikTok videos, 3× Instagram Stories, 1× YouTube integration"
               />
+              <div>
+                <label
+                  htmlFor="req-type"
+                  className="mb-1.5 block text-sm font-medium text-ink-900 dark:text-ink-50"
+                >
+                  Type
+                </label>
+                <select
+                  id="req-type"
+                  name="type"
+                  defaultValue="One-time project"
+                  className="w-full rounded-xl border border-ink-300 dark:border-ink-700 bg-white dark:bg-ink-900 px-4 py-3 text-[15px] text-ink-900 dark:text-ink-50 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand-100"
+                >
+                  <option value="One-time project">One-time project</option>
+                  <option value="Long-term">Long-term</option>
+                  <option value="Retainer">Retainer</option>
+                </select>
+              </div>
               <div className="grid gap-5 sm:grid-cols-2">
                 <TextField
                   label="Budget"

@@ -18,6 +18,10 @@ export class CreateCampaignDto {
 
   @IsOptional()
   @IsString()
+  type?: string;
+
+  @IsOptional()
+  @IsString()
   deadline?: string;
 
   @IsOptional()
@@ -45,6 +49,10 @@ export class UpdateCampaignDto {
   @IsOptional()
   @IsString()
   budget?: string;
+
+  @IsOptional()
+  @IsString()
+  type?: string;
 
   @IsOptional()
   @IsString()

@@ -36,6 +36,9 @@ export class Campaign {
   budget: string;
 
   @Column({ nullable: true })
+  type: string;
+
+  @Column({ nullable: true })
   deadline: string;
 
   @Column('text', { nullable: true })

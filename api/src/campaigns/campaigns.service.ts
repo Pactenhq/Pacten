@@ -84,6 +84,11 @@ export class CampaignsService {
     await this.planLimits.assertCanCreateCampaign(brandId);
     const campaign = this.campaigns.create({
       ...dto,
+      // Default type: every new campaign carries one, so the public
+      // Category filter ("One-time project" / "Long-term" / "Retainer")
+      // can match it — including campaigns created via direct API calls
+      // that omit the field. The web form defaults the select the same way.
+      type: dto.type ?? 'One-time project',
       brandId,
       status: CampaignStatus.OPEN,
     });

@@ -255,7 +255,10 @@ export function CampaignCard({ job }: { job: CampaignListing }) {
         {job.description}
       </p>
       <div className="mt-4 flex flex-wrap gap-2">
-        {[job.budget, job.timeline, job.type].map((m) => (
+        {/* Null/empty meta renders as nothing — a campaign with no
+            type (e.g. created before the type field existed) must not
+            show an empty pill or a misleading default label. */}
+        {[job.budget, job.timeline, job.type].filter(Boolean).map((m) => (
           <span
             key={m}
             className="inline-flex h-9 items-center rounded-full border border-ink-300 dark:border-ink-700 bg-white dark:bg-ink-900 px-4 text-[13px] font-medium text-ink-700 dark:text-ink-200"

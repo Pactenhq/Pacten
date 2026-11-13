@@ -518,7 +518,10 @@ export default function DealDetailPage() {
               {isBrand &&
                 (deal.status === "agreed" || deal.status === "active") && (
                   <Button size="sm" onClick={payUpfront} disabled={m4busy}>
-                    Pay Upfront{deal.agreedBudget ? ` (${deal.agreedBudget})` : ""}
+                    Pay Upfront
+                    {deal.agreedBudget
+                      ? ` (${formatBudgetDisplay(deal.agreedBudget)})`
+                      : ""}
                   </Button>
                 )}
             </div>
