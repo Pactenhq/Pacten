@@ -20,7 +20,6 @@
     "@nestjs/passport": "^12.0.0",
     "@nestjs/platform-express": "^12.1.2",
     "@nestjs/platform-socket.io": "^12.1.2",
-    "@nestjs/schedule": "^12.0.4",
     "@nestjs/typeorm": "^12.0.2",
     "@nestjs/websockets": "^12.1.2",
     "@types/bcryptjs": "^2.4.6",

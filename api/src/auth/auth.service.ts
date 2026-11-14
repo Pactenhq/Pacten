@@ -72,8 +72,6 @@ export class AuthService {
       status: UserStatus.PENDING_VERIFICATION,
       verificationToken,
       verificationExpiresAt,
-      // TOS §1.4/§2.1: record when the user accepted the Platform Terms.
-      ...(dto.termsAccepted ? { termsAcceptedAt: new Date() } : {}),
     });
     await this.usersRepo.save(user);
 

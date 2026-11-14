@@ -38,7 +38,6 @@ type AuthContextValue = {
     role: Role;
     firstName: string;
     lastName: string;
-    termsAccepted?: boolean;
   }) => Promise<{ verified: boolean }>;
   logout: () => void;
   refresh: () => Promise<void>;
@@ -117,7 +116,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       firstName: string;
       lastName: string;
       referralCode?: string;
-      termsAccepted?: boolean;
     }) => {
       const data = await api.signup(d);
       // Dev-mode: the API returns the verification token directly

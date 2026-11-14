@@ -108,7 +108,6 @@ export const api = {
     companyName?: string;
     displayName?: string;
     referralCode?: string;
-    termsAccepted?: boolean;
   }) => apiFetch("/auth/signup", { method: "POST", body: d }),
 
   verifyEmail: (token: string) =>

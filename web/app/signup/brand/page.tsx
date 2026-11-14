@@ -17,7 +17,7 @@ import {
 // completion happens later in Settings — so no stepper is shown: showing
 // steps that never happen misled users into waiting for a step 2.
 function BrandSignupForm() {
-  const { field, submit, error, loading, checkEmail, email, termsAccepted, setTermsAccepted } =
+  const { field, submit, error, loading, checkEmail, email } =
     useSignupForm("brand");
   return (
     <form className="mt-8 flex flex-col gap-5" onSubmit={submit}>
@@ -70,32 +70,6 @@ function BrandSignupForm() {
               {...field("confirmPassword")}
             />
           </div>
-          <label className="flex items-start gap-3 text-sm text-ink-700 dark:text-ink-200">
-            <input
-              type="checkbox"
-              required
-              checked={termsAccepted}
-              onChange={(e) => setTermsAccepted(e.target.checked)}
-              aria-label="I confirm I am at least 18 years old and I agree to the Terms of Service and Privacy Policy"
-              className="mt-0.5 h-4 w-4 shrink-0 accent-brand"
-            />
-            <span>
-              I confirm I am at least 18 years old and I agree to the{" "}
-              <Link
-                href="/terms"
-                className="font-semibold text-brand dark:text-brand-200 hover:underline"
-              >
-                Terms of Service
-              </Link>{" "}
-              and{" "}
-              <Link
-                href="/privacy"
-                className="font-semibold text-brand dark:text-brand-200 hover:underline"
-              >
-                Privacy Policy
-              </Link>
-            </span>
-          </label>
           <div>
             <Button type="submit" size="lg" disabled={loading}>
               {loading ? "Creating account…" : "Create account"}

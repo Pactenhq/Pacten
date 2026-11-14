@@ -1,13 +1,12 @@
 import {
   Injectable,
-  Logger,
   NotFoundException,
   ForbiddenException,
   BadRequestException,
   ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IsNull, Not, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Deal, DealStatus } from './deal.entity';
 import { DealVersion } from './deal-version.entity';
 import { User, UserRole } from '../users/user.entity';
@@ -28,8 +27,6 @@ import {
 } from './dto/deals.dto';
 import { PayoutsService } from '../payments/payouts.service';
 import { PlanLimitsService } from '../common/plan-limits/plan-limits.service';
-import { EmailsService } from '../emails/emails.service';
-import { workingDaysElapsed } from './working-days.util';
 
 // Valid state transitions for the deal state machine
 export const VALID_TRANSITIONS: Record<DealStatus, DealStatus[]> = {
@@ -71,8 +68,6 @@ function assertUuid(id: string): void {
 
 @Injectable()
 export class DealsService {
-  private readonly logger = new Logger(DealsService.name);
-
   constructor(
     @InjectRepository(Deal)
     private dealsRepo: Repository<Deal>,
@@ -95,7 +90,6 @@ export class DealsService {
     private professionalProfilesRepo: Repository<ProfessionalProfile>,
     private payoutsService: PayoutsService,
     private planLimits: PlanLimitsService,
-    private emails: EmailsService,
   ) {}
 
   // D2: the manual-ID field accepts EITHER id a brand can plausibly
@@ -369,13 +363,6 @@ export class DealsService {
     }
 
     deal.status = dto.status;
-
-    // TOS §6.8: (re-)entering SUBMITTED (re-)starts the 14-working-day
-    // auto-completion clock — a re-submission after ACTIVE restarts it.
-    if (dto.status === DealStatus.SUBMITTED) {
-      deal.submittedAt = new Date();
-    }
-
     const saved = await this.dealsRepo.save(deal);
     await this.snapshot(saved, userId);
 
@@ -416,75 +403,6 @@ export class DealsService {
     return this.updateStatus(dealId, userId, {
       status: DealStatus.APPROVED,
     } as UpdateDealStatusDto);
-  }
-
-  /**
-   * TOS §6.8 auto-completion: if the brand does not respond for 14
-   * working days after the creator submits work, the work is
-   * automatically completed and the funds approved.
-   *
-   * ASSUMPTION: working days = Monday–Friday; the clock starts at
-   * submission (submittedAt); bank holidays are NOT excluded unless
-   * the client confirms otherwise (see working-days.util.ts).
-   *
-   * Safety: only SUBMITTED deals are ever queried here, so
-   * DISPUTED / ACTIVE / PROPOSED / CANCELLED deals are never touched.
-   * Completion reuses updateStatus() (SUBMITTED → APPROVED →
-   * COMPLETED), so VALID_TRANSITIONS is enforced and the payout is
-   * created on COMPLETED exactly as a manual approval would — no
-   * payout logic is duplicated and no Stripe API is called here
-   * directly. A single-deal failure is caught, logged and skipped;
-   * this method never throws because of one bad deal.
-   */
-  async autoCompleteStaleDeals(now: Date = new Date()): Promise<void> {
-    const stale = await this.dealsRepo.find({
-      where: { status: DealStatus.SUBMITTED, submittedAt: Not(IsNull()) },
-    });
-    for (const candidate of stale) {
-      try {
-        const elapsed = workingDaysElapsed(candidate.submittedAt, now);
-        if (elapsed < 14) {
-          this.logger.log(
-            `deal ${candidate.id}: ${elapsed} working days since submission — not yet due (needs 14)`,
-          );
-          continue;
-        }
-        // Idempotency: re-check the live status — the brand may have
-        // approved, disputed or sent it back since the query ran.
-        const deal = await this.dealsRepo.findOne({
-          where: { id: candidate.id },
-        });
-        if (!deal || deal.status !== DealStatus.SUBMITTED) {
-          this.logger.log(
-            `deal ${candidate.id}: skipped — status is now ${deal?.status ?? 'gone'}`,
-          );
-          continue;
-        }
-        await this.updateStatus(deal.id, deal.brandId, {
-          status: DealStatus.APPROVED,
-        } as UpdateDealStatusDto);
-        const completed = await this.updateStatus(deal.id, deal.brandId, {
-          status: DealStatus.COMPLETED,
-        } as UpdateDealStatusDto);
-        completed.autoCompletedAt = now;
-        await this.dealsRepo.save(completed);
-        this.logger.log(
-          `deal ${deal.id}: auto-completed after ${elapsed} working days without a brand response (TOS §6.8)`,
-        );
-        // Notify both parties by email; no new notification type is
-        // added (notifications.type is a Postgres ENUM) — email +
-        // the deal-page status carry this instead.
-        const subject = 'Deal automatically completed — Pacten';
-        const html = `<p>The work for deal <strong>${deal.title ?? deal.id}</strong> was automatically completed: the brand did not respond within 14 working days of submission, so the work is approved and the funds released under the Platform Terms (§6.8).</p><p>You can view the deal in your dashboard.</p>`;
-        await this.emails.send(deal.brand?.email ?? '', subject, html);
-        await this.emails.send(deal.creator?.email ?? '', subject, html);
-      } catch (e: any) {
-        this.logger.error(
-          `deal ${candidate.id}: auto-completion failed — ${e?.message ?? e}`,
-        );
-        continue;
-      }
-    }
   }
 
   // DealVersion history — only the deal's two parties can read it.

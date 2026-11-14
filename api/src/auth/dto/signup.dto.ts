@@ -1,4 +1,4 @@
-import { IsEmail, IsEnum, IsNotEmpty, MinLength, IsOptional, IsString, IsBoolean } from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, MinLength, IsOptional, IsString } from 'class-validator';
 import { UserRole } from '../../users/user.entity';
 
 export class SignupDto {
@@ -31,11 +31,4 @@ export class SignupDto {
   @IsOptional()
   @IsString()
   referralCode?: string;
-
-  // TOS §1.4/§2.1: account creation implies agreement to the Platform
-  // Terms; the signup form records the user's acceptance. Optional so
-  // existing callers (incl. API test suites) that omit it keep working.
-  @IsOptional()
-  @IsBoolean()
-  termsAccepted?: boolean;
 }
