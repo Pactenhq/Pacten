@@ -68,6 +68,12 @@ export class User {
   @Column({ nullable: true })
   lastLoginAt: Date;
 
+  // TOS §1.4/§2.1: when the user accepted the Platform Terms at
+  // signup (null when signup predates the acceptance flag or the user
+  // did not tick it).
+  @Column({ nullable: true })
+  termsAcceptedAt: Date;
+
   // Stripe Connect Express account id (acct_...) for payouts. Set only by
   // the Connect onboarding flow; null until the user connects. Never
   // exposed on public profile endpoints (the user relation is stripped

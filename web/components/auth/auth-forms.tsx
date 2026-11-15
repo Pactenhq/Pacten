@@ -99,6 +99,9 @@ export function useSignupForm(role: Role) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [checkEmail, setCheckEmail] = useState(false);
+  // TOS (Nov 13): user must confirm 18+ and agree to the Terms of
+  // Service and Privacy Policy before an account is created.
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const field = (name: string) => ({
     name,
@@ -110,6 +113,12 @@ export function useSignupForm(role: Role) {
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
+    if (!termsAccepted) {
+      setError(
+        "Please confirm you are at least 18 and agree to the Terms of Service and Privacy Policy."
+      );
+      return;
+    }
     if (values.password !== values.confirmPassword) {
       setError("Passwords do not match.");
       return;
@@ -131,6 +140,7 @@ export function useSignupForm(role: Role) {
         role,
         firstName: values.firstName.trim(),
         lastName: values.lastName.trim(),
+        termsAccepted: true,
         ...(ref ? { referralCode: ref } : {}),
       });
       if (verified) router.push("/login?verified=1");
@@ -142,5 +152,14 @@ export function useSignupForm(role: Role) {
     }
   };
 
-  return { field, submit, error, loading, checkEmail, email: values.email };
+  return {
+    field,
+    submit,
+    error,
+    loading,
+    checkEmail,
+    email: values.email,
+    termsAccepted,
+    setTermsAccepted,
+  };
 }

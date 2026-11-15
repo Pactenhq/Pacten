@@ -8,9 +8,11 @@ import { User } from '../users/user.entity';
 import { CreatorProfile } from '../profiles/creator-profile.entity';
 import { ProfessionalProfile } from '../profiles/professional-profile.entity';
 import { DealsService } from './deals.service';
+import { DealsAutoCompleteService } from './deals-auto-complete.service';
 import { DealsController } from './deals.controller';
 import { PaymentsModule } from '../payments/payments.module';
 import { PlanLimitsModule } from '../common/plan-limits/plan-limits.module';
+import { EmailsModule } from '../emails/emails.module';
 
 @Module({
   imports: [
@@ -28,9 +30,12 @@ import { PlanLimitsModule } from '../common/plan-limits/plan-limits.module';
     ]),
     PaymentsModule,
     PlanLimitsModule,
+    // EmailsModule is @Global, so this import is redundant but explicit:
+    // DealsService sends the TOS §6.8 auto-completion emails via it.
+    EmailsModule,
   ],
   controllers: [DealsController],
-  providers: [DealsService],
+  providers: [DealsService, DealsAutoCompleteService],
   exports: [DealsService],
 })
 export class DealsModule {}

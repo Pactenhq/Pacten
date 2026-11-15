@@ -356,6 +356,18 @@ export default function DealDetailPage() {
           </Link>
         </div>
 
+        {/* TOS §6.8: auto-completion after 14 working days without a
+            response. Defensive read — the field is null until the
+            backend sets it. */}
+        {deal.autoCompletedAt ? (
+          <div
+            role="status"
+            className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200"
+          >
+            Automatically completed after 14 working days without a response
+          </div>
+        ) : null}
+
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="rounded-2xl border border-gray-200 dark:border-ink-700 bg-white dark:bg-ink-900 p-6">
             <h3 className="mb-4 text-lg font-semibold">Deal Terms</h3>

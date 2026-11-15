@@ -242,9 +242,13 @@ export default function ContractDetailPage() {
             </div>
 
             <div className="mt-8 rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 p-6">
-              <h3 className="mb-4 text-lg font-semibold">Legal Wording</h3>
+              <h3 className="mb-4 text-lg font-semibold">
+                {contract.renderedAgreement
+                  ? "Pacten Simple Transaction Agreement"
+                  : "Legal Wording"}
+              </h3>
               <pre className="whitespace-pre-wrap text-sm text-ink-700 dark:text-ink-200">
-                {contract.legalWording}
+                {contract.renderedAgreement ?? contract.legalWording}
               </pre>
             </div>
           </>

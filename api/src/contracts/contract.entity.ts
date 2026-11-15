@@ -36,15 +36,17 @@ export class Contract {
   @Column('text')
   termsSnapshot: string;
 
-  // Legal wording. PLACEHOLDER until the client provides final legal text.
-  // Swappable via the CONTRACT_LEGAL_WORDING env var — no code change needed.
+  // Legal wording for simple contracts: the client-supplied Simple
+  // Transaction Agreement text (Nov 2026), or the CONTRACT_LEGAL_WORDING
+  // env-var override when set. Frozen at generation time.
   // For standard-template contracts this holds the verbatim template text.
   @Column('text')
   legalWording: string;
 
   /**
-   * Which agreement form this contract uses. 'simple' is the original
-   * wording; 'standard' is the Pacten Standard Transaction Agreement
+   * Which agreement form this contract uses. 'simple' is the
+   * client-supplied Simple Transaction Agreement (default);
+   * 'standard' is the Pacten Standard Transaction Agreement
    * (client-supplied template, versioned snapshot below).
    */
   @Column({ type: 'varchar', length: 20, default: 'simple' })
@@ -122,11 +124,10 @@ export class Contract {
   updatedAt: Date;
 
   /**
-   * Transient (never persisted): the rendered agreement text for a
-   * standard-template contract, produced by enrich() from the frozen
-   * snapshot + fieldValues + signature columns. Null for simple
-   * contracts and legacy rows, which render from termsSnapshot +
-   * legalWording instead.
+   * Transient (never persisted): the rendered agreement text, produced
+   * by enrich() from the frozen snapshot/wording + fieldValues +
+   * signature columns. Null for legacy rows whose text carries no
+   * placeholders, which render from termsSnapshot + legalWording.
    */
   renderedAgreement?: string | null;
 }

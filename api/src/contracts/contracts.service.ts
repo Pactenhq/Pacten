@@ -210,6 +210,170 @@ export class ContractsService {
   }
 
   /**
+   * Rendered agreement text for EITHER template: the standard template
+   * renders from its frozen snapshot, the simple agreement from its
+   * frozen legalWording text + frozen fieldValues. Signature-block
+   * values are computed at render time in both cases.
+   */
+  private renderAgreement(contract: Contract): string | null {
+    if (contract.template === 'standard') {
+      return this.renderStandardAgreement(contract);
+    }
+    return this.renderSimpleAgreement(contract);
+  }
+
+  /**
+   * Signature-block values for ONE side of a simple agreement, keyed
+   * by the simple text's own tokens ([FULL NAME], [ELECTRONIC
+   * SIGNATURE], [SIGNING DATE AND TIME]). Same conventions as the
+   * standard signatureOverlay: 'Pending' / 'Awaiting signature'
+   * before that party confirms.
+   */
+  private simpleSignatureValues(
+    contract: Contract,
+    side: 'PARTY_A' | 'PARTY_B',
+  ): Record<string, string> {
+    const isBrand = side === 'PARTY_A';
+    const signedAt = isBrand
+      ? contract.brandSignedAt
+      : contract.creatorSignedAt;
+    const name = isBrand
+      ? contract.brandSignatoryName
+      : contract.creatorSignatoryName;
+    if (!signedAt) {
+      return {
+        FULL_NAME: 'Pending',
+        ELECTRONIC_SIGNATURE: 'Awaiting signature',
+        SIGNING_DATE_AND_TIME: 'Pending',
+      };
+    }
+    const at = new Date(signedAt);
+    return {
+      FULL_NAME: name ?? 'Pending',
+      ELECTRONIC_SIGNATURE: `Electronically signed by ${name ?? 'the signatory'} (recorded acceptance via Pacten)`,
+      SIGNING_DATE_AND_TIME: `${this.utcDate(at)} ${this.utcTime(at)} UTC`,
+    };
+  }
+
+  /**
+   * Render a simple-template contract from its FROZEN legalWording
+   * text + frozen fieldValues + signature columns.
+   *
+   * The simple agreement reuses three tokens in BOTH signature blocks
+   * ([FULL NAME], [ELECTRONIC SIGNATURE], [SIGNING DATE AND TIME]),
+   * so one global substitution cannot give the two parties different
+   * values. The text is split at the LAST "Party B – Provider / Seller"
+   * line — the signature block, not the parties intro at the top —
+   * and each half is substituted with its own party's signature values.
+   * If the marker is absent (legacy placeholder wording or a custom
+   * env-var text), the whole text is substituted once with the frozen
+   * values; shared signature tokens then render "Not applicable".
+   */
+  private renderSimpleAgreement(contract: Contract): string | null {
+    if (contract.template !== 'simple' || !contract.legalWording) {
+      return null;
+    }
+    const statusText =
+      contract.status === ContractStatus.DECLINED
+        ? 'Declined'
+        : contract.status === ContractStatus.ACCEPTED
+          ? 'Signed'
+          : 'Awaiting signatures';
+    const base: Record<string, string> = {
+      ...(contract.fieldValues ?? {}),
+      STATUS: statusText,
+    };
+    const text = contract.legalWording;
+    const marker = 'Party B – Provider / Seller';
+    const idx = text.lastIndexOf(marker);
+    if (idx === -1) {
+      return substituteAgreementFields(text, base);
+    }
+    const head = substituteAgreementFields(text.slice(0, idx), {
+      ...base,
+      ...this.simpleSignatureValues(contract, 'PARTY_A'),
+    });
+    const tail = substituteAgreementFields(text.slice(idx), {
+      ...base,
+      ...this.simpleSignatureValues(contract, 'PARTY_B'),
+    });
+    return head + tail;
+  }
+
+  /**
+   * Build the COMPLETE frozen field map for a simple contract from the
+   * deal + the two parties. Only values the platform actually knows
+   * are filled; everything else stays blank and renders as
+   * "Not applicable" (same rule as the standard template). Nothing is
+   * invented:
+   * - No country field exists anywhere (User / profiles carry none),
+   *   so both countries stay blank.
+   * - The deal has no start date, time zone, quantity, revision or
+   *   ownership fields, so those stay blank too.
+   * - Payment Schedule is "Upfront": the platform's payment flow is
+   *   upfront-only (brand funds the budget through Stripe, released
+   *   after completion/approval), so this states the platform's rule,
+   *   not a per-deal invention.
+   * - [DATE] is the agreement date (contract creation date). It also
+   *   fills the Payment Due Date line: payment is due upfront when the
+   *   agreement is made, so the two dates coincide on this platform.
+   * - Party names are the display names the contract page already
+   *   shows (first + last name, email fallback) — the token reads
+   *   "Name or Business", not "Legal Name", so no legal-name claim
+   *   is made (unlike the standard template, whose legal names are
+   *   form-confirmed by the parties themselves).
+   */
+  private buildSimpleFieldValues(
+    contract: Contract,
+    deal: Deal,
+    brand: User | null,
+    creator: User | null,
+  ): Record<string, string> {
+    const partyName = (u?: User | null): string => {
+      const n = this.displayName(u);
+      return n === '—' ? '' : n;
+    };
+    const budget = this.formatBudget(deal.agreedBudget);
+    const raw: Record<string, string> = {
+      'AGREEMENT ID': contract.id,
+      DATE: this.utcDate(new Date(contract.createdAt)),
+      'PARTY A NAME': partyName(brand),
+      'PARTY A EMAIL': brand?.email ?? '',
+      'PARTY A COUNTRY': '',
+      'PARTY B NAME': partyName(creator),
+      'PARTY B EMAIL': creator?.email ?? '',
+      'PARTY B COUNTRY': '',
+      'DESCRIPTION OF WORK OR GOODS': String(deal.description ?? ''),
+      'WHAT WILL BE PROVIDED': String(deal.deliverables ?? ''),
+      QUANTITY: '',
+      'SPECIAL REQUIREMENTS': '',
+      'START DATE AND TIME': '',
+      'DEADLINE AND TIME': String(deal.deadline ?? ''),
+      'TIME ZONE': '',
+      'AMOUNT AND CURRENCY': budget ? `${budget} USD` : '',
+      'UPFRONT / MILESTONE / COMPLETION': 'Upfront',
+      CONDITIONS: '',
+      'NUMBER OF DAYS': '',
+      'NUMBER OR NOT APPLICABLE': '',
+      DETAILS: '',
+      'OWNERSHIP TERMS': '',
+      'USAGE RIGHTS': '',
+      'DURATION AND REGION': '',
+      PLATFORMS: '',
+      TERMS: '',
+      'NOTICE PERIOD': '',
+      'REFUND CONDITIONS': '',
+      'PAYMENT TERMS': '',
+      'COUNTRY OR JURISDICTION': '',
+      'COURT LOCATION': '',
+      'OPTIONAL TERMS OR NONE': '',
+    };
+    return Object.fromEntries(
+      Object.entries(raw).map(([k, v]) => [placeholderKey(k), v]),
+    );
+  }
+
+  /**
    * Build the COMPLETE frozen field map for a standard contract:
    * form-entered values first, then authoritative auto-fill/prefill
    * values overwrite the system-owned keys. Blank values stay blank
@@ -368,20 +532,18 @@ export class ContractsService {
 
     const saved = await this.contractsRepo.save(contract);
 
-    if (isStandard) {
-      const [brand, creator] = await Promise.all([
-        this.usersRepo.findOne({ where: { id: deal.brandId } }),
-        this.usersRepo.findOne({ where: { id: deal.creatorId } }),
-      ]);
-      saved.fieldValues = this.buildStandardFieldValues(
-        saved,
-        deal,
-        brand,
-        creator,
-        form,
-      );
-      await this.contractsRepo.save(saved);
-    }
+    // Freeze the per-transaction field map at generation time for
+    // BOTH templates, so the rendered agreement never changes when
+    // live deal/user records change. Signature-block values are NOT
+    // stored here: they are computed at render time.
+    const [brand, creator] = await Promise.all([
+      this.usersRepo.findOne({ where: { id: deal.brandId } }),
+      this.usersRepo.findOne({ where: { id: deal.creatorId } }),
+    ]);
+    saved.fieldValues = isStandard
+      ? this.buildStandardFieldValues(saved, deal, brand, creator, form)
+      : this.buildSimpleFieldValues(saved, deal, brand, creator);
+    await this.contractsRepo.save(saved);
 
     // Notify the other party (M5 transactional email).
     try {
@@ -416,8 +578,9 @@ export class ContractsService {
   /**
    * Attach display data the contract rows/pages need: both parties'
    * names, the counterparty relative to the caller, the deal's
-   * deadline, and — for standard-template contracts — the rendered
-   * agreement text (from the frozen snapshot, never live records).
+   * deadline, and the rendered agreement text for either template
+   * (from the frozen snapshot/wording + frozen fieldValues, never
+   * live records).
    * (The contracts list previously rendered literal placeholders —
    * "Client Name —", "Deadline -" — for every row.)
    */
@@ -439,7 +602,7 @@ export class ContractsService {
           : this.displayName(brand);
       (c as any).dealDeadline = deal?.deadline ?? null;
       (c as any).dealTitle = deal?.title ?? null;
-      c.renderedAgreement = this.renderStandardAgreement(c);
+      c.renderedAgreement = this.renderAgreement(c);
     }
     return contracts;
   }
