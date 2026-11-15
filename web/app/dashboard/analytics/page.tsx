@@ -29,7 +29,7 @@ import { dashboardPathForRole } from "@/lib/api";
 // (0 / 0% / £0) — never a real metric and never an invented realistic
 // value. There is no impressions / engagement / conversion data source in
 // MVP, so the sections render Figma's empty states. Real-data wiring
-// happens in Phase 2, when an analytics data source exists.
+// happens later, when an analytics data source exists.
 // ---------------------------------------------------------------------------
 
 const selectClassName =
@@ -49,7 +49,7 @@ function AnalyticsFilters({
       <label className="flex items-center gap-2 text-[14px] font-semibold text-ink-500 dark:text-ink-300">
         Filter by client
         {/* Design-only: no client data source yet, so "All clients" is the
-            only option. Phase 2 wires the real client list here. */}
+            only option. The real client list is wired here once a client data source exists. */}
         <select aria-label="Filter by client" className={selectClassName} defaultValue="all">
           <option value="all">All clients</option>
         </select>
@@ -120,7 +120,7 @@ function EarningsSummary() {
       </div>
       <p className="mt-4 text-[14px] text-ink-500 dark:text-ink-300">
         No earnings yet — earnings from completed campaigns will appear here
-        once analytics data is connected in Phase 2.
+        once analytics data is connected.
       </p>
     </SectionCard>
   );
@@ -155,7 +155,7 @@ function CampaignPerformance() {
       </div>
       <p className="mt-4 text-[14px] text-ink-500 dark:text-ink-300">
         No campaigns yet — campaign performance will appear here once
-        analytics data is connected in Phase 2.
+        analytics data is connected.
       </p>
     </SectionCard>
   );
@@ -187,12 +187,11 @@ function ContentPerformance() {
       </div>
       <EmptyState
         title="No performance data yet"
-        body="Content performance will appear here once analytics data is connected in Phase 2."
+        body="Content performance will appear here once analytics data is connected."
       />
       {exportNote && (
         <p className="mt-4 text-[14px] font-medium text-ink-700 dark:text-ink-200">
-          Export will be available once real analytics data is connected in
-          Phase 2.
+          Export will be available once real analytics data is connected.
         </p>
       )}
     </SectionCard>
@@ -204,7 +203,7 @@ function CompletedCampaigns() {
     <SectionCard title="Completed Campaigns">
       <EmptyState
         title="No campaigns yet"
-        body="Completed campaigns will appear here once analytics data is connected in Phase 2."
+        body="Completed campaigns will appear here once analytics data is connected."
       />
     </SectionCard>
   );
@@ -224,7 +223,7 @@ function TopPerformingCreators() {
       </div>
       <EmptyState
         title="No top-performing creators yet"
-        body="Top-performing creators will appear here once analytics data is connected in Phase 2."
+        body="Top-performing creators will appear here once analytics data is connected."
       />
     </SectionCard>
   );
@@ -235,7 +234,7 @@ function RecentCampaignActivity() {
     <SectionCard title="Recent Campaign Activity">
       <EmptyState
         title="No recent campaign activity"
-        body="Recent campaign activity will appear here once analytics data is connected in Phase 2."
+        body="Recent campaign activity will appear here once analytics data is connected."
       />
     </SectionCard>
   );
@@ -295,16 +294,16 @@ export default function AnalyticsDashboardPage() {
   // Figma placeholder stat cards (0 / 0% / £0 — never real metrics).
   const statCards = isBrand
     ? [
-        { value: "£0", label: "Total Revenue", delta: "", icon: "moneybag", sub: "vs last month" },
-        { value: "0", label: "Active Campaigns", delta: "", icon: "megaphone", sub: "vs last month" },
-        { value: "0", label: "Total Impressions", delta: "", icon: "eye", sub: "vs last month" },
-        { value: "0%", label: "Avg. Engagement Rate", delta: "", icon: "percent", sub: "vs last month" },
+        { value: "£0", label: "Total Revenue", delta: "0%", icon: "moneybag", sub: "vs last month" },
+        { value: "0", label: "Active Campaigns", delta: "0%", icon: "megaphone", sub: "vs last month" },
+        { value: "0", label: "Total Impressions", delta: "0%", icon: "eye", sub: "vs last month" },
+        { value: "0%", label: "Avg. Engagement Rate", delta: "0%", icon: "percent", sub: "vs last month" },
       ]
     : [
-        { value: "£0", label: "Total Earnings", delta: "", icon: "moneybag", sub: "vs last month" },
-        { value: "0", label: "Total Conversions", delta: "", icon: "target", sub: "vs last month" },
-        { value: "0", label: "Total Impressions", delta: "", icon: "eye", sub: "vs last month" },
-        { value: "0", label: "Total Engagements", delta: "", icon: "people", sub: "vs last month" },
+        { value: "£0", label: "Total Earnings", delta: "0%", icon: "moneybag", sub: "vs last month" },
+        { value: "0", label: "Total Conversions", delta: "0%", icon: "target", sub: "vs last month" },
+        { value: "0", label: "Total Impressions", delta: "0%", icon: "eye", sub: "vs last month" },
+        { value: "0", label: "Total Engagements", delta: "0%", icon: "people", sub: "vs last month" },
       ];
 
   // Figma placeholder summary metrics (desktop "Performance Summary" card).
@@ -347,8 +346,7 @@ export default function AnalyticsDashboardPage() {
 
         {reportsNote && (
           <p className="text-[14px] font-medium text-ink-700 dark:text-ink-200">
-            Campaign Reports will be available once real analytics data is
-            connected in Phase 2.
+            Campaign Reports will be available once real analytics data is connected.
           </p>
         )}
 

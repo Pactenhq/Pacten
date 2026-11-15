@@ -16,6 +16,10 @@ import { cn } from "@/lib/cn";
 import { homeSearchChips } from "@/lib/mock";
 import { api } from "@/lib/api";
 import { HomeShowcase } from "@/components/home/Showcase";
+import {
+  HomeCreatorsStrip,
+  HomeProfessionalsStrip,
+} from "@/components/home/HomeRealUsers";
 
 // Home page sections in order.
 
@@ -549,6 +553,9 @@ function HowItWorks() {
                 className="w-full max-w-[420px] object-contain"
               />
             </div>
+            {/* Real users (Nov 2026): the newest real creators, live only —
+                renders nothing on staging or when no eligible creators exist. */}
+            <HomeCreatorsStrip />
           </Card>
           {/* step 03 */}
           <Card className="card-lift p-8">
@@ -647,6 +654,9 @@ function Professionals() {
             </Button>
           </Link>
         </div>
+        {/* Real users (Nov 2026): the newest real professionals, live only —
+            renders nothing on staging or when no eligible professionals exist. */}
+        <HomeProfessionalsStrip />
       </Reveal>
     </section>
   );
