@@ -46,41 +46,87 @@ const dropdownLinks = [
 
 function NavDropdown({
   label,
+  href,
   items,
   open,
   onOpen,
   onClose,
   triggerRef,
+  escapeCloseRef,
 }: {
   label: string;
+  href: string;
   items: { label: string; href: string }[];
   open: boolean;
   onOpen: () => void;
   onClose: () => void;
-  triggerRef: (el: HTMLButtonElement | null) => void;
+  triggerRef: (el: HTMLAnchorElement | null) => void;
+  // Set by the parent when it closes the menu via Escape and then
+  // focuses the trigger: the focus event that .focus() fires must NOT
+  // reopen the menu it just closed. The flag is consumed by the next
+  // focus and also cleared on mouseenter, so it can never stick.
+  escapeCloseRef: React.MutableRefObject<boolean>;
 }) {
+  // Close delay, cancelled on re-enter. A plain mouseleave closed the
+  // menu the instant the cursor left the trigger — including while it
+  // crossed the 8px strip between trigger and panel — so a normal slow
+  // move down could never reach the menu items (client report, Nov 14).
+  // The delay alone is not the fix: the panel below also carries a
+  // padding bridge, so the strip belongs to this wrapper and no
+  // mouseleave fires while crossing it at all. The delay is belt and
+  // braces for fast diagonal moves that briefly leave the wrapper.
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleEnter = () => {
+    escapeCloseRef.current = false;
+    if (closeTimer.current) {
+      clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
+    onOpen();
+  };
+  const handleLeave = () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    closeTimer.current = setTimeout(onClose, 150);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (closeTimer.current) clearTimeout(closeTimer.current);
+    };
+  }, []);
+
   return (
     <div
       className="relative shrink-0"
-      onMouseEnter={onOpen}
-      onMouseLeave={onClose}
+      onMouseEnter={handleEnter}
+      onMouseLeave={handleLeave}
       onBlur={(e) => {
         if (!e.currentTarget.contains(e.relatedTarget as Node)) onClose();
       }}
     >
-      <button
+      <Link
         ref={triggerRef}
-        type="button"
+        href={href}
         aria-haspopup="true"
         aria-expanded={open}
-        // Click ALWAYS opens this menu — never toggles it. A real click
-        // is preceded by a mouseenter on the same trigger, so by click
-        // time the hovered menu is already open; a toggle here would
-        // read that just-opened state and close it, which is why
-        // switching menus used to take two clicks (first click only
-        // closed the open menu). Closing still happens via mouseleave,
-        // outside-click, Escape, or a menu link click.
-        onClick={onOpen}
+        // Clicking the trigger NAVIGATES to the group's page — the
+        // label is a link (mobile already treats it as one; desktop
+        // must match the client's expectation that clicking switches
+        // to the section). Hover already opened the menu before the
+        // click, so there is NO toggle here and no way for a click to
+        // close a just-opened menu — the Nov 11 lesson. Focus also
+        // opens the menu, so keyboard users can Tab from the trigger
+        // straight into the menu items — except for the focus the
+        // parent performs after closing with Escape (see
+        // escapeCloseRef): that one must not reopen the menu.
+        onFocus={() => {
+          if (escapeCloseRef.current) {
+            escapeCloseRef.current = false;
+            return;
+          }
+          onOpen();
+        }}
         className="inline-flex cursor-pointer items-center gap-1.5 whitespace-nowrap bg-transparent text-[15px] font-medium text-ink-700 dark:text-ink-200 hover:text-ink-900 dark:hover:text-ink-50 shrink-0"
       >
         {label}
@@ -93,22 +139,31 @@ function NavDropdown({
         >
           <Chevron />
         </span>
-      </button>
+      </Link>
       {open && (
-        <div className="absolute top-full left-0 z-50 mt-2 w-60 rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 p-2 shadow-card">
-          <ul>
-            {items.map((item) => (
-              <li key={item.label}>
-                <Link
-                  href={item.href}
-                  onClick={onClose}
-                  className="flex w-full items-center rounded-xl px-3 py-2.5 text-[15px] font-medium text-ink-700 dark:text-ink-200 transition-colors hover:bg-ink-50 dark:hover:bg-white/5 hover:text-ink-900 dark:hover:text-ink-50"
-                >
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
+        // Padding bridge: the outer wrapper carries pt-2, so the 8px
+        // strip between the trigger and the visual menu belongs to
+        // this hover wrapper — crossing it no longer fires
+        // mouseleave. The visual styles stay on the inner menu, so
+        // the menu appears in exactly the same place as before
+        // (previously `mt-2` on the menu itself, which put the strip
+        // outside the wrapper).
+        <div className="absolute top-full left-0 z-50 w-60 pt-2">
+          <div className="rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 p-2 shadow-card">
+            <ul>
+              {items.map((item) => (
+                <li key={item.label}>
+                  <Link
+                    href={item.href}
+                    onClick={onClose}
+                    className="flex w-full items-center rounded-xl px-3 py-2.5 text-[15px] font-medium text-ink-700 dark:text-ink-200 transition-colors hover:bg-ink-50 dark:hover:bg-white/5 hover:text-ink-900 dark:hover:text-ink-50"
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       )}
     </div>
@@ -141,7 +196,10 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [openMenu, setOpenMenu] = useState<number | null>(null);
   const desktopNavRef = useRef<HTMLDivElement>(null);
-  const triggerRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const triggerRefs = useRef<Array<HTMLAnchorElement | null>>([]);
+  // Set just before the Escape handler focuses a trigger, so the
+  // focus event it fires does not reopen the menu it just closed.
+  const escapeCloseRef = useRef(false);
   const { user, displayName, loading, logout } = useAuth();
   const loggedIn = !loading && !!user;
   const dashboardHref = user ? dashboardPathForRole(user.role) : "/dashboard/brand";
@@ -169,6 +227,7 @@ export function Navbar() {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         const idx = openMenu;
+        escapeCloseRef.current = true;
         setOpenMenu(null);
         triggerRefs.current[idx]?.focus();
       }
@@ -205,6 +264,7 @@ export function Navbar() {
               <NavDropdown
                 key={group.label}
                 label={group.label}
+                href={group.href}
                 items={group.items}
                 open={openMenu === i}
                 onOpen={() => setOpenMenu(i)}
@@ -212,6 +272,7 @@ export function Navbar() {
                 triggerRef={(el) => {
                   triggerRefs.current[i] = el;
                 }}
+                escapeCloseRef={escapeCloseRef}
               />
             ))}
             <Link

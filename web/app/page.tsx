@@ -126,11 +126,16 @@ function Hero() {
   const router = useRouter();
   const [tab, setTab] = useState(0);
   const [query, setQuery] = useState("");
-  const go = (value?: string) => {
-    const base = searchTabs[tab].target;
+  // Clicking a hero card NAVIGATES to its target (client report, Nov 14:
+  // clicking only changed the selected tab and never went anywhere — and
+  // Creators, the default tab, showed nothing at all when clicked).
+  // A typed query is carried along as ?q= so it is not lost.
+  const goTo = (idx: number, value?: string) => {
+    const base = searchTabs[idx].target;
     const q = (value ?? query).trim();
     router.push(q ? `${base}?q=${encodeURIComponent(q)}` : base);
   };
+  const go = (value?: string) => goTo(tab, value);
   return (
     <section className="relative mx-auto max-w-[1380px] overflow-hidden px-6 pt-12 text-center lg:px-12 lg:pt-16">
       {/* ambient background orbs */}
@@ -173,7 +178,10 @@ function Hero() {
           {searchTabs.map((t, i) => (
             <button
               key={t.title}
-              onClick={() => setTab(i)}
+              onClick={() => {
+                setTab(i);
+                goTo(i);
+              }}
               className={cn(
                 "flex items-center gap-4 rounded-xl border p-4 text-left transition-colors",
                 i === tab
@@ -504,8 +512,8 @@ function HowItWorks() {
               Increase brand awareness
             </div>
             <p className="mt-3 text-xs font-semibold text-ink-700 dark:text-ink-200">Budget</p>
-            <div className="mt-1.5 rounded-lg border border-ink-200 dark:border-ink-700 px-3 py-2.5 text-[13px] text-ink-700 dark:text-ink-200">
-              $ 5,000
+            <div className="mt-1.5 rounded-lg border border-ink-200 dark:border-ink-700 px-3 py-2.5 text-[13px] text-ink-400 dark:text-ink-500">
+              Enter your budget
             </div>
             <Button className="mt-4 w-full" size="md">
               Post Brief
@@ -535,7 +543,7 @@ function HowItWorks() {
             <div className="mt-6">
               <Image
                 src="/assets/home/how-it-works-creators.webp"
-                alt="Matched creators: Sophie, Alex, Mia, Jordan"
+                alt="Matched creator profiles"
                 width={407}
                 height={137}
                 className="w-full max-w-[420px] object-contain"
@@ -555,21 +563,22 @@ function HowItWorks() {
             <div className="mt-6 grid grid-cols-2 gap-3">
               <div className="rounded-xl border border-ink-100 dark:border-ink-800 p-4">
                 <p className="text-[11px] font-medium text-ink-500 dark:text-ink-300">Performance Overview</p>
-                <p className="mt-1 text-2xl font-extrabold text-ink-900 dark:text-ink-50">128K</p>
-                <p className="text-[11px] text-ink-500 dark:text-ink-300">Views</p>
-                <svg width="100%" height="44" viewBox="0 0 120 44" fill="none" aria-hidden className="mt-2">
-                  <path d="M2 36 18 30l14-10 16 8 18-14 16 6 18-10 18 4" stroke="#0c29ab" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                <svg width="100%" height="64" viewBox="0 0 120 64" fill="none" aria-hidden className="mt-3">
+                  <path d="M2 52 18 44l14-12 16 8 18-16 16 6 18-12 18 4" stroke="#0c29ab" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
               <div className="flex flex-col items-center justify-center rounded-xl border border-ink-100 dark:border-ink-800 p-4">
                 <p className="text-[11px] font-medium text-ink-500 dark:text-ink-300">Engagement</p>
                 <div className="relative mt-2 h-20 w-20">
-                  <svg viewBox="0 0 80 80" className="h-20 w-20 -rotate-90">
+                  <svg viewBox="0 0 80 80" className="h-20 w-20">
                     <circle cx="40" cy="40" r="34" fill="none" stroke="#e8edfd" strokeWidth="9" />
-                    <circle cx="40" cy="40" r="34" fill="none" stroke="#0c29ab" strokeWidth="9" strokeLinecap="round" strokeDasharray="213.6" strokeDashoffset="200" />
                   </svg>
-                  <span className="absolute inset-0 flex items-center justify-center text-sm font-extrabold text-ink-900 dark:text-ink-50">
-                    4.8%
+                  <span aria-hidden className="absolute inset-0 flex items-center justify-center">
+                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                      <rect x="3" y="14" width="5" height="11" rx="1.5" fill="#0c29ab" />
+                      <rect x="11.5" y="8" width="5" height="17" rx="1.5" fill="#0c29ab" />
+                      <rect x="20" y="3" width="5" height="22" rx="1.5" fill="#0c29ab" />
+                    </svg>
                   </span>
                 </div>
               </div>
@@ -737,7 +746,7 @@ function BottomCta() {
         <div className="relative -mb-10 mt-4">
           <Image
             src="/assets/home/cta-visual-mobile-v4.webp"
-            alt="Pacten dashboard on phone with earnings and payable card"
+            alt="Pacten app dashboard on a phone"
             width={553}
             height={475}
             className="h-auto w-full"

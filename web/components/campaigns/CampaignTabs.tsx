@@ -63,6 +63,28 @@ export function CampaignTabs() {
   const [openMenu, setOpenMenu] = useState<number | null>(null);
   const [closingId, setClosingId] = useState<string | null>(null);
 
+  // The kebab menu used to close only by clicking the kebab again or
+  // by choosing an action — clicking anywhere else on the page (or
+  // pressing Escape) left it open. Close it on outside mousedown and
+  // on Escape, like the header menus and the notification bell.
+  useEffect(() => {
+    if (openMenu == null) return;
+    const onDocClick = (e: MouseEvent) => {
+      if (!(e.target as HTMLElement).closest("[data-campaign-kebab]")) {
+        setOpenMenu(null);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpenMenu(null);
+    };
+    document.addEventListener("mousedown", onDocClick);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDocClick);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [openMenu]);
+
   useEffect(() => {
     api
       .myCampaigns()
@@ -175,7 +197,7 @@ export function CampaignTabs() {
                 <p className="text-[13px] font-medium text-ink-500 dark:text-ink-300">Submitted</p>
                 <p className="mt-0.5 text-[15px] font-bold text-ink-900 dark:text-ink-50">{c.submitted}</p>
               </div>
-              <div className="relative justify-self-end">
+              <div className="relative justify-self-end" data-campaign-kebab>
                 <button
                   aria-label="Campaign options"
                   aria-haspopup="menu"

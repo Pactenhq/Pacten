@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode, type CSSProperties, type ElementType } from "react";
+import { Children, useEffect, useRef, type ReactNode, type CSSProperties, type ElementType } from "react";
 
 type RevealProps = {
   children: ReactNode;
@@ -130,7 +130,10 @@ export function Stagger({
     return () => io.disconnect();
   }, []);
 
-  const kids = Array.isArray(children) ? children : [children];
+  // Flatten nested arrays (e.g. a .map() array passed alongside a single
+  // element) so every card becomes its own grid item. Array.isArray on
+  // children would treat the whole array as ONE child and stack its cards.
+  const kids = Children.toArray(children);
 
   return (
     <div ref={ref} className={`rv-stagger ${className ?? ""}`}>
