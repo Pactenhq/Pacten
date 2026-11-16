@@ -54,8 +54,11 @@ export class ProfilesController {
   @Get('creators/for-deal')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(UserRole.BRAND)
-  searchCreatorsForDeal(@Query('limit') limit?: number) {
-    return this.profilesService.searchCreatorsForDeal(limit);
+  searchCreatorsForDeal(
+    @Query('limit') limit?: number,
+    @Query('q') query?: string,
+  ) {
+    return this.profilesService.searchCreatorsForDeal(limit, query);
   }
 
   @Get('professionals')

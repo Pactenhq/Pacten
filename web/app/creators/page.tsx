@@ -42,7 +42,20 @@ function FilterButton({ onClick }: { onClick: () => void }) {
 
 export default function CreatorsPage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const allCreators = useMarketplaceCreators();
+  const [searchQuery, setSearchQuery] = useState("");
+  // Server-side keyword search (small-fixes, Nov 2026): the typed term
+  // is sent to the API as `q` (debounced so typing does not fire a
+  // request per keystroke) instead of filtering client-side over the
+  // first 100 profiles — a brand-new creator past the 100th could
+  // never be found that way. The hook re-fetches when it changes.
+  const [serverQuery, setServerQuery] = useState("");
+  useEffect(() => {
+    const t = setTimeout(() => setServerQuery(searchQuery.trim()), 400);
+    return () => clearTimeout(t);
+  }, [searchQuery]);
+  const allCreators = useMarketplaceCreators({
+    query: serverQuery || undefined,
+  });
   // The hook returns a NEW array identity when its fetch resolves — even
   // for zero rows — so identity change (not length) is the "loaded"
   // signal. The timeout covers an unreachable API, which otherwise
@@ -57,7 +70,6 @@ export default function CreatorsPage() {
     const t = setTimeout(() => setListSettled(true), 30000);
     return () => clearTimeout(t);
   }, []);
-  const [searchQuery, setSearchQuery] = useState("");
   // FINAL fix (Nov 12): "Clear all" must also clear the hero box's
   // DRAFT value (see MarketplaceHero clearSignal). The parent term
   // alone cannot signal the clear — it may already be "".
@@ -129,14 +141,11 @@ export default function CreatorsPage() {
   }, []);
 
   const filtered = allCreators.filter((c) => {
-    const q = searchQuery.trim().toLowerCase();
-    if (q) {
-      const hay = [c.name, ...(c.niches ?? []), ...(c.platforms ?? [])]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-      if (!hay.includes(q)) return false;
-    }
+    // Keyword is server-side now (see serverQuery above): the API
+    // already matched name/bio/niches/platforms, so re-filtering here
+    // would hide valid matches (e.g. a bio match whose name does not
+    // contain the term). All other filters still apply client-side
+    // over the server's matches.
     if (activeTab !== "All") {
       const plats = (c.platforms ?? []).map((p: string) => p.toLowerCase());
       if (!plats.some((p: string) => p.includes(activeTab.toLowerCase()))) return false;

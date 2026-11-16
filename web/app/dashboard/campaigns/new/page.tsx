@@ -36,6 +36,8 @@ export default function CampaignRequestPage() {
     const description = ((form.get("description") as string) ?? "").trim();
     const errs: { title?: string; description?: string } = {};
     if (!title) errs.title = "Campaign title is required.";
+    else if (title.length < 3)
+      errs.title = "Campaign title must be at least 3 characters long.";
     if (!description)
       errs.description = "Campaign description is required.";
     if (Object.keys(errs).length > 0) {

@@ -136,6 +136,12 @@ export interface MarketplaceListOptions {
   sort?: string;
   /** Max rows to fetch. Defaults to 100 — the exact current behavior. */
   limit?: number;
+  /** Server-side keyword search (name/bio/niches/platforms). When set,
+   *  the API filters — the page must NOT re-filter the keyword
+   *  client-side, or a bio match the server returned would be hidden
+   *  again. Other filters (language/industry/skill/…) still apply
+   *  client-side over the server's matches. */
+  query?: string;
   /** F-1: pass excludeTest=true to the API so test/demo-domain owners
    *  are left out. Opt-in and OFF by default — /creators,
    *  /professionals, search and for-deal are UNCHANGED. Only the
@@ -146,6 +152,7 @@ export interface MarketplaceListOptions {
 function buildListParams(options?: MarketplaceListOptions): string {
   const params = new URLSearchParams();
   params.set("limit", String(options?.limit ?? 100));
+  if (options?.query) params.set("q", options.query);
   if (options?.sort) params.set("sort", options.sort);
   if (options?.excludeTest) params.set("excludeTest", "true");
   return `?${params.toString()}`;
@@ -164,11 +171,12 @@ export function useMarketplaceCreators(options?: MarketplaceListOptions): Creato
   const sort = options?.sort;
   const limit = options?.limit;
   const excludeTest = options?.excludeTest;
+  const query = options?.query;
   const [list, setList] = useState<CreatorFilterData[]>([]);
   useEffect(() => {
     let alive = true;
     api
-      .creators(buildListParams({ sort, limit, excludeTest }))
+      .creators(buildListParams({ sort, limit, excludeTest, query }))
       .then((rows) => {
         if (alive && Array.isArray(rows)) {
           setList(rows.map(mapCreator));
@@ -180,7 +188,7 @@ export function useMarketplaceCreators(options?: MarketplaceListOptions): Creato
     return () => {
       alive = false;
     };
-  }, [sort, limit, excludeTest]);
+  }, [sort, limit, excludeTest, query]);
   return list;
 }
 

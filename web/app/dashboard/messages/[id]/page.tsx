@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { Navbar } from "@/components/ui/Navbar";
 import { Footer } from "@/components/ui/Footer";
@@ -27,6 +27,33 @@ export default function ConversationPage() {
   const [messages, setMessages] = useState<any[]>([]);
   const [loaded, setLoaded] = useState(false);
 
+  // The session resolves after the first render, so `myId` is kept in a
+  // ref for the list refresh — the refresh must use the latest id
+  // without re-running the load effect.
+  const myIdRef = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    myIdRef.current = myId;
+  }, [myId]);
+
+  // Refresh the conversation list (unread badges) after the open thread
+  // is marked read. Deliberately NOT gated by the load effect's
+  // `cancelled` flag: on a direct-URL open the effect runs twice
+  // (session unresolved, then resolved) and the first run's cleanup
+  // used to discard the refresh, leaving a stale badge. The refresh is
+  // idempotent — the list is re-read from the API after mark-read — so
+  // a superseded run applying it is harmless.
+  const refreshConversations = useCallback(() => {
+    api
+      .conversations()
+      .catch(() => [])
+      .then((fresh: any) => {
+        if (Array.isArray(fresh))
+          setConversations(
+            fresh.map((c: any) => mapConversation(c, myIdRef.current))
+          );
+      });
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
     Promise.all([
@@ -45,19 +72,12 @@ export default function ConversationPage() {
       // Opening the thread marked its messages read — refetch the list
       // once so the unread badge clears instead of showing the
       // load-time snapshot.
-      api
-        .conversations()
-        .catch(() => [])
-        .then((fresh: any) => {
-          if (cancelled) return;
-          if (Array.isArray(fresh))
-            setConversations(fresh.map((c: any) => mapConversation(c, myId)));
-        });
+      refreshConversations();
     });
     return () => {
       cancelled = true;
     };
-  }, [id, myId]);
+  }, [id, myId, refreshConversations]);
 
   return (
     <div className="flex min-h-screen flex-col bg-white dark:bg-ink-900">

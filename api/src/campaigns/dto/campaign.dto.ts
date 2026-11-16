@@ -1,8 +1,15 @@
-import { IsString, IsOptional, IsArray, IsEnum } from 'class-validator';
+import { IsString, IsOptional, IsArray, IsEnum, MinLength } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { CampaignStatus } from '../campaign.entity';
 
 export class CreateCampaignDto {
   @IsString()
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
+  @MinLength(3, {
+    message: 'Campaign title must be at least 3 characters long.',
+  })
   title: string;
 
   @IsString()
@@ -36,6 +43,12 @@ export class CreateCampaignDto {
 export class UpdateCampaignDto {
   @IsOptional()
   @IsString()
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
+  @MinLength(3, {
+    message: 'Campaign title must be at least 3 characters long.',
+  })
   title?: string;
 
   @IsOptional()

@@ -130,8 +130,18 @@ export class ProfilesService {
     if (filters.platform) {
       qb.andWhere(':platform = ANY(c.platforms)', { platform: filters.platform });
     }
+    // Small-fixes (Nov 2026): keyword search is now fully server-side.
+    // `q` matches name/bio (as before) AND the niches/platforms arrays —
+    // the old /creators page filtered client-side over name + niches +
+    // platforms, so those two arrays stay searchable or a keyword that
+    // used to match (e.g. a platform name) would silently stop matching.
     if (filters.query) {
-      qb.andWhere('(c.displayName ILIKE :q OR c.bio ILIKE :q)', { q: `%${filters.query}%` });
+      qb.andWhere(
+        '(c.displayName ILIKE :q OR c.bio ILIKE :q ' +
+          'OR EXISTS (SELECT 1 FROM unnest(c.niches) AS n WHERE n ILIKE :q) ' +
+          'OR EXISTS (SELECT 1 FROM unnest(c.platforms) AS p WHERE p ILIKE :q))',
+        { q: `%${filters.query}%` },
+      );
     }
     // F-1 (showcase): opt-in exclusion of test/demo-domain owners.
     // Raw EXISTS subquery (not a join) so the linked user row is never
@@ -212,12 +222,27 @@ export class ProfilesService {
   // creator can tell two same-named creators apart. Only the fields
   // the dropdown needs are selected — no user row is ever returned
   // whole.
-  async searchCreatorsForDeal(limit?: number) {
-    const rows = await this.creatorRepo
+  // Small-fixes (Nov 2026): server-side search + newest-first ordering.
+  // The dropdown used to take the top 100 by rating — with every rating
+  // at 0 that is effectively the 100 OLDEST creators, so a brand-new
+  // creator could never be selected. Now: `q` filters server-side by
+  // name/bio/email, and the default order is newest first, so a new
+  // creator is at the top even before anything is typed. Limit stays
+  // capped at 100 (a sensible bound for a dropdown).
+  async searchCreatorsForDeal(limit?: number, query?: string) {
+    const qb = this.creatorRepo
       .createQueryBuilder('c')
       .leftJoin('c.user', 'u')
-      .where('c.availableNow = :available', { available: true })
-      .orderBy('c.rating', 'DESC')
+      .where('c.availableNow = :available', { available: true });
+    if (query?.trim()) {
+      qb.andWhere(
+        '(c.displayName ILIKE :q OR c.bio ILIKE :q OR u.email ILIKE :q)',
+        { q: `%${query.trim()}%` },
+      );
+    }
+    const rows = await qb
+      .orderBy('c.createdAt', 'DESC')
+      .addOrderBy('c.rating', 'DESC')
       .limit(Math.min(Math.max(limit || 100, 1), 100))
       .select(['c.id', 'c.userId', 'c.displayName', 'c.location', 'c.rate', 'u.email'])
       .getMany();

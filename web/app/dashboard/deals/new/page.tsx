@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
@@ -14,6 +14,15 @@ import { api } from "@/lib/api";
 
 // NOTE: No Figma design exists for New Deal — basic functional form.
 type CreatorOption = { id: string; name: string; email?: string | null; detail?: string };
+
+// Maps a for-deal (or public-list) row to a dropdown option. The id is
+// the creator's USER id — that is what a deal is created against.
+const toOption = (c: any): CreatorOption => ({
+  id: String(c.userId),
+  name: c.displayName ?? "Creator",
+  email: c.email ?? null,
+  detail: [c.location, c.rate].filter(Boolean).join(" · ") || undefined,
+});
 
 // D1: the form draft is preserved in sessionStorage so typed input
 // survives any remount — the creator list resolving, navigating away
@@ -116,8 +125,76 @@ function NewDealForm() {
   // the created deal even if the redirect below ever fails to navigate,
   // so the form never silently sits there after the deal exists.
   const [createdDealId, setCreatedDealId] = useState<string | null>(null);
-  // null = loading, [] = fetch failed/empty -> fall back to manual UUID entry
-  const [creators, setCreators] = useState<CreatorOption[] | null>(null);
+  // Searchable creator picker (small-fixes, Nov 2026): the old static
+  // <select> only carried the top 100 by rating, so a brand-new creator
+  // could never be chosen. Now the list is searched server-side —
+  // typing queries /profiles/creators/for-deal?q=… (newest first) —
+  // and the box shows the newest creators before anything is typed.
+  // creatorOptions null = initial load pending, [] = no matches.
+  const [creatorOptions, setCreatorOptions] = useState<CreatorOption[] | null>(null);
+  const [creatorQuery, setCreatorQuery] = useState("");
+  const [creatorOpen, setCreatorOpen] = useState(false);
+  const [creatorSearching, setCreatorSearching] = useState(false);
+  const creatorSearchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const creatorBlurTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const loadCreatorOptions = useCallback((q?: string) => {
+    const query = (q ?? "").trim();
+    const params = `?limit=20${query ? `&q=${encodeURIComponent(query)}` : ""}`;
+    setCreatorSearching(true);
+    // D2 (dropdown disambiguation): prefer the brand-only directory
+    // WITH emails, so two creators sharing a display name are
+    // distinguishable. Fall back to the public list (name + location /
+    // rate as the distinguishing detail) if the authed call fails.
+    api
+      .creatorsForDeal(params)
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setCreatorOptions(data.filter((c: any) => c?.userId).map(toOption));
+        } else {
+          setCreatorOptions([]);
+        }
+      })
+      .catch(() =>
+        api
+          .creators(params)
+          .then((data) => {
+            if (Array.isArray(data)) {
+              setCreatorOptions(
+                data.filter((c: any) => c?.userId).map(toOption)
+              );
+            } else {
+              setCreatorOptions([]);
+            }
+          })
+          .catch(() => {
+            // API unavailable — the manual ID entry below stays usable
+            setCreatorOptions([]);
+          })
+      )
+      .finally(() => setCreatorSearching(false));
+  }, []);
+
+  useEffect(() => {
+    loadCreatorOptions();
+  }, [loadCreatorOptions]);
+
+  // Typing searches server-side (debounced) and drops any previous
+  // selection, so a stale creator id can never be submitted.
+  const onCreatorQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const text = e.target.value;
+    setCreatorQuery(text);
+    setCreatorOpen(true);
+    setForm((f) => (f.creatorId ? { ...f, creatorId: "" } : f));
+    if (creatorSearchTimer.current) clearTimeout(creatorSearchTimer.current);
+    creatorSearchTimer.current = setTimeout(() => loadCreatorOptions(text), 300);
+  };
+
+  const pickCreator = (c: CreatorOption) => {
+    setForm((f) => ({ ...f, creatorId: c.id }));
+    setCreatorQuery(c.name);
+    setCreatorOpen(false);
+  };
   // Manual entry lets a brand hire ANY creator by user ID. The dropdown
   // only carries the top 100 by rating, so without this toggle a
   // brand-new creator (or any creator past the 100th) could never be
@@ -140,49 +217,6 @@ function NewDealForm() {
       /* storage unavailable */
     }
   }, [form, manualCreator, hasPrefillParams]);
-
-  useEffect(() => {
-    // D2 (dropdown disambiguation): prefer the brand-only directory
-    // WITH emails, so two creators sharing a display name are
-    // distinguishable. Fall back to the public list (name + location /
-    // rate as the distinguishing detail) if the authed call fails.
-    const toOption = (c: any): CreatorOption => ({
-      id: String(c.userId),
-      name: c.displayName ?? "Creator",
-      email: c.email ?? null,
-      detail: [c.location, c.rate].filter(Boolean).join(" · ") || undefined,
-    });
-    api
-      .creatorsForDeal("?limit=100")
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setCreators(
-            data.filter((c: any) => c?.userId).map(toOption)
-          );
-        } else {
-          setCreators([]);
-        }
-      })
-      .catch(() =>
-        api
-          .creators("?limit=100")
-          .then((data) => {
-            if (Array.isArray(data)) {
-              setCreators(
-                data
-                  .filter((c: any) => c?.userId)
-                  .map(toOption)
-              );
-            } else {
-              setCreators([]);
-            }
-          })
-          .catch(() => {
-            // API unavailable — fall back to manual UUID entry
-            setCreators([]);
-          })
-      );
-  }, []);
 
   // Pre-fill from an accepted application (application-to-deal conversion)
   useEffect(() => {
@@ -254,6 +288,32 @@ function NewDealForm() {
     };
   }, [opportunityId]);
 
+  // Resolve the selected creator's display name into the search box.
+  // Covers prefill (?creatorId / application / opportunity) and draft
+  // restore, where only the id is known. Tries the loaded options
+  // first, then the public by-user lookup. Only fills an EMPTY box —
+  // once the user has typed, the id was already cleared by the input
+  // handler and this must not clobber their text.
+  useEffect(() => {
+    const id = form.creatorId;
+    if (!id || manualCreator || creatorQuery) return;
+    const inOptions = (creatorOptions ?? []).find((c) => c.id === id);
+    if (inOptions) {
+      setCreatorQuery(inOptions.name);
+      return;
+    }
+    let alive = true;
+    api
+      .creatorProfileByUser(id)
+      .then((p: any) => {
+        if (alive && p?.displayName) setCreatorQuery(p.displayName);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [form.creatorId, creatorOptions, manualCreator, creatorQuery]);
+
   const set =
     (key: string) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
@@ -261,6 +321,14 @@ function NewDealForm() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // The creator picker is a combobox now (its text is a display name,
+    // not the id), so the old native `required` on a <select> is gone —
+    // enforce the selection here. Manual mode still has its own
+    // `required` input, so this only fires for the picker.
+    if (!form.creatorId && !manualCreator) {
+      setError("Please choose a creator from the list.");
+      return;
+    }
     setSaving(true);
     setError("");
     try {
@@ -326,19 +394,65 @@ function NewDealForm() {
       </div>
       <div>
         <label className="mb-1 block text-sm font-medium">Creator *</label>
-        {creators === null ? (
+        {creatorOptions === null ? (
           <input className={inputCls} disabled placeholder="Loading creators…" />
-        ) : creators.length > 0 && !manualCreator ? (
+        ) : !manualCreator ? (
           <>
-            <select className={inputCls} value={form.creatorId} onChange={set("creatorId")} required>
-              <option value="">Select a creator…</option>
-              {creators.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                  {c.email ? ` — ${c.email}` : c.detail ? ` — ${c.detail}` : ""}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <input
+                className={inputCls}
+                value={creatorQuery}
+                onChange={onCreatorQueryChange}
+                onFocus={() => {
+                  if (creatorBlurTimer.current) clearTimeout(creatorBlurTimer.current);
+                  setCreatorOpen(true);
+                }}
+                onBlur={() => {
+                  // Delayed so a click on a suggestion (mousedown) lands
+                  // before the list closes.
+                  creatorBlurTimer.current = setTimeout(() => setCreatorOpen(false), 150);
+                }}
+                placeholder="Type to search creators…"
+                autoComplete="off"
+              />
+              {creatorOpen && (
+                <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-gray-300 dark:border-ink-700 bg-white dark:bg-ink-900 shadow-lg">
+                  {creatorSearching && (
+                    <li className="px-4 py-2.5 text-sm text-gray-500 dark:text-ink-300">
+                      Searching…
+                    </li>
+                  )}
+                  {!creatorSearching && creatorOptions.length === 0 && (
+                    <li className="px-4 py-2.5 text-sm text-gray-500 dark:text-ink-300">
+                      No creators found
+                      {creatorQuery ? ` for “${creatorQuery}”` : ""}. Try a
+                      different name, or enter the creator ID manually below.
+                    </li>
+                  )}
+                  {creatorOptions.map((c) => (
+                    <li key={c.id}>
+                      <button
+                        type="button"
+                        onMouseDown={(e) => {
+                          // mousedown (not click): the input's blur would
+                          // close the list before a click ever fires.
+                          e.preventDefault();
+                          pickCreator(c);
+                        }}
+                        className="block w-full px-4 py-2.5 text-left text-sm hover:bg-gray-50 dark:hover:bg-white/5"
+                      >
+                        <span className="font-medium">{c.name}</span>
+                        {c.email ? (
+                          <span className="text-gray-500 dark:text-ink-300"> — {c.email}</span>
+                        ) : c.detail ? (
+                          <span className="text-gray-500 dark:text-ink-300"> — {c.detail}</span>
+                        ) : null}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
             <button
               type="button"
               onClick={() => setManualCreator(true)}
@@ -354,15 +468,13 @@ function NewDealForm() {
               Paste the creator&apos;s user ID or profile ID — both work.
               The profile ID is the one in the creator&apos;s page address.
             </p>
-            {creators.length > 0 && (
-              <button
-                type="button"
-                onClick={() => setManualCreator(false)}
-                className="mt-1 cursor-pointer text-xs font-semibold text-brand dark:text-brand-200 hover:underline"
-              >
-                Back to creator list
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={() => setManualCreator(false)}
+              className="mt-1 cursor-pointer text-xs font-semibold text-brand dark:text-brand-200 hover:underline"
+            >
+              Back to creator list
+            </button>
           </>
         )}
         <p className="mt-1 text-xs text-gray-500 dark:text-ink-300">
