@@ -38,29 +38,24 @@ const columns: Array<{ title: string; links: Array<[string, string]> }> = [
 ];
 
 // Pacten's official social accounts (client-supplied, Nov 2026).
-// External links: plain <a>, new tab, with the platform mark next to
-// the label. Icons reuse the supplied brand SVGs; x.svg was created
-// for this column (no X icon existed in the project).
-const socialLinks: Array<{ label: string; href: string; icon: string }> = [
+// External links: plain <a>, new tab, text label only (no platform
+// icons — client asked Nov 17, 2026: names only, "the logo doesn't flow").
+const socialLinks: Array<{ label: string; href: string }> = [
   {
     label: "Instagram",
     href: "https://www.instagram.com/pacten_hq/",
-    icon: "/assets/icons/instagram.svg",
   },
   {
     label: "TikTok",
     href: "https://www.tiktok.com/@pacten_hq",
-    icon: "/assets/icons/tiktok.svg",
   },
   {
     label: "X",
     href: "https://x.com/Pacten_hq",
-    icon: "/assets/icons/x.svg",
   },
   {
     label: "LinkedIn",
     href: "https://ca.linkedin.com/company/pacten-hq",
-    icon: "/assets/icons/linkedin.svg",
   },
 ];
 
@@ -114,17 +109,8 @@ export function Footer({ logoTone = "dark" }: { logoTone?: "dark" | "brand" }) {
                       href={link.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="footer-link inline-flex items-center gap-2 text-sm text-ink-500 dark:text-ink-300 hover:text-ink-900 dark:hover:text-ink-50"
+                      className="footer-link text-sm text-ink-500 dark:text-ink-300 hover:text-ink-900 dark:hover:text-ink-50"
                     >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={link.icon}
-                        alt=""
-                        aria-hidden
-                        width={18}
-                        height={18}
-                        className="rounded-[4px]"
-                      />
                       {link.label}
                     </a>
                   </li>
