@@ -366,7 +366,7 @@ function PricingSection() {
       <h2 className="mx-auto mt-6 max-w-[760px] text-4xl font-extrabold tracking-tight lg:text-[52px] lg:leading-[1.1]">
         <span className="text-gradient-blue text-gradient-animated">Simple pricing.</span>
         <br />
-        <span className="text-ink-900 dark:text-ink-50">Built for creators and brands.</span>
+        <span className="text-ink-900 dark:text-ink-50">Built for creators and businesses.</span>
       </h2>
       <p className="mx-auto mt-4 max-w-[640px] text-lg text-ink-500 dark:text-ink-300">
         Start for free and scale as you grow. No hidden fees. Cancel anytime.
@@ -416,7 +416,7 @@ function MarketplaceSection() {
           <p className="mt-6 max-w-full break-words text-[16px] leading-relaxed text-ink-700 dark:text-ink-200 sm:max-w-[560px] sm:text-[17px]">
             The way people discover, create, and grow online is constantly
             changing. Creators are building businesses from their content,
-            brands are looking for authentic voices, and social professionals
+            businesses are looking for authentic voices, and social professionals
             are helping turn ideas into meaningful campaigns.
           </p>
           <p className="mt-4 max-w-full break-words text-[16px] leading-relaxed text-ink-700 dark:text-ink-200 sm:max-w-[560px] sm:text-[17px]">
@@ -546,7 +546,7 @@ function HowItWorks() {
             <h3 className="mt-5 text-2xl font-extrabold text-ink-900 dark:text-ink-50">Create Your Profile</h3>
             <p className="mt-2 max-w-[420px] text-[15px] leading-relaxed text-ink-500 dark:text-ink-300">
               Showcase your work, add your platforms and skills, and set your
-              rate — so brands can discover you.
+              rate — so businesses can discover you.
             </p>
           </div>
           <div className="relative rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 p-5 shadow-card">
@@ -600,8 +600,7 @@ function HowItWorks() {
             </span>
             <h3 className="mt-5 text-2xl font-extrabold text-ink-900 dark:text-ink-50">Match with Creators</h3>
             <p className="mt-2 max-w-[420px] text-[15px] leading-relaxed text-ink-500 dark:text-ink-300">
-              Browse verified creator profiles or let our smart matching
-              surface the best fits.
+              Browse verified creator profiles and find the best fits for your campaign.
             </p>
             <div className="mt-6">
               <Image
@@ -623,8 +622,7 @@ function HowItWorks() {
             </span>
             <h3 className="mt-5 text-2xl font-extrabold text-ink-900 dark:text-ink-50">Launch &amp; Measure</h3>
             <p className="mt-2 max-w-[420px] text-[15px] leading-relaxed text-ink-500 dark:text-ink-300">
-              Collaborate, approve content, and track real-time campaign
-              performance.
+              Collaborate, approve content, and track your campaign performance.
             </p>
             <div className="mt-6 grid grid-cols-2 gap-3">
               <div className="rounded-xl border border-ink-100 dark:border-ink-800 p-4">
@@ -660,8 +658,7 @@ function HowItWorks() {
             </span>
             <h3 className="mt-5 text-2xl font-extrabold text-ink-900 dark:text-ink-50">Find Campaigns</h3>
             <p className="mt-2 max-w-[420px] text-[15px] leading-relaxed text-ink-500 dark:text-ink-300">
-              Browse campaigns from brands and apply to the ones that fit
-              your style and audience.
+              Browse campaigns from businesses and apply to the ones that fit your style and audience.
             </p>
             <div className="mt-6 flex flex-col gap-3">
               <div className="flex items-center justify-between gap-3 rounded-xl border border-ink-100 dark:border-ink-800 p-4">
@@ -693,8 +690,7 @@ function HowItWorks() {
             </span>
             <h3 className="mt-5 text-2xl font-extrabold text-ink-900 dark:text-ink-50">Get Hired &amp; Get Paid</h3>
             <p className="mt-2 max-w-[420px] text-[15px] leading-relaxed text-ink-500 dark:text-ink-300">
-              Collaborate with the brand, deliver your content, and get paid
-              securely through the platform.
+              Collaborate with the business, deliver your content, and get paid securely through the platform.
             </p>
             <div className="mt-6 grid grid-cols-2 gap-3">
               <div className="rounded-xl border border-ink-100 dark:border-ink-800 p-4">
@@ -733,7 +729,7 @@ function CtaBanner() {
           <div>
             <p className="text-2xl font-extrabold text-white">Ready to get started?</p>
             <p className="mt-1 text-[15px] text-brand-100">
-              Join brands and creators growing together.
+              Join businesses and creators growing together.
             </p>
           </div>
         </div>
@@ -762,7 +758,7 @@ function Professionals() {
         <h2 className="mt-6 max-w-[700px] text-4xl font-extrabold tracking-tight lg:text-[52px] lg:leading-[1.1]">
           <span className="text-ink-900 dark:text-ink-50">Find social media professionals</span>
           <br />
-          <span className="text-gradient-blue text-gradient-animated">for brand collaborations</span>
+          <span className="text-gradient-blue text-gradient-animated">for business collaborations</span>
         </h2>
         <p className="mt-4 max-w-[640px] text-lg leading-relaxed text-ink-500 dark:text-ink-300">
           Browse the professional marketplace to find editors, designers,
@@ -803,7 +799,7 @@ function BottomCta() {
         Ready to grow with Pacten?
       </h2>
       <p className="mt-4 max-w-[520px] text-lg text-brand-100 lg:whitespace-nowrap lg:text-[1.35cqi]">
-        Join the marketplace built for creators and brands to connect,
+        Join the marketplace built for creators and businesses to connect,
         collaborate and grow.
       </p>
       <div className="mt-8 flex flex-wrap gap-3 lg:flex-nowrap lg:mt-[2.2cqi]">
@@ -860,7 +856,7 @@ function BottomCta() {
           Pacten?
         </h2>
         <p className="mx-auto mt-4 max-w-[290px] text-[14px] leading-relaxed text-white/90">
-          Join the marketplace built for creators and brands to connect,
+          Join the marketplace built for creators and businesses to connect,
           collaborate and grow.
         </p>
         <div className="mt-6 flex items-stretch justify-center gap-3">

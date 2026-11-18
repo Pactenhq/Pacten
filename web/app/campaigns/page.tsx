@@ -76,7 +76,7 @@ export default function CampaignsPage() {
             _live: true,
             id: c.id,
             title: c.title,
-            brand: c.brand?.displayName ?? "Brand",
+            brand: c.brand?.displayName ?? "Business",
             description: c.description,
             budget: c.budget ?? "",
             niches: c.niches ?? [],
@@ -178,9 +178,9 @@ export default function CampaignsPage() {
         <MarketplaceHero
           eyebrow="Campaigns & Opportunities"
           titleBlue="Discover creator campaigns"
-          titleDark="and brand collaborations."
-          subtitle="Discover brand campaigns, creative projects, and long-term collaborations."
-          placeholder="Search by job title, skills, brand or keyword..."
+          titleDark="and business collaborations."
+          subtitle="Discover business campaigns, creative projects, and long-term collaborations."
+          placeholder="Search by job title, skills, business or keyword..."
           onSearch={handleSearch}
           defaultQuery={searchQuery}
           clearSignal={clearKey}

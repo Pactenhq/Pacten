@@ -18,7 +18,7 @@ export default function PrivacyPage() {
       </InfoSection>
       <InfoSection heading="How we use it">
         <p>
-          To operate the marketplace: matching brands with creators and
+          To operate the marketplace: matching businesses with creators and
           professionals, generating contracts, processing payments and
           payouts, calculating commissions and referral earnings, and
           keeping accounts secure. We do not sell your personal data.

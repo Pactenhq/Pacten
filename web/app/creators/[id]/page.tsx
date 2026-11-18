@@ -216,7 +216,7 @@ export default function CreatorDetailPage() {
                       <Link href="/login" className="font-medium text-brand dark:text-brand-200 hover:underline">
                         Log in
                       </Link>{" "}
-                      as a brand to create a deal with this creator.
+                      as a business to create a deal with this creator.
                     </p>
                   )}
                 </div>

@@ -39,7 +39,7 @@ export default function CreatorApplicationsPage() {
         if (Array.isArray(data)) {
           setRows(
             data.map((a: any) => ({
-              company: a.campaign?.brand?.displayName ?? "Brand",
+              company: a.campaign?.brand?.displayName ?? "Business",
               jobTitle: a.campaign?.title ?? "",
               initials: "CA",
               jobType: "Contract",

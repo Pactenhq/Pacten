@@ -467,7 +467,7 @@ export default function PricingPage() {
             Pricing that rewards growth.
           </h1>
           <p className="mx-auto mt-5 max-w-[724px] text-lg leading-relaxed text-ink-500 dark:text-ink-300">
-            Creators and professionals join free. Brands can start free and
+            Creators and professionals join free. Businesses can start free and
             upgrade as they grow. Pacten only succeeds when our community
             succeeds.
           </p>

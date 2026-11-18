@@ -75,7 +75,7 @@ export default function OpportunitiesPage() {
         subtitle={
           isBrand
             ? "Creators and professionals you reached out to directly."
-            : "Brands that sent you a direct opportunity. Accept the ones you like."
+            : "Businesses that sent you a direct opportunity. Accept the ones you like."
         }
       />
       {loading ? (
@@ -86,7 +86,7 @@ export default function OpportunitiesPage() {
           <p className="mt-2 text-ink-500 dark:text-ink-300">
             {isBrand
               ? "Open a creator or professional profile and send them a direct opportunity."
-              : "When a brand sends you a direct opportunity, it will appear here."}
+              : "When a business sends you a direct opportunity, it will appear here."}
           </p>
         </Card>
       ) : (

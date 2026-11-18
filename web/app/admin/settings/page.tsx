@@ -141,7 +141,7 @@ export default function AdminSettingsPage() {
       <SectionCard title="Commission rates" className="mt-6">
         <p className="mt-1 text-[13px] text-ink-500 dark:text-ink-300">
           Share of each payment kept by the platform, by payee role and
-          subscription tier. Brands are never charged.
+          subscription tier. Businesses are never charged.
         </p>
         {loading ? (
           <p className="mt-3 text-[14px] text-ink-500 dark:text-ink-300">Loading…</p>

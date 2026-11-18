@@ -47,9 +47,9 @@ function fmtDate(d: any): string {
 }
 
 function personName(u: any): string {
-  if (!u) return "Brand";
+  if (!u) return "Business";
   const n = [u.firstName, u.lastName].filter(Boolean).join(" ");
-  return n || u.email || "Brand";
+  return n || u.email || "Business";
 }
 
 function dealCard(d: any, status: "Active" | "Completed"): DashboardCampaign {
@@ -164,7 +164,7 @@ export default function CreatorDashboardPage() {
             ) : (
               <EmptyState
                 title="No requests yet."
-                body="Collaboration requests from brands will appear here when you receive them."
+                body="Collaboration requests from businesses will appear here when you receive them."
               />
             )}
           </div>
@@ -195,13 +195,13 @@ export default function CreatorDashboardPage() {
           ) : (
             <EmptyState
               title="No campaigns yet."
-              body="Collaboration requests from brands will appear here when you receive them."
+              body="Collaboration requests from businesses will appear here when you receive them."
             />
           )}
         </SectionCard>
 
         <SectionCard
-          title="Review Your Brand Partners"
+          title="Review Your Business Partners"
           className="border-0 bg-transparent p-0 shadow-none"
         >
           {completedDeals.length > 0 ? (
@@ -212,8 +212,8 @@ export default function CreatorDashboardPage() {
             </div>
           ) : (
             <EmptyState
-              title="No brand partners to review yet."
-              body="Complete a campaign with a brand to leave a review and share your experience."
+              title="No business partners to review yet."
+              body="Complete a campaign with a business to leave a review and share your experience."
             />
           )}
         </SectionCard>

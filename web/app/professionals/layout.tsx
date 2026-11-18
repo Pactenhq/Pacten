@@ -4,13 +4,13 @@ import { routeMetadata } from "@/lib/seo";
 export const metadata: Metadata = routeMetadata({
   title: "Hire Social Media Professionals | Influencer Marketplace — Pacten",
   description:
-    "Find social media professionals — editors, designers, strategists and copywriters — for brand collaborations and influencer marketing campaigns.",
+    "Find social media professionals — editors, designers, strategists and copywriters — for business collaborations and influencer marketing campaigns.",
   path: "/professionals",
   keywords: [
     "social media professionals",
     "influencer marketplace",
     "influencer marketing",
-    "brand collaborations",
+    "business collaborations",
     "creator campaigns",
     "influencer partnerships",
   ],

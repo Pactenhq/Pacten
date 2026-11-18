@@ -113,7 +113,7 @@ export default function AdminCampaignsPage() {
               <thead>
                 <tr className="border-b border-ink-100 dark:border-ink-800 text-[12px] uppercase text-ink-400 dark:text-ink-300">
                   <th className="py-3 pr-4">Title</th>
-                  <th className="py-3 pr-4">Brand</th>
+                  <th className="py-3 pr-4">Business</th>
                   <th className="py-3 pr-4">Status</th>
                   <th className="py-3 pr-4">Applications</th>
                   <th className="py-3 pr-4">Created</th>

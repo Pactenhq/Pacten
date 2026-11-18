@@ -95,11 +95,11 @@ export default function BrandProfilePage() {
                   <h1 className="text-[26px] font-extrabold tracking-tight text-ink-900 dark:text-ink-50">
                     {profile.companyName || displayName || "Your brand"}
                   </h1>
-                  <p className="mt-1 text-[15px] text-ink-500 dark:text-ink-300">Brand profile</p>
+                  <p className="mt-1 text-[15px] text-ink-500 dark:text-ink-300">Business profile</p>
                 </div>
                 {profile.logoUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={profile.logoUrl} alt="Brand logo" width={64} height={64} className="h-16 w-16 rounded-xl object-cover" />
+                  <img src={profile.logoUrl} alt="Business logo" width={64} height={64} className="h-16 w-16 rounded-xl object-cover" />
                 ) : null}
               </div>
               <div className="mt-6">

@@ -84,7 +84,7 @@ export default function BrandApplicationsPage() {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <WelcomeHeader
             title="My Applications"
-            subtitle="Review creator applications for your jobs and find the right fit for your brand."
+            subtitle="Review creator applications for your jobs and find the right fit for your business."
           />
           <Link href="/dashboard/campaigns/new">
             <Button size="lg">Post a New Job</Button>

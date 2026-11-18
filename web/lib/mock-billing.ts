@@ -74,11 +74,11 @@ export const pricingFaqs: Faq[] = [
   },
   {
     q: "Is there a free trial?",
-    a: "Creators and professionals join free. Brands can start free and upgrade as they grow.",
+    a: "Creators and professionals join free. Businesses can start free and upgrade as they grow.",
   },
   {
     q: "What is the free plan and how do paid plans apply?",
-    a: "Creators and professionals join free. Brands can start free and upgrade as they grow. Pacten only succeeds when our community succeeds.",
+    a: "Creators and professionals join free. Businesses can start free and upgrade as they grow. Pacten only succeeds when our community succeeds.",
   },
   {
     q: "Are there hidden fees?",

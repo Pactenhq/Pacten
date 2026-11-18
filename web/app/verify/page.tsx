@@ -1,10 +1,13 @@
 "use client";
 
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { TextField } from "@/components/ui/TextField";
 import { Button } from "@/components/ui/Button";
 import { Stepper } from "@/components/auth/Stepper";
+import { api } from "@/lib/api";
 
 //
 // Copy, stepper, card and side-panel layout matched verbatim from the frame.
@@ -36,7 +39,112 @@ function ChevronDown() {
   );
 }
 
-export default function VerifyPage() {
+//
+// Email verification (token link from the signup email).
+// The verification email links here as /verify?token=... — this component
+// submits that token to the API (GET /auth/verify) and reports the result.
+// Previously this page ignored the token entirely and the Continue button
+// did nothing, so users who clicked the email link were stuck here.
+function EmailVerificationResult({ token }: { token: string }) {
+  const [state, setState] = useState<"verifying" | "success" | "error">(
+    "verifying"
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    api.verifyEmail(token).then(
+      () => {
+        if (!cancelled) setState("success");
+      },
+      () => {
+        if (!cancelled) setState("error");
+      }
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
+
+  return (
+    <main className="bg-mist/50 dark:bg-ink-950/50">
+      <div className="mx-auto max-w-[1380px] px-6 py-14 lg:px-12 lg:py-20">
+        <h1 className="text-4xl font-extrabold tracking-tight text-ink-900 dark:text-ink-50 lg:text-5xl">
+          Verification
+        </h1>
+        <div className="mt-10 flex justify-center">
+          <Card className="fade-up fade-up-2 w-full max-w-[662px] p-6 shadow-pop sm:p-10">
+            {state === "verifying" && (
+              <>
+                <div className="h-10 w-10 animate-spin rounded-full border-2 border-ink-200 dark:border-ink-700 border-t-brand" />
+                <h2 className="mt-6 text-2xl font-bold tracking-tight text-ink-900 dark:text-ink-50 lg:text-3xl">
+                  Verifying your email…
+                </h2>
+                <p className="mt-2 text-[15px] text-ink-500 dark:text-ink-300">
+                  Please wait while we confirm your email address.
+                </p>
+              </>
+            )}
+            {state === "success" && (
+              <>
+                <span
+                  aria-hidden
+                  className="flex h-14 w-14 items-center justify-center rounded-full bg-[#e7f7ee]"
+                >
+                  <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                    <path
+                      d="M6 14.5 11.5 20 22 8.5"
+                      stroke="#16a34a"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </span>
+                <h2 className="mt-6 text-2xl font-bold tracking-tight text-ink-900 dark:text-ink-50 lg:text-3xl">
+                  Your email is verified
+                </h2>
+                <p className="mt-2 text-[15px] text-ink-500 dark:text-ink-300">
+                  Your email address has been confirmed. You can now log in
+                  to your Pacten account.
+                </p>
+                <div className="mt-8">
+                  <Link href="/login">
+                    <Button size="lg">Login</Button>
+                  </Link>
+                </div>
+              </>
+            )}
+            {state === "error" && (
+              <>
+                <h2 className="mt-6 text-2xl font-bold tracking-tight text-ink-900 dark:text-ink-50 lg:text-3xl">
+                  Verification link invalid
+                </h2>
+                <p className="mt-2 text-[15px] text-ink-500 dark:text-ink-300">
+                  This verification link is invalid or has expired. Please log
+                  in — you can still use your account — or contact support if
+                  the problem continues.
+                </p>
+                <div className="mt-8">
+                  <Link href="/login">
+                    <Button size="lg">Login</Button>
+                  </Link>
+                </div>
+              </>
+            )}
+          </Card>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+//
+// Identity verification (verified-badge application) — Figma design, kept
+// exactly as designed. It has no backend: the manual-verification flow is
+// a separate gated item, so this form is only shown when the page is opened
+// WITHOUT an email-verification token (no link in the app points here;
+// only the verification email does, and it always carries a token).
+function IdentityVerificationForm() {
   return (
     <main className="bg-mist/50 dark:bg-ink-950/50">
       <div className="mx-auto max-w-[1380px] px-6 py-14 lg:px-12 lg:py-20">
@@ -151,5 +259,35 @@ export default function VerifyPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+function VerifyPageInner() {
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
+  if (token) {
+    return <EmailVerificationResult token={token} />;
+  }
+  return <IdentityVerificationForm />;
+}
+
+export default function VerifyPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="bg-mist/50 dark:bg-ink-950/50">
+          <div className="mx-auto max-w-[1380px] px-6 py-14 lg:px-12 lg:py-20">
+            <h1 className="text-4xl font-extrabold tracking-tight text-ink-900 dark:text-ink-50 lg:text-5xl">
+              Verification
+            </h1>
+            <p className="mt-3 text-lg text-ink-500 dark:text-ink-300">
+              Verifying your email…
+            </p>
+          </div>
+        </main>
+      }
+    >
+      <VerifyPageInner />
+    </Suspense>
   );
 }

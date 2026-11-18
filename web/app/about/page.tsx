@@ -5,11 +5,11 @@ export default function AboutPage() {
     <InfoPage
       tag="Company"
       title="About Pacten"
-      intro="Pacten is the marketplace where brands hire creators and professionals for campaigns — with contracts, secure payments and clear commissions built in."
+      intro="Pacten is the marketplace where businesses hire creators and professionals for campaigns — with contracts, secure payments and clear commissions built in."
     >
       <InfoSection heading="What we do">
         <p>
-          Brands post campaigns and discover verified creators and
+          Businesses post campaigns and discover verified creators and
           professionals. Creators and professionals build public profiles,
           apply to campaigns, and receive direct opportunities. When both
           sides agree, Pacten generates the contract, collects payment
@@ -21,8 +21,8 @@ export default function AboutPage() {
         <p>
           1. Discover — search creators and professionals by niche, platform
           and rate. 2. Deal — agree the scope and budget, sign the contract,
-          and the brand pays upfront. 3. Deliver &amp; get paid — the creator
-          submits the work, the brand approves it, and the payout is released
+          and the business pays upfront. 3. Deliver &amp; get paid — the creator
+          submits the work, the business approves it, and the payout is released
           minus the plan commission.
         </p>
       </InfoSection>

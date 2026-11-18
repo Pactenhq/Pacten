@@ -31,7 +31,7 @@ function ProfessionalForm() {
         Join Pacten Professional
       </h1>
       <p className="mt-2 text-[15px] text-ink-500 dark:text-ink-300">
-        Create your profile and connect with creators and brands.
+        Create your profile and connect with creators and businesses.
       </p>
       <form className="mt-8 flex flex-col gap-5" onSubmit={submit}>
         <AuthError message={error} />

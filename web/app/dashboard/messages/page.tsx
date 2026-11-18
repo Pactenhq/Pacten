@@ -180,7 +180,7 @@ function MessagesContent() {
                     ? "Loading conversations…"
                     : loadError
                       ? "Conversations couldn't be loaded. Please check your connection and refresh the page."
-                      : "No conversations yet. When you message a creator or brand, the conversation will appear here."}
+                      : "No conversations yet. When you message a creator or business, the conversation will appear here."}
                 </p>
               </div>
             )}

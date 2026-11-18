@@ -15,13 +15,13 @@ const inter = Inter({
 export const metadata: Metadata = routeMetadata({
   title: "Pacten — Influencer Marketplace | Hire Content Creators & Social Media Professionals",
   description:
-    "Pacten is an influencer marketplace for brand collaborations, creator campaigns and influencer partnerships. Hire content creators and social media professionals for influencer marketing.",
+    "Pacten is an influencer marketplace for business collaborations, creator campaigns and influencer partnerships. Hire content creators and social media professionals for influencer marketing.",
   path: "/",
   keywords: [
     "influencer marketplace",
     "hire content creators",
     "influencer marketing",
-    "brand collaborations",
+    "business collaborations",
     "social media professionals",
     "creator campaigns",
     "influencer partnerships",

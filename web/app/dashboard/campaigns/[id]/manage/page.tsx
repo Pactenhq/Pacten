@@ -130,7 +130,7 @@ export default function ManageCampaignPage() {
           <div className="flex flex-col items-start gap-3">
             <p className="text-lg font-medium text-ink-900 dark:text-ink-50">This campaign is not yours.</p>
             <p className="text-[15px] text-ink-500 dark:text-ink-300">
-              Only the brand that created a campaign can manage it.
+              Only the business that created a campaign can manage it.
             </p>
             <Link href="/dashboard/campaigns" className="text-[15px] font-semibold text-brand dark:text-brand-200 hover:underline">
               Back to campaigns

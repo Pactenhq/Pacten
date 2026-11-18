@@ -401,7 +401,7 @@ export default function DealDetailPage() {
             <h3 className="mb-4 text-lg font-semibold">Parties</h3>
             <dl className="space-y-3">
               <div>
-                <dt className="text-sm text-gray-500 dark:text-ink-300">Brand</dt>
+                <dt className="text-sm text-gray-500 dark:text-ink-300">Business</dt>
                 <dd className="font-medium">{personName(deal.brand)}</dd>
               </div>
               <div>
@@ -525,7 +525,7 @@ export default function DealDetailPage() {
               <p className="text-[15px] text-gray-600 dark:text-ink-200">
                 {isBrand
                   ? "Fund this deal upfront to get work started."
-                  : "Awaiting upfront payment from the brand."}
+                  : "Awaiting upfront payment from the business."}
               </p>
               {isBrand &&
                 (deal.status === "agreed" || deal.status === "active") && (

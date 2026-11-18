@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import { routeMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = routeMetadata({
-  title: "Creator Campaigns & Brand Collaborations | Pacten",
+  title: "Creator Campaigns & Business Collaborations | Pacten",
   description:
-    "Discover creator campaigns, brand collaborations and influencer partnerships on the Pacten influencer marketplace.",
+    "Discover creator campaigns, business collaborations and influencer partnerships on the Pacten influencer marketplace.",
   path: "/campaigns",
   keywords: [
     "creator campaigns",
-    "brand collaborations",
+    "business collaborations",
     "influencer partnerships",
     "influencer marketplace",
     "hire content creators",

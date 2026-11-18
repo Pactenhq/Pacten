@@ -38,7 +38,7 @@ function CampaignDetailContent() {
           setCampaign({
             id: data.id,
             title: data.title,
-            brand: data.brand?.displayName ?? "Brand",
+            brand: data.brand?.displayName ?? "Business",
             description: data.description ?? "",
             budget: data.budget ?? "",
             timeline: data.deadline ?? "",
@@ -240,8 +240,8 @@ function CampaignDetailContent() {
                       </h2>
                       <p className="mt-2 text-[15px] text-ink-600 dark:text-ink-300">
                         {applySuccess
-                          ? "The brand has received your application and will review it shortly."
-                          : "You have already applied to this campaign. The brand will review it shortly."}
+                          ? "The business has received your application and will review it shortly."
+                          : "You have already applied to this campaign. The business will review it shortly."}
                       </p>
                       <Link
                         href="/dashboard/applications"
@@ -254,7 +254,7 @@ function CampaignDetailContent() {
                     <form onSubmit={submitApplication}>
                       <h2 className="text-lg font-bold text-ink-900 dark:text-ink-50">Apply to this campaign</h2>
                       <p className="mt-2 text-[15px] text-ink-600 dark:text-ink-300">
-                        Tell the brand why you&apos;re a great fit.
+                        Tell the business why you&apos;re a great fit.
                       </p>
                       <textarea
                         value={coverLetter}
@@ -286,7 +286,7 @@ function CampaignDetailContent() {
                           Interested in this campaign?
                         </h2>
                         <p className="mt-1 text-[15px] text-ink-600 dark:text-ink-300">
-                          Send the brand your application in one click.
+                          Send the business your application in one click.
                         </p>
                       </div>
                       <Button size="lg" onClick={() => setApplyOpen(true)}>

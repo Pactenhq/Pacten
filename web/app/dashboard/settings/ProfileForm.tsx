@@ -246,7 +246,7 @@ export function SettingsProfileForm() {
           <textarea
             id="bio"
             rows={4}
-            placeholder="Tell brands and clients a little about yourself..."
+            placeholder="Tell businesses and clients a little about yourself..."
             className="w-full resize-none rounded-xl border border-ink-300 dark:border-ink-700 bg-white dark:bg-ink-900 px-4 py-3 text-[15px] text-ink-900 dark:text-ink-50 placeholder:text-ink-400 dark:placeholder:text-ink-300 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand-100"
             {...field("bio")}
           />

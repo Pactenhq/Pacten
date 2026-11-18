@@ -74,7 +74,7 @@ export default function CampaignRequestPage() {
         msg.includes("401") ||
         msg.includes("403")
       ) {
-        setError("Please log in as a brand to post campaigns.");
+        setError("Please log in as a business to post campaigns.");
       } else {
         setError(
           msg ||
@@ -149,7 +149,7 @@ export default function CampaignRequestPage() {
                   id="req-description"
                   name="description"
                   rows={5}
-                  placeholder="Describe your campaign, brand, and what you'd like the creator to do..."
+                  placeholder="Describe your campaign, business, and what you'd like the creator to do..."
                   onChange={() =>
                     setFieldErrors((f) => ({ ...f, description: undefined }))
                   }

@@ -16,7 +16,7 @@ export default function SignupIndexPage() {
   const roles = [
     {
       href: `/signup/brand${suffix}`,
-      title: "Brand",
+      title: "Business",
       desc: "Find creators and run campaigns.",
     },
     {
@@ -27,7 +27,7 @@ export default function SignupIndexPage() {
     {
       href: `/signup/professional${suffix}`,
       title: "Professional",
-      desc: "Offer your services to brands.",
+      desc: "Offer your services to businesses.",
     },
   ];
   return (

@@ -86,7 +86,7 @@ export default function AdminDealsPage() {
               <thead>
                 <tr className="border-b border-ink-100 dark:border-ink-800 text-[12px] uppercase text-ink-400 dark:text-ink-300">
                   <th className="py-3 pr-4">Title</th>
-                  <th className="py-3 pr-4">Brand</th>
+                  <th className="py-3 pr-4">Business</th>
                   <th className="py-3 pr-4">Creator</th>
                   <th className="py-3 pr-4">Status</th>
                   <th className="py-3 pr-4">Budget</th>

@@ -20,7 +20,7 @@ const columns: Array<{ title: string; links: Array<[string, string]> }> = [
     ],
   },
   {
-    title: "Brands",
+    title: "Businesses",
     links: [
       ["Find Creators", "/creators"],
       ["Browse Campaigns", "/campaigns"],

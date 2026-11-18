@@ -573,7 +573,7 @@ export function TrustScore({
             Trust Score
           </h2>
           <p className="mt-1 text-[15px] text-ink-500 dark:text-ink-300">
-            How brands perceive your reliability
+            How businesses perceive your reliability
           </p>
         </div>
         <div className="text-right">
@@ -750,7 +750,7 @@ export function ServicesCard({ filledAdd = false }: { filledAdd?: boolean }) {
       <div className="mt-4">
         <EmptyState
           title="No services added yet"
-          body="Add your services and set your rates to help brands understand what you offer."
+          body="Add your services and set your rates to help businesses understand what you offer."
         />
       </div>
     </section>
@@ -815,7 +815,7 @@ export function VisibilityBoost() {
         You don&apos;t have an active visibility boost.
         <br />
         Boost your profile to appear higher in search results and get
-        discovered by more brands.
+        discovered by more businesses.
       </p>
       <Button className="mt-5">View Boost Plans</Button>
     </Card>
