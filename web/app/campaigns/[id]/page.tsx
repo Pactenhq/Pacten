@@ -61,6 +61,11 @@ function CampaignDetailContent() {
             deliverables: data.deliverables ?? "",
             notes: data.notes ?? "",
             niches: data.niches ?? [],
+            // M5 fix (Nov 20): campaign requirements (optional).
+            country: data.country ?? "",
+            language: data.language ?? "",
+            industry: data.industry ?? "",
+            skills: data.skills ?? [],
           });
         }
       })
@@ -184,6 +189,63 @@ function CampaignDetailContent() {
                       {n}
                     </span>
                   ))}
+                </div>
+              )}
+
+              {/* M5 fix (Nov 20): campaign requirements, shown only when
+                  the brand set at least one — so creators see what the
+                  campaign needs before applying. */}
+              {(campaign.country ||
+                campaign.language ||
+                campaign.industry ||
+                campaign.skills?.length > 0) && (
+                <div className="mt-8">
+                  <h2 className="text-lg font-bold text-ink-900 dark:text-ink-50">
+                    Campaign requirements
+                  </h2>
+                  <dl className="mt-3 space-y-2 text-[15px] text-ink-900 dark:text-ink-50">
+                    {campaign.country && (
+                      <div className="flex gap-2">
+                        <dt className="w-24 shrink-0 font-medium text-ink-500 dark:text-ink-300">
+                          Country
+                        </dt>
+                        <dd>{campaign.country}</dd>
+                      </div>
+                    )}
+                    {campaign.language && (
+                      <div className="flex gap-2">
+                        <dt className="w-24 shrink-0 font-medium text-ink-500 dark:text-ink-300">
+                          Language
+                        </dt>
+                        <dd>{campaign.language}</dd>
+                      </div>
+                    )}
+                    {campaign.industry && (
+                      <div className="flex gap-2">
+                        <dt className="w-24 shrink-0 font-medium text-ink-500 dark:text-ink-300">
+                          Industry
+                        </dt>
+                        <dd>{campaign.industry}</dd>
+                      </div>
+                    )}
+                    {campaign.skills?.length > 0 && (
+                      <div className="flex gap-2">
+                        <dt className="w-24 shrink-0 font-medium text-ink-500 dark:text-ink-300">
+                          Skills
+                        </dt>
+                        <dd className="flex flex-wrap gap-2">
+                          {campaign.skills.map((s: string) => (
+                            <span
+                              key={s}
+                              className="inline-flex h-8 items-center rounded-full bg-brand-50 dark:bg-white/10 px-3 text-[13px] font-medium text-brand dark:text-brand-200"
+                            >
+                              {s}
+                            </span>
+                          ))}
+                        </dd>
+                      </div>
+                    )}
+                  </dl>
                 </div>
               )}
 

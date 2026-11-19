@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Navbar } from "@/components/ui/Navbar";
 import { Footer } from "@/components/ui/Footer";
 import { Drawer } from "@/components/ui/Drawer";
@@ -13,6 +13,11 @@ import {
 import { CampaignCard } from "@/components/marketplace/Cards";
 import { FilterPanel, type CampaignFilters } from "@/components/marketplace/Filters";
 import { api } from "@/lib/api";
+
+// Distinct sorted values across rows, for the requirement dropdowns
+// (same pattern as /creators: options come from the rows themselves).
+const distinctValues = (rows: any[], get: (c: any) => string[]) =>
+  [...new Set(rows.flatMap(get))].sort((a, b) => a.localeCompare(b));
 
 // 
 // Filter drawer content matches "Filter campagns" (411:58388).
@@ -40,6 +45,10 @@ export default function CampaignsPage() {
     locations: [],
     budget: null,
     verifiedOnly: false,
+    country: "",
+    language: "",
+    skill: "",
+    industry: "",
   });
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 6;
@@ -96,6 +105,41 @@ export default function CampaignsPage() {
     setPage(1);
   };
 
+  // M5 fix (Nov 20): distinct real requirement values across the loaded
+  // campaigns, for the Country / Language / Skills / Industry dropdowns
+  // — same pattern as /creators (options come from the rows themselves,
+  // never hardcoded). A field with no values anywhere yields no options.
+  const countryOptions = useMemo(
+    () =>
+      distinctValues(allCampaigns, (c) =>
+        String(c.country ?? "").trim() ? [String(c.country).trim()] : []
+      ),
+    [allCampaigns]
+  );
+  const languageOptions = useMemo(
+    () =>
+      distinctValues(allCampaigns, (c) =>
+        String(c.language ?? "").trim() ? [String(c.language).trim()] : []
+      ),
+    [allCampaigns]
+  );
+  const industryOptions = useMemo(
+    () =>
+      distinctValues(allCampaigns, (c) =>
+        String(c.industry ?? "").trim() ? [String(c.industry).trim()] : []
+      ),
+    [allCampaigns]
+  );
+  const skillOptions = useMemo(
+    () =>
+      distinctValues(allCampaigns, (c) =>
+        Array.isArray(c.skills)
+          ? c.skills.map((s: string) => String(s).trim()).filter(Boolean)
+          : []
+      ),
+    [allCampaigns]
+  );
+
   const handleFilterChange = (filters: CampaignFilters) => {
     setActiveFilters(filters);
     setPage(1);
@@ -125,6 +169,35 @@ export default function CampaignsPage() {
     if (activeFilters.type && activeFilters.type !== "All") {
       result = result.filter((c: any) =>
         String(c.type ?? "").toLowerCase() === activeFilters.type.toLowerCase()
+      );
+    }
+    // M5 fix (Nov 20): requirement filters. A selected value keeps only
+    // campaigns whose field matches it (case-insensitive); campaigns
+    // with no value for that field (null/empty — incl. all legacy
+    // campaigns) match nothing here, so they appear only under "All"
+    // (filter ""), exactly like the nullable `type` precedent.
+    if (activeFilters.country) {
+      result = result.filter((c: any) =>
+        String(c.country ?? "").toLowerCase() === activeFilters.country.toLowerCase()
+      );
+    }
+    if (activeFilters.language) {
+      result = result.filter((c: any) =>
+        String(c.language ?? "").toLowerCase() === activeFilters.language.toLowerCase()
+      );
+    }
+    if (activeFilters.industry) {
+      result = result.filter((c: any) =>
+        String(c.industry ?? "").toLowerCase() === activeFilters.industry.toLowerCase()
+      );
+    }
+    if (activeFilters.skill) {
+      result = result.filter((c: any) =>
+        Array.isArray(c.skills) &&
+        c.skills.some(
+          (s: string) =>
+            String(s).toLowerCase() === activeFilters.skill.toLowerCase()
+        )
       );
     }
     if (activeFilters.timelines.length > 0) {
@@ -204,7 +277,7 @@ export default function CampaignsPage() {
           <div className="flex gap-8">
             <aside className="hidden w-[300px] shrink-0 lg:block">
               <div className="sticky top-24 rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 p-5 shadow-card">
-                <FilterPanel kind="campaigns" onFilterChange={handleFilterChange} onClearSearch={handleClearSearch} />
+                <FilterPanel kind="campaigns" countryOptions={countryOptions} languageOptions={languageOptions} skillOptions={skillOptions} industryOptions={industryOptions} onFilterChange={handleFilterChange} onClearSearch={handleClearSearch} />
               </div>
             </aside>
             <div className="min-w-0 flex-1">
@@ -254,7 +327,7 @@ export default function CampaignsPage() {
         onClose={() => setDrawerOpen(false)}
         title="Filters"
       >
-        <FilterPanel kind="campaigns" onFilterChange={handleFilterChange} onClearSearch={handleClearSearch} />
+        <FilterPanel kind="campaigns" countryOptions={countryOptions} languageOptions={languageOptions} skillOptions={skillOptions} industryOptions={industryOptions} onFilterChange={handleFilterChange} onClearSearch={handleClearSearch} />
       </Drawer>
     </>
   );

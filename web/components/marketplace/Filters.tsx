@@ -348,6 +348,14 @@ export interface CampaignFilters {
   budget: [number, number] | null;
   /** True = only campaigns posted by registered brand accounts (live API data). */
   verifiedOnly: boolean;
+  /** Selected country from the Country dropdown; "" = no filter. */
+  country: string;
+  /** Selected language from the Language dropdown; "" = no filter. */
+  language: string;
+  /** Selected skill from the Skills dropdown; "" = no skill filter. */
+  skill: string;
+  /** Selected industry from the Industry dropdown; "" = no filter. */
+  industry: string;
 }
 
 export interface CreatorFilters {
@@ -410,6 +418,7 @@ const DEFAULT_PROFESSIONAL_FILTERS: ProfessionalFilters = {
 
 export function FilterPanel({
   kind,
+  countryOptions,
   skillOptions,
   languageOptions,
   industryOptions,
@@ -419,6 +428,8 @@ export function FilterPanel({
   onClearSearch,
 }: {
   kind: FilterKind;
+  /** Distinct real countries across the loaded rows; feeds the Country dropdown. */
+  countryOptions?: string[];
   /** Distinct real skills across the loaded rows; feeds the Skills dropdown. */
   skillOptions?: string[];
   /** Distinct real languages across the loaded rows; feeds the Language dropdown. */
@@ -441,6 +452,10 @@ export function FilterPanel({
     locations: [],
     budget: null,
     verifiedOnly: false,
+    country: "",
+    language: "",
+    skill: "",
+    industry: "",
   });
   const creatorRef = useRef<CreatorFilters>({ ...DEFAULT_CREATOR_FILTERS });
   const professionalRef = useRef<ProfessionalFilters>({ ...DEFAULT_PROFESSIONAL_FILTERS });
@@ -467,6 +482,10 @@ export function FilterPanel({
       locations: [],
       budget: null,
       verifiedOnly: false,
+      country: "",
+      language: "",
+      skill: "",
+      industry: "",
     };
     creatorRef.current = { ...DEFAULT_CREATOR_FILTERS };
     professionalRef.current = { ...DEFAULT_PROFESSIONAL_FILTERS };
@@ -627,10 +646,33 @@ export function FilterPanel({
             options={["Remote", "Hybrid", "On-site"]}
             onChange={(locations) => emit({ locations })}
           />
-          {/* No Country / Language / Skills / Industry selects here:
-              campaigns carry none of that data, so those four dropdowns
-              used to render with no options at all (only "Choose").
-              Creator/professional filters keep their own selects below. */}
+          {/* M5 fix (Nov 20): the four requirement dropdowns are back,
+              RESTORED as working filters. Campaigns now carry optional
+              country / language / industry / skills fields (set by the
+              brand at creation), and the options below are derived from
+              the loaded campaigns' own data — the same pattern as the
+              creators filters. A campaign with no value for a field
+              appears only under "All" for that filter. */}
+          <SelectRow
+            label="Country"
+            options={countryOptions}
+            onChange={(country) => emit({ country })}
+          />
+          <SelectRow
+            label="Language"
+            options={languageOptions}
+            onChange={(language) => emit({ language })}
+          />
+          <SelectRow
+            label="Skills"
+            options={skillOptions}
+            onChange={(skill) => emit({ skill })}
+          />
+          <SelectRow
+            label="Industry"
+            options={industryOptions}
+            onChange={(industry) => emit({ industry })}
+          />
         </div>
       )}
     </div>

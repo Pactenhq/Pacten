@@ -38,6 +38,33 @@ export class CreateCampaignDto {
   @IsOptional()
   @IsArray()
   niches?: string[];
+
+  // M5 fix (Nov 20): optional campaign requirements (see entity).
+  @IsOptional()
+  @IsString()
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
+  country?: string;
+
+  @IsOptional()
+  @IsString()
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
+  language?: string;
+
+  @IsOptional()
+  @IsString()
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
+  industry?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  skills?: string[];
 }
 
 export class UpdateCampaignDto {
@@ -78,6 +105,33 @@ export class UpdateCampaignDto {
   @IsOptional()
   @IsArray()
   niches?: string[];
+
+  // M5 fix (Nov 20): optional campaign requirements (see entity).
+  @IsOptional()
+  @IsString()
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
+  country?: string;
+
+  @IsOptional()
+  @IsString()
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
+  language?: string;
+
+  @IsOptional()
+  @IsString()
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
+  industry?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  skills?: string[];
 
   @IsOptional()
   @IsEnum(CampaignStatus)

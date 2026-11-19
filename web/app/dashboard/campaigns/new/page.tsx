@@ -46,6 +46,15 @@ export default function CampaignRequestPage() {
     }
     setFieldErrors({});
     setLoading(true);
+    // M5 fix (Nov 20): optional campaign requirements. Empty values are
+    // sent as undefined (dropped from the JSON body) so the columns stay
+    // null; skills are a comma-separated list in the form, an array in
+    // the API. Nothing here is required — the create flow stays
+    // friction-free.
+    const skillList = ((form.get("skills") as string) ?? "")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
     try {
       await api.createCampaign({
         title: form.get("title") as string,
@@ -55,6 +64,12 @@ export default function CampaignRequestPage() {
         type: form.get("type") as string,
         deadline: form.get("deadline") as string,
         notes: form.get("notes") as string,
+        country: ((form.get("country") as string) ?? "").trim() || undefined,
+        language:
+          ((form.get("language") as string) ?? "").trim() || undefined,
+        industry:
+          ((form.get("industry") as string) ?? "").trim() || undefined,
+        skills: skillList.length > 0 ? [...new Set(skillList)] : undefined,
       });
       setSent(true);
     } catch (err: any) {
@@ -200,6 +215,46 @@ export default function CampaignRequestPage() {
                   name="deadline"
                   placeholder="e.g. Nov 30, 2026"
                 />
+              </div>
+              {/* M5 fix (Nov 20): campaign requirements (all optional).
+                  These power the Country / Language / Skills / Industry
+                  filters on the campaigns page. Leave blank anything
+                  that does not apply. */}
+              <div>
+                <p className="mb-1.5 text-sm font-medium text-ink-900 dark:text-ink-50">
+                  Campaign requirements{" "}
+                  <span className="font-normal text-ink-500 dark:text-ink-300">
+                    (optional)
+                  </span>
+                </p>
+                <p className="mb-3 text-[13px] text-ink-500 dark:text-ink-300">
+                  Tell creators what this campaign needs — these power the
+                  Country, Language, Skills and Industry filters on the
+                  campaigns page. Leave blank anything that does not apply.
+                </p>
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <TextField
+                    label="Country"
+                    name="country"
+                    placeholder="e.g. United Kingdom"
+                  />
+                  <TextField
+                    label="Language"
+                    name="language"
+                    placeholder="e.g. English"
+                  />
+                  <TextField
+                    label="Industry"
+                    name="industry"
+                    placeholder="e.g. Fashion"
+                  />
+                  <TextField
+                    label="Required skills"
+                    name="skills"
+                    placeholder="e.g. Video Editing, Photography"
+                    hint="Separate multiple skills with commas."
+                  />
+                </div>
               </div>
               <div>
                 <label
