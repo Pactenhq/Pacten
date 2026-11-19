@@ -72,6 +72,10 @@ export class AuthService {
       status: UserStatus.PENDING_VERIFICATION,
       verificationToken,
       verificationExpiresAt,
+      // Login gate (user-ordered, Nov 19): every account created from
+      // this deploy on must verify its email before logging in. Older
+      // accounts keep verificationRequired=false and are never gated.
+      verificationRequired: true,
       // TOS §1.4/§2.1: record when the user accepted the Platform Terms.
       ...(dto.termsAccepted ? { termsAcceptedAt: new Date() } : {}),
     });
@@ -123,6 +127,53 @@ export class AuthService {
       userId: user.id,
       ...(isProduction ? {} : { verificationToken }),
     };
+  }
+
+  // Resend rate limit — max 3 attempts per email per rolling 15
+  // minutes (same window as the login rate limit, same in-memory
+  // pattern). Over-limit attempts silently return the generic success
+  // response, so the 429/200 boundary cannot be used as an
+  // enumeration oracle.
+  private resendAttempts = new Map<string, number[]>();
+  private readonly RESEND_LIMIT = 3;
+  private readonly RESEND_WINDOW_MS = 15 * 60_000;
+
+  /**
+   * Resend the verification email to a gated, unverified account.
+   * Always returns the same generic message — whether the email exists,
+   * is already verified, or belongs to a pre-gate (never gated) account
+   * — so the endpoint cannot be used to enumerate accounts. A gated,
+   * unverified account gets a FRESH token (same shape as signup: 32
+   * random bytes, 24h expiry); the old token is never reused, it may
+   * already be expired.
+   */
+  async resendVerification(email: string) {
+    const generic = {
+      message:
+        'If an account exists for this email, a verification email has been sent.',
+    };
+    const key = email.toLowerCase();
+    const now = Date.now();
+    const recent = (this.resendAttempts.get(key) ?? []).filter(
+      (t) => t > now - this.RESEND_WINDOW_MS,
+    );
+    if (recent.length >= this.RESEND_LIMIT) return generic;
+    recent.push(now);
+    this.resendAttempts.set(key, recent);
+
+    const user = await this.usersRepo.findOne({ where: { email: key } });
+    if (!user || !user.verificationRequired || user.status === UserStatus.ACTIVE) {
+      return generic;
+    }
+    const verificationToken = randomBytes(32).toString('hex');
+    user.verificationToken = verificationToken;
+    user.verificationExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    await this.usersRepo.save(user);
+    const displayName = `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim();
+    // Fire-and-forget, same as signup: the resend must not block on
+    // the provider. send() catches its own errors and logs failures.
+    void this.emails.sendVerificationEmail(user.email, displayName, verificationToken);
+    return generic;
   }
 
   async verifyEmail(token: string) {
@@ -184,6 +235,23 @@ export class AuthService {
 
     if (user.status === UserStatus.SUSPENDED) {
       throw new UnauthorizedException('Account suspended');
+    }
+
+    // Login gate (user-ordered, Nov 19): accounts created after the gate
+    // deploy (verificationRequired=true) must verify their email before
+    // logging in — no token is issued here. Older accounts have
+    // verificationRequired=false and are never gated. The check runs
+    // AFTER the password check, so a wrong password still returns the
+    // generic invalid-credentials error (no leak about which accounts
+    // are gated). Verified means status ACTIVE (verifyEmail sets it).
+    if (user.verificationRequired && user.status !== UserStatus.ACTIVE) {
+      throw new HttpException(
+        {
+          message: 'Please verify your email before logging in',
+          code: 'EMAIL_NOT_VERIFIED',
+        },
+        HttpStatus.UNAUTHORIZED,
+      );
     }
 
     user.lastLoginAt = new Date();

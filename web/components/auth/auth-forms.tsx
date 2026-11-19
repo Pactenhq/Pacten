@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth, dashboardPathForRole } from "./AuthProvider";
-import type { Role } from "@/lib/api";
+import { api, type Role } from "@/lib/api";
 
 export function AuthError({ message }: { message: string | null }) {
   if (!message) return null;
@@ -53,6 +53,13 @@ export function useLoginForm() {
   const [values, setValues] = useState<FieldBag>({ email: "", password: "" });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  // Login gate (user-ordered, Nov 19): a post-gate account that has not
+  // verified its email gets the EMAIL_NOT_VERIFIED error from the API.
+  // The login page then offers a "Resend verification email" action.
+  const [needsVerification, setNeedsVerification] = useState(false);
+  const [resendState, setResendState] = useState<
+    "idle" | "sending" | "sent" | "error"
+  >("idle");
   // B-1: "Remember me" — checked by default (the pre-fix behaviour
   // always persisted the token), unchecked = session-only token.
   const [remember, setRemember] = useState(true);
@@ -72,18 +79,36 @@ export function useLoginForm() {
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
+    setNeedsVerification(false);
+    setResendState("idle");
     setLoading(true);
     try {
       const u = await login(values.email.trim(), values.password, remember);
       router.push(dashboardPathForRole(u?.role ?? ""));
     } catch (err) {
+      if ((err as { code?: string })?.code === "EMAIL_NOT_VERIFIED") {
+        setNeedsVerification(true);
+      }
       setError(err instanceof Error ? err.message : "Login failed.");
     } finally {
       setLoading(false);
     }
   };
 
-  return { field, submit, error, loading, verifiedNotice, remember, setRemember };
+  // Resend the verification email to the address just typed in. The
+  // endpoint always returns the generic message, so a failure here is
+  // only a transport error.
+  const resendVerification = async () => {
+    setResendState("sending");
+    try {
+      await api.resendVerificationEmail(values.email.trim());
+      setResendState("sent");
+    } catch {
+      setResendState("error");
+    }
+  };
+
+  return { field, submit, error, loading, verifiedNotice, remember, setRemember, needsVerification, resendState, resendVerification };
 }
 
 export function useSignupForm(role: Role) {

@@ -2,6 +2,7 @@ import { Controller, Post, Body, Get, Query, HttpCode, HttpStatus } from '@nestj
 import { AuthService } from './auth.service';
 import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
+import { ResendVerificationDto } from './dto/resend-verification.dto';
 import { ForgotPasswordDto, ResetPasswordDto } from './dto/password.dto';
 
 @Controller('auth')
@@ -23,6 +24,15 @@ export class AuthController {
   @Get('verify')
   verify(@Query('token') token: string) {
     return this.authService.verifyEmail(token);
+  }
+
+  // Login gate (user-ordered, Nov 19): resend the verification email
+  // to a gated, unverified account. Always returns the same generic
+  // message so the endpoint cannot enumerate accounts.
+  @Post('resend-verification')
+  @HttpCode(HttpStatus.OK)
+  resendVerification(@Body() dto: ResendVerificationDto) {
+    return this.authService.resendVerification(dto.email);
   }
 
   @Post('forgot-password')

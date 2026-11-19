@@ -91,7 +91,12 @@ export async function apiFetch<T = any>(
         : Array.isArray(data?.message)
           ? data.message.join(", ")
           : `Request failed (${res.status})`;
-    throw new Error(message);
+    // Carry a machine-readable error code when the API sent one
+    // (e.g. EMAIL_NOT_VERIFIED from the login gate), so callers can
+    // branch on it. Existing callers only read .message — unaffected.
+    const err = new Error(message) as Error & { code?: string };
+    if (typeof data?.code === "string") err.code = data.code;
+    throw err;
   }
   return data as T;
 }
@@ -118,6 +123,14 @@ export const api = {
     apiFetch<{ accessToken: string; user: any }>("/auth/login", {
       method: "POST",
       body: d,
+    }),
+
+  // Login gate (user-ordered, Nov 19): resend the verification email
+  // to a gated, unverified account. Always returns the generic message.
+  resendVerificationEmail: (email: string) =>
+    apiFetch<{ message: string }>("/auth/resend-verification", {
+      method: "POST",
+      body: { email },
     }),
 
   me: () => apiFetch<any>("/users/me", { auth: true }),
