@@ -187,7 +187,7 @@ function Hero() {
                 goTo(i);
               }}
               className={cn(
-                "flex items-center gap-4 rounded-xl border p-4 text-left transition-colors",
+                "cursor-pointer flex items-center gap-4 rounded-xl border p-4 text-left transition-colors",
                 i === tab
                   ? "border-brand bg-white dark:bg-ink-900"
                   : "border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900 hover:border-ink-300 dark:hover:border-ink-700"
@@ -226,7 +226,7 @@ function Hero() {
               key={chip}
               onClick={() => go(chip)}
               className={cn(
-                "inline-flex h-9 items-center rounded-full px-4 text-sm font-medium transition-colors",
+                "cursor-pointer inline-flex h-9 items-center rounded-full px-4 text-sm font-medium transition-colors",
                 i === 0
                   ? "bg-brand text-white"
                   : "border border-ink-300 dark:border-ink-700 bg-white dark:bg-ink-900 text-ink-700 dark:text-ink-200 hover:border-brand hover:text-brand dark:hover:text-brand-200"
@@ -379,7 +379,7 @@ function PricingSection() {
             key={t}
             onClick={() => setActive(i)}
             className={cn(
-              "h-10 shrink-0 rounded-full px-4 text-[13px] font-semibold transition-all duration-300 hover:scale-105 sm:px-5 sm:text-sm",
+              "cursor-pointer h-10 shrink-0 rounded-full px-4 text-[13px] font-semibold transition-all duration-300 hover:scale-105 sm:px-5 sm:text-sm",
               i === active ? "bg-brand text-white shadow-lg" : "text-ink-700 dark:text-ink-200 hover:text-ink-900 dark:hover:text-ink-50"
             )}
           >
@@ -482,7 +482,7 @@ function HowItWorks() {
             key={t}
             onClick={() => setActive(i)}
             className={cn(
-              "h-10 shrink-0 rounded-full px-4 text-[13px] font-semibold transition-colors sm:px-5 sm:text-sm",
+              "cursor-pointer h-10 shrink-0 rounded-full px-4 text-[13px] font-semibold transition-colors sm:px-5 sm:text-sm",
               i === active ? "bg-brand text-white" : "text-ink-700 dark:text-ink-200 hover:text-ink-900 dark:hover:text-ink-50"
             )}
           >

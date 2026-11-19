@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { Drawer } from "@/components/ui/Drawer";
@@ -36,9 +36,32 @@ export function DashboardShell({
   children: React.ReactNode;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  // Account menu (name + chevron): closes on outside click / Escape,
+  // same pattern as the campaign kebab menu.
+  useEffect(() => {
+    if (!userMenuOpen) return;
+    const onDocClick = (e: MouseEvent) => {
+      if (!(e.target as HTMLElement).closest("[data-user-menu]")) {
+        setUserMenuOpen(false);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setUserMenuOpen(false);
+    };
+    document.addEventListener("mousedown", onDocClick);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDocClick);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [userMenuOpen]);
   // When a real session exists, show the logged-in user's name instead of
   // the mock prop. Visual layout unchanged.
   const { user, displayName, loading: authLoading, logout } = useAuth();
+  // Public profile exists for brand/creator/professional; admins have none.
+  const profileHref =
+    user && user.role !== "admin" ? `/profile/${user.role}` : null;
   // While the session is still resolving, show a neutral loading label —
   // never the mock `userName` prop (a stranger's name flashing on load).
   const shownName = authLoading ? "Loading…" : user ? displayName : userName;
@@ -63,7 +86,7 @@ export function DashboardShell({
         <div className="mx-auto flex h-[76px] max-w-[1380px] items-center justify-between px-6 lg:px-12">
           <div className="flex items-center gap-4">
             <button
-              className="inline-flex h-10 w-10 items-center justify-center rounded-xl text-ink-700 dark:text-ink-200 hover:bg-ink-50 dark:hover:bg-white/5 lg:hidden"
+              className="cursor-pointer inline-flex h-10 w-10 items-center justify-center rounded-xl text-ink-700 dark:text-ink-200 hover:bg-ink-50 dark:hover:bg-white/5 lg:hidden"
               onClick={() => setMenuOpen(true)}
               aria-label="Open dashboard menu"
             >
@@ -83,32 +106,76 @@ export function DashboardShell({
           <div className="flex items-center gap-2 sm:gap-4">
             <ThemeToggle />
             <NotificationBell />
-            <span className="hidden items-center gap-2.5 sm:flex">
-              {/* No stock-photo fallback: the header used to show a
-                  stranger's photo (avatar-reviewer.jpg) as the logged-in
-                  user's face. The initials Avatar renders instead — the
-                  same component the marketplace cards use. */}
-              <Avatar name={shownName} size="sm" />
-              <span className="text-[15px] font-semibold text-ink-900 dark:text-ink-50">
-                {shownName}
-              </span>
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden
-                className="text-ink-500 dark:text-ink-300"
+            <div className="relative hidden sm:block" data-user-menu>
+              <button
+                type="button"
+                aria-haspopup="menu"
+                aria-expanded={userMenuOpen}
+                onClick={() => setUserMenuOpen((v) => !v)}
+                className="flex cursor-pointer items-center gap-2.5 rounded-xl px-1 py-1 hover:bg-ink-50 dark:hover:bg-white/5"
               >
-                <path
-                  d="m6 9 6 6 6-6"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </span>
+                {/* No stock-photo fallback: the header used to show a
+                    stranger's photo (avatar-reviewer.jpg) as the logged-in
+                    user's face. The initials Avatar renders instead — the
+                    same component the marketplace cards use. */}
+                <Avatar name={shownName} size="sm" />
+                <span className="text-[15px] font-semibold text-ink-900 dark:text-ink-50">
+                  {shownName}
+                </span>
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  aria-hidden
+                  className={`text-ink-500 dark:text-ink-300 transition-transform ${userMenuOpen ? "rotate-180" : ""}`}
+                >
+                  <path
+                    d="m6 9 6 6 6-6"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+              {userMenuOpen && (
+                <div
+                  role="menu"
+                  className="absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 shadow-lg"
+                >
+                  {profileHref && (
+                    <Link
+                      href={profileHref}
+                      role="menuitem"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="block w-full px-4 py-2.5 text-left text-[14px] font-medium text-ink-700 dark:text-ink-200 hover:bg-ink-50 dark:hover:bg-white/5"
+                    >
+                      View Public Profile
+                    </Link>
+                  )}
+                  <Link
+                    href="/dashboard/settings"
+                    role="menuitem"
+                    onClick={() => setUserMenuOpen(false)}
+                    className="block w-full px-4 py-2.5 text-left text-[14px] font-medium text-ink-700 dark:text-ink-200 hover:bg-ink-50 dark:hover:bg-white/5"
+                  >
+                    Profile Settings
+                  </Link>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setUserMenuOpen(false);
+                      handleLogout();
+                    }}
+                    className="block w-full cursor-pointer px-4 py-2.5 text-left text-[14px] font-medium text-ink-700 dark:text-ink-200 hover:bg-ink-50 dark:hover:bg-white/5"
+                  >
+                    Log Out
+                  </button>
+                </div>
+              )}
+            </div>
             <Button
               size="md"
               variant="outline"

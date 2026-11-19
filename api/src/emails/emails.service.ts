@@ -56,6 +56,9 @@ ${body}
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ from: this.from, to, subject, html }),
+        // A hung provider must not stall signup / forgot-password: abort
+        // after 10s (caught below, logged, reported as not sent).
+        signal: AbortSignal.timeout(10_000),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {

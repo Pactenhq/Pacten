@@ -301,9 +301,12 @@ export function Navbar() {
             </div>
           ) : loggedIn ? (
             <>
-              <span className="mr-2 max-w-[180px] truncate whitespace-nowrap text-[15px] font-semibold text-ink-900 dark:text-ink-50">
+              <Link
+                href={dashboardHref}
+                className="mr-2 max-w-[180px] truncate whitespace-nowrap text-[15px] font-semibold text-ink-900 dark:text-ink-50 hover:underline"
+              >
                 {displayName}
-              </span>
+              </Link>
               <Link href={dashboardHref}>
                 <Button variant="primary" size="sm" className="px-4">
                   Dashboard
@@ -311,7 +314,7 @@ export function Navbar() {
               </Link>
               <button
                 onClick={logout}
-                className="whitespace-nowrap text-[15px] font-semibold text-brand dark:text-brand-200 hover:underline"
+                className="cursor-pointer whitespace-nowrap text-[15px] font-semibold text-brand dark:text-brand-200 hover:underline"
               >
                 Log out
               </button>
@@ -349,7 +352,7 @@ export function Navbar() {
         <div className="flex items-center gap-2 xl:hidden">
           <ThemeToggle />
           <button
-            className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-ink-200 dark:border-ink-700 dark:bg-ink-900 dark:text-ink-200 xl:hidden"
+            className="cursor-pointer inline-flex h-11 w-11 items-center justify-center rounded-xl border border-ink-200 dark:border-ink-700 dark:bg-ink-900 dark:text-ink-200 xl:hidden"
             aria-label="Open menu"
             onClick={() => setOpen((v) => !v)}
           >

@@ -38,7 +38,7 @@ function CategoryPills({
             type="button"
             onClick={() => select(o)}
             className={cn(
-              "inline-flex h-10 items-center justify-center rounded-full border px-2 text-[13px] font-medium transition-colors",
+              "cursor-pointer inline-flex h-10 items-center justify-center rounded-full border px-2 text-[13px] font-medium transition-colors",
               active === o
                 ? "border-brand bg-brand text-white"
                 : "border-brand/60 bg-white dark:bg-ink-900 text-brand dark:text-brand-200 hover:bg-brand-50 dark:hover:bg-white/10"
@@ -485,7 +485,7 @@ export function FilterPanel({
         <button
           type="button"
           onClick={clearAll}
-          className="text-[15px] text-ink-900 dark:text-ink-50 hover:text-brand dark:hover:text-brand-200"
+          className="cursor-pointer text-[15px] text-ink-900 dark:text-ink-50 hover:text-brand dark:hover:text-brand-200"
         >
           Clear all
         </button>
@@ -627,10 +627,10 @@ export function FilterPanel({
             options={["Remote", "Hybrid", "On-site"]}
             onChange={(locations) => emit({ locations })}
           />
-          <SelectRow label="Country" />
-          <SelectRow label="Language" />
-          <SelectRow label="Skills" />
-          <SelectRow label="Industry" />
+          {/* No Country / Language / Skills / Industry selects here:
+              campaigns carry none of that data, so those four dropdowns
+              used to render with no options at all (only "Choose").
+              Creator/professional filters keep their own selects below. */}
         </div>
       )}
     </div>

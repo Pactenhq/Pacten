@@ -61,7 +61,7 @@ export default function AdminDisputesPage() {
           <button
             key={f || "all"}
             onClick={() => setFilter(f)}
-            className={`scroll-mt-[92px] rounded-full px-4 py-2 text-[13px] font-semibold capitalize ${
+            className={`cursor-pointer scroll-mt-[92px] rounded-full px-4 py-2 text-[13px] font-semibold capitalize ${
               filter === f
                 ? "bg-brand text-white"
                 : "bg-white dark:bg-ink-900 text-ink-600 dark:text-ink-300 border border-ink-200 dark:border-ink-700"

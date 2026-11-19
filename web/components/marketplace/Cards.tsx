@@ -162,7 +162,7 @@ export function ProfessionalCard({
         <button
           type="button"
           aria-label="Save"
-          className="absolute top-3 right-3 inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/60 bg-white/20 text-white backdrop-blur-sm hover:bg-white/40"
+          className="cursor-pointer absolute top-3 right-3 inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/60 bg-white/20 text-white backdrop-blur-sm hover:bg-white/40"
         >
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden>
             <path
@@ -206,7 +206,7 @@ export function ProfessionalCard({
           <button
             type="button"
             aria-label="Message"
-            className="inline-flex h-10 w-10 items-center justify-center text-ink-700 dark:text-ink-200 hover:text-brand dark:hover:text-brand-200"
+            className="cursor-pointer inline-flex h-10 w-10 items-center justify-center text-ink-700 dark:text-ink-200 hover:text-brand dark:hover:text-brand-200"
           >
             <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden>
               <rect x="2" y="4.5" width="18" height="13" rx="2.5" stroke="currentColor" strokeWidth="1.7" />

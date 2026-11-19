@@ -210,9 +210,12 @@ export const brandNav: DashboardNavItem[] = withDashboardHome("/dashboard/brand"
   // No API behind it yet — placeholder data, real-data wiring in Phase 2.
   { label: "Analytics", href: "/dashboard/analytics", icon: "chart" },
   dashboardNavBase[3],
+  // Subscription sits here (not at the bottom): the cancel area was
+  // effectively undiscoverable below the fold, so it moves up with the
+  // account-adjacent items. Same position in creator/professional nav.
+  dashboardNavBase[6],
   dashboardNavBase[4],
   dashboardNavBase[5],
-  dashboardNavBase[6],
   dashboardNavBase[7],
 ]);
 
@@ -230,7 +233,13 @@ export const creatorNav: DashboardNavItem[] = withDashboardHome(
     // Design-only Performance Analytics (Figma "Analytics creator dashboard").
     // No API behind it yet — placeholder data, real-data wiring in Phase 2.
     { label: "Analytics", href: "/dashboard/analytics", icon: "chart" },
-    ...dashboardNavBase.slice(3),
+    dashboardNavBase[3],
+    // Subscription moved up (see brandNav): the cancel area was
+    // effectively undiscoverable below the fold.
+    dashboardNavBase[6],
+    dashboardNavBase[4],
+    dashboardNavBase[5],
+    dashboardNavBase[7],
   ],
 );
 export const professionalNav: DashboardNavItem[] = withDashboardHome(
@@ -240,7 +249,14 @@ export const professionalNav: DashboardNavItem[] = withDashboardHome(
     dashboardNavBase[1],
     { label: "Opportunities", href: "/dashboard/opportunities", icon: "briefcase" },
     { label: "Deals", href: "/dashboard/deals", icon: "briefcase" },
-    ...dashboardNavBase.slice(2),
+    dashboardNavBase[2],
+    dashboardNavBase[3],
+    // Subscription moved up (see brandNav): the cancel area was
+    // effectively undiscoverable below the fold.
+    dashboardNavBase[6],
+    dashboardNavBase[4],
+    dashboardNavBase[5],
+    dashboardNavBase[7],
   ],
 );
 /** Referral view lives under the brand dashboard nav with Referral active. */

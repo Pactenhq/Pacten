@@ -26,7 +26,7 @@ export function ThemeToggle() {
       aria-label="Toggle dark mode"
       title="Toggle dark mode"
       onClick={toggle}
-      className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-ink-200 bg-white text-ink-700 transition-colors hover:bg-ink-50 hover:text-ink-900 dark:border-ink-700 dark:bg-ink-900 dark:text-ink-200 dark:hover:bg-white/5 dark:hover:text-white"
+      className="inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-ink-200 bg-white text-ink-700 transition-colors hover:bg-ink-50 hover:text-ink-900 dark:border-ink-700 dark:bg-ink-900 dark:text-ink-200 dark:hover:bg-white/5 dark:hover:text-white"
     >
       {/* Moon: shown in light mode */}
       <svg

@@ -67,8 +67,8 @@ function AnalyticsFilters({
             aria-pressed={range === r}
             className={
               range === r
-                ? "rounded-lg bg-brand px-3 py-1.5 text-[13px] font-bold text-white"
-                : "rounded-lg px-3 py-1.5 text-[13px] font-semibold text-ink-600 dark:text-ink-200 hover:text-ink-900 dark:hover:text-ink-50"
+                ? "cursor-pointer rounded-lg bg-brand px-3 py-1.5 text-[13px] font-bold text-white"
+                : "cursor-pointer rounded-lg px-3 py-1.5 text-[13px] font-semibold text-ink-600 dark:text-ink-200 hover:text-ink-900 dark:hover:text-ink-50"
             }
           >
             {r}
@@ -329,7 +329,7 @@ export default function AnalyticsDashboardPage() {
           subtitle={
             isBrand
               ? "Track campaign results, creator performance, and revenue across all clients."
-              : "Track your content performance, earnings, and brand collaborations."
+              : "Track your content performance, earnings, and business collaborations."
           }
           action={
             isBrand ? (

@@ -159,7 +159,7 @@ export function Pagination({
           key={p}
           onClick={() => onPageChange?.(p)}
           className={cn(
-            "inline-flex h-10 w-10 items-center justify-center rounded-lg border text-sm font-medium transition-colors",
+            "cursor-pointer inline-flex h-10 w-10 items-center justify-center rounded-lg border text-sm font-medium transition-colors",
             p === page
               ? "border-brand bg-white dark:bg-ink-900 font-semibold text-brand dark:text-brand-200"
               : "border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900 text-ink-700 dark:text-ink-200 hover:border-brand hover:text-brand dark:hover:text-brand-200"
@@ -230,7 +230,7 @@ export function PlatformTabs({
           key={t}
           onClick={() => onTabChange?.(t)}
           className={cn(
-            "inline-flex h-10 items-center gap-2 rounded-full border px-4 text-sm font-medium transition-colors",
+            "cursor-pointer inline-flex h-10 items-center gap-2 rounded-full border px-4 text-sm font-medium transition-colors",
             t === current
               ? "border-brand bg-white dark:bg-ink-900 font-semibold text-brand dark:text-brand-200"
               : "border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900 text-ink-700 dark:text-ink-200 hover:border-brand hover:text-brand dark:hover:text-brand-200"

@@ -361,7 +361,7 @@ export function CampaignCard({ campaign }: { campaign: DashboardCampaign }) {
         <button
           type="button"
           aria-label="More options"
-          className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-300 dark:text-ink-200 hover:bg-ink-50 dark:hover:bg-white/5 hover:text-ink-500 dark:hover:text-ink-300"
+          className="cursor-pointer flex h-9 w-9 items-center justify-center rounded-lg text-ink-300 dark:text-ink-200 hover:bg-ink-50 dark:hover:bg-white/5 hover:text-ink-500 dark:hover:text-ink-300"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
             <circle cx="12" cy="5" r="1.8" />
@@ -660,7 +660,7 @@ export function AvailabilityCalendar() {
             type="button"
             aria-label="Previous month"
             onClick={() => shiftMonth(-1)}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-ink-400 dark:text-ink-300 hover:bg-ink-50 dark:hover:bg-white/5"
+            className="cursor-pointer flex h-8 w-8 items-center justify-center rounded-full text-ink-400 dark:text-ink-300 hover:bg-ink-50 dark:hover:bg-white/5"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
               <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth={1.6} />
@@ -674,7 +674,7 @@ export function AvailabilityCalendar() {
             type="button"
             aria-label="Next month"
             onClick={() => shiftMonth(1)}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-ink-400 dark:text-ink-300 hover:bg-ink-50 dark:hover:bg-white/5"
+            className="cursor-pointer flex h-8 w-8 items-center justify-center rounded-full text-ink-400 dark:text-ink-300 hover:bg-ink-50 dark:hover:bg-white/5"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
               <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth={1.6} />
@@ -882,7 +882,7 @@ export function ReferralHero({
                 type="button"
                 onClick={copyLink}
                 aria-label="Copy referral link"
-                className="shrink-0 text-brand dark:text-brand-200 hover:text-brand-dark"
+                className="cursor-pointer shrink-0 text-brand dark:text-brand-200 hover:text-brand-dark"
               >
                 <WidgetIcon name="copy" className="h-[18px] w-[18px]" />
               </button>

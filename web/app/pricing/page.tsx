@@ -54,7 +54,7 @@ function PlanTabs({
           onClick={() => onChange(t.role)}
           aria-pressed={active === t.role}
           className={cn(
-            "h-11 shrink-0 rounded-full px-4 text-[13px] font-semibold transition-colors sm:px-6 sm:text-[15px]",
+            "cursor-pointer h-11 shrink-0 rounded-full px-4 text-[13px] font-semibold transition-colors sm:px-6 sm:text-[15px]",
             active === t.role
               ? "bg-brand text-white"
               : "text-ink-500 dark:text-ink-300 hover:text-ink-900 dark:hover:text-ink-50"
@@ -417,7 +417,7 @@ function PricingFaq() {
                 type="button"
                 onClick={() => setOpen(isOpen ? -1 : i)}
                 aria-expanded={isOpen}
-                className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left"
+                className="cursor-pointer flex w-full items-center justify-between gap-4 px-6 py-5 text-left"
               >
                 <span className="text-[16px] font-semibold text-ink-900 dark:text-ink-50">
                   {item.q}

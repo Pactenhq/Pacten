@@ -54,7 +54,7 @@ export function Drawer({
           <button
             onClick={onClose}
             aria-label="Close filters"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full text-ink-500 dark:text-ink-300 hover:bg-ink-50 dark:hover:bg-white/5 hover:text-ink-900 dark:hover:text-ink-50"
+            className="cursor-pointer inline-flex h-9 w-9 items-center justify-center rounded-full text-ink-500 dark:text-ink-300 hover:bg-ink-50 dark:hover:bg-white/5 hover:text-ink-900 dark:hover:text-ink-50"
           >
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden>
               <path

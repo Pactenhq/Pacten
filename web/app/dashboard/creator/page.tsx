@@ -12,7 +12,6 @@ import {
   QuickActions,
   RequestRowCard,
   SectionCard,
-  ServicesCard,
   StatCard,
   VisibilityBoost,
   WelcomeHeader,
@@ -32,7 +31,9 @@ import { api } from "@/lib/api";
 // "Profile Views" ka koi data source MVP me nahi (analytics Phase 2) —
 // us ki jagah real Pending Requests count hai. Profile completeness
 // asal profile fields se gintee hai. Availability /
-// Services abhi design blocks hain (backend source MVP scope me nahi).
+// Services abhi design blocks hain (backend source MVP scope me nahi) —
+// ServicesCard is hidden from the dashboard until the feature is built
+// (its dead "Add Service" button confused users).
 
 function moneyOf(v: any): number {
   if (v == null) return 0;
@@ -170,17 +171,17 @@ export default function CreatorDashboardPage() {
           </div>
         </section>
 
-        <div className="grid gap-8 lg:grid-cols-2">
-          <ServicesCard />
-          <QuickActions
-            buttons={[
-              { label: "View Public Profile", href: "/profile/creator" },
-              { label: "Edit Creator Profile", href: "/dashboard/settings" },
-              { label: "Browse Campaigns", href: "/campaigns" },
-              { label: "My Applications", href: "/dashboard/applications" },
-            ]}
-          />
-        </div>
+        {/* ServicesCard hidden: "My Services" / "Add Service" is design-only
+            (no services backend in MVP scope) and the button led nowhere.
+            The card returns when the services feature is built. */}
+        <QuickActions
+          buttons={[
+            { label: "View Public Profile", href: "/profile/creator" },
+            { label: "Edit Creator Profile", href: "/dashboard/settings" },
+            { label: "Browse Campaigns", href: "/campaigns" },
+            { label: "My Applications", href: "/dashboard/applications" },
+          ]}
+        />
 
         <SectionCard
           title="Active Campaigns"

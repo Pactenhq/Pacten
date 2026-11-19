@@ -162,7 +162,7 @@ export function NotificationBell() {
         }
         aria-expanded={open}
         className={cn(
-          "relative inline-flex h-10 w-10 items-center justify-center rounded-xl text-ink-700 dark:text-ink-200 transition-colors hover:bg-ink-50 dark:hover:bg-white/5",
+          "cursor-pointer relative inline-flex h-10 w-10 items-center justify-center rounded-xl text-ink-700 dark:text-ink-200 transition-colors hover:bg-ink-50 dark:hover:bg-white/5",
           open && "bg-ink-50 dark:bg-ink-900"
         )}
       >
@@ -187,7 +187,7 @@ export function NotificationBell() {
               <button
                 type="button"
                 onClick={markAllRead}
-                className="text-[13px] font-medium text-brand dark:text-brand-200 hover:underline"
+                className="cursor-pointer text-[13px] font-medium text-brand dark:text-brand-200 hover:underline"
               >
                 Mark all read
               </button>
@@ -214,7 +214,7 @@ export function NotificationBell() {
                     type="button"
                     onClick={() => openItem(n)}
                     className={cn(
-                      "flex w-full items-start gap-3 rounded-xl px-2 py-2.5 text-left transition-colors hover:bg-ink-50 dark:hover:bg-white/5",
+                      "cursor-pointer flex w-full items-start gap-3 rounded-xl px-2 py-2.5 text-left transition-colors hover:bg-ink-50 dark:hover:bg-white/5",
                       !n.isRead && "bg-brand-50/60 dark:bg-white/10"
                     )}
                   >

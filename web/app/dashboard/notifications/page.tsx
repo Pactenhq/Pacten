@@ -81,7 +81,7 @@ export default function NotificationsPage() {
             <button
               type="button"
               onClick={markAllRead}
-              className="text-[14px] font-medium text-brand dark:text-brand-200 hover:underline"
+              className="cursor-pointer text-[14px] font-medium text-brand dark:text-brand-200 hover:underline"
             >
               Mark all read
             </button>
@@ -118,7 +118,7 @@ export default function NotificationsPage() {
                       type="button"
                       onClick={() => openItem(n)}
                       className={cn(
-                        "flex w-full items-start gap-4 py-4 text-left transition-colors hover:bg-ink-50 dark:hover:bg-white/5",
+                        "cursor-pointer flex w-full items-start gap-4 py-4 text-left transition-colors hover:bg-ink-50 dark:hover:bg-white/5",
                         !n.isRead && "bg-brand-50/50 dark:bg-white/10"
                       )}
                     >

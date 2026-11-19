@@ -106,7 +106,7 @@ export default function SettingsPage() {
                       onClick={() => setActive(item)}
                       aria-current={active === item ? "page" : undefined}
                       className={cn(
-                        "flex h-11 w-full items-center rounded-xl px-4 text-[15px] font-medium transition-colors",
+                        "cursor-pointer flex h-11 w-full items-center rounded-xl px-4 text-[15px] font-medium transition-colors",
                         active === item
                           ? "bg-brand-50 dark:bg-white/10 text-brand dark:text-brand-200"
                           : "text-ink-500 dark:text-ink-300 hover:bg-ink-50 dark:hover:bg-white/5 hover:text-ink-900 dark:hover:text-ink-50"

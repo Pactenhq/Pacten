@@ -252,7 +252,7 @@ export default function SubscriptionPage() {
                     type="button"
                     onClick={() => setConfirmCancel(true)}
                     disabled={cancelling || !plan || plan.priceCentsMonthly === 0}
-                    className="inline-flex h-12 w-full items-center justify-center rounded-xl border border-danger bg-white dark:bg-ink-900 px-6 text-[15px] font-semibold text-danger dark:text-danger-bright transition-colors hover:bg-danger-bg dark:hover:bg-danger/15 disabled:opacity-40"
+                    className="cursor-pointer disabled:cursor-not-allowed inline-flex h-12 w-full items-center justify-center rounded-xl border border-danger bg-white dark:bg-ink-900 px-6 text-[15px] font-semibold text-danger dark:text-danger-bright transition-colors hover:bg-danger-bg dark:hover:bg-danger/15 disabled:opacity-40"
                   >
                     {cancelling ? "Cancelling..." : "Cancel Subscription"}
                   </button>
@@ -322,7 +322,7 @@ export default function SubscriptionPage() {
               <button
                 type="button"
                 onClick={exportBillingHistory}
-                className="inline-flex h-10 items-center rounded-xl border border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900 px-4 text-[15px] font-semibold text-ink-700 dark:text-ink-200 transition-colors hover:border-brand hover:text-brand dark:hover:text-brand-200"
+                className="cursor-pointer inline-flex h-10 items-center rounded-xl border border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900 px-4 text-[15px] font-semibold text-ink-700 dark:text-ink-200 transition-colors hover:border-brand hover:text-brand dark:hover:text-brand-200"
               >
                 Export
               </button>

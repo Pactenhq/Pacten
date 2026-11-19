@@ -315,7 +315,7 @@ export function ConversationPanel({
           )}
           <button
             aria-label="Conversation options"
-            className="inline-flex h-11 w-11 items-center justify-center rounded-xl text-ink-700 dark:text-ink-200 hover:bg-ink-50 dark:hover:bg-white/5"
+            className="cursor-pointer inline-flex h-11 w-11 items-center justify-center rounded-xl text-ink-700 dark:text-ink-200 hover:bg-ink-50 dark:hover:bg-white/5"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
               <circle cx="12" cy="5" r="1.8" />
@@ -378,7 +378,7 @@ export function ConversationPanel({
             <button
               type="button"
               aria-label="Attach a file"
-              className="inline-flex h-11 w-11 items-center justify-center rounded-xl text-ink-400 dark:text-ink-300 hover:bg-ink-50 dark:hover:bg-white/5"
+              className="cursor-pointer inline-flex h-11 w-11 items-center justify-center rounded-xl text-ink-400 dark:text-ink-300 hover:bg-ink-50 dark:hover:bg-white/5"
             >
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
                 <path

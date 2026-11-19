@@ -142,7 +142,7 @@ function ContractRowCard({ row }: { row: Row }) {
   return (
     <button
       onClick={() => router.push(`/dashboard/contracts/${row.id}`)}
-      className="flex w-full flex-wrap items-center gap-x-8 gap-y-3 rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 px-6 py-5 text-left transition-colors hover:border-brand/50"
+      className="cursor-pointer flex w-full flex-wrap items-center gap-x-8 gap-y-3 rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 px-6 py-5 text-left transition-colors hover:border-brand/50"
     >
       <p className="min-w-[240px] flex-1 text-[15px] font-bold text-ink-900 dark:text-ink-50">{row.title}</p>
       <div className="w-[110px]">
@@ -200,7 +200,7 @@ function ContractStatusBlock({ rows }: { rows: Row[] }) {
               key={t}
               onClick={() => setTab(t)}
               className={cn(
-                "rounded-full px-3.5 py-2 text-[13px] font-semibold transition-colors",
+                "cursor-pointer rounded-full px-3.5 py-2 text-[13px] font-semibold transition-colors",
                 tab === t
                   ? "bg-brand text-white"
                   : "border border-brand/60 bg-white dark:bg-ink-900 text-brand dark:text-brand-200 hover:bg-brand-50 dark:hover:bg-white/10"

@@ -10,7 +10,7 @@ function IconButton({ label, children }: { label: string; children: React.ReactN
     <button
       type="button"
       aria-label={label}
-      className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-ink-300 dark:border-ink-700 bg-white dark:bg-ink-900 text-ink-700 dark:text-ink-200 hover:border-brand hover:text-brand dark:hover:text-brand-200"
+      className="cursor-pointer inline-flex h-12 w-12 items-center justify-center rounded-full border border-ink-300 dark:border-ink-700 bg-white dark:bg-ink-900 text-ink-700 dark:text-ink-200 hover:border-brand hover:text-brand dark:hover:text-brand-200"
     >
       {children}
     </button>

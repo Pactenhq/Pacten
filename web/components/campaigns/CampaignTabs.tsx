@@ -221,7 +221,7 @@ export function CampaignTabs() {
                         role="menuitem"
                         disabled={closingId === c.id}
                         onClick={() => c.id && closeCampaign(c.id)}
-                        className="block w-full px-4 py-2.5 text-left text-[14px] font-medium text-ink-700 dark:text-ink-200 hover:bg-ink-50 dark:hover:bg-white/5 disabled:opacity-50"
+                        className="cursor-pointer disabled:cursor-not-allowed block w-full px-4 py-2.5 text-left text-[14px] font-medium text-ink-700 dark:text-ink-200 hover:bg-ink-50 dark:hover:bg-white/5 disabled:opacity-50"
                       >
                         {closingId === c.id ? "Closing…" : "Close campaign"}
                       </button>

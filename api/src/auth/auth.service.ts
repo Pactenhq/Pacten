@@ -105,8 +105,12 @@ export class AuthService {
     await this.referralsService.attributeSignup(user.id, dto.referralCode);
 
     // Transactional email (M5). Log-only until RESEND_API_KEY is set.
+    // Fire-and-forget: the verification email must not block signup.
+    // The Resend call used to be awaited here, so a slow provider (or a
+    // cold backend) stalled the whole signup request. send() catches its
+    // own errors and logs failures, so this cannot reject unhandled.
     const displayName = `${dto.firstName} ${dto.lastName}`.trim();
-    await this.emails.sendVerificationEmail(dto.email, displayName, verificationToken);
+    void this.emails.sendVerificationEmail(dto.email, displayName, verificationToken);
 
     // The verification token is returned only outside production so
     // local/dev tests can complete the flow without an inbox; it is
