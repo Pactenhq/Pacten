@@ -132,9 +132,13 @@ export const api = {
   creators: (params = "") => apiFetch<any[]>(`/profiles/creators${params}`),
 
   creatorFilterOptions: () =>
-    apiFetch<{ countries: string[]; cities: string[] }>(
-      `/profiles/creators/filter-options`,
-    ),
+    apiFetch<{
+      countries: string[];
+      cities: string[];
+      languages: string[];
+      skills: string[];
+      industries: string[];
+    }>(`/profiles/creators/filter-options`),
 
   // Brand-only creator directory WITH emails, for the New Deal form's
   // creator dropdown (D2 disambiguation: two same-named creators must
@@ -156,9 +160,13 @@ export const api = {
     apiFetch<any[]>(`/profiles/professionals${params}`),
 
   professionalFilterOptions: () =>
-    apiFetch<{ countries: string[]; cities: string[] }>(
-      `/profiles/professionals/filter-options`,
-    ),
+    apiFetch<{
+      countries: string[];
+      cities: string[];
+      languages: string[];
+      skills: string[];
+      industries: string[];
+    }>(`/profiles/professionals/filter-options`),
 
   professionalProfile: (id: string) =>
     apiFetch<any>(`/profiles/professionals/${id}`),

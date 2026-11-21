@@ -52,13 +52,18 @@ export default function ProfessionalsPage() {
     language: "",
     industry: "",
   });
-  // Country/city options come from the whole table, not the capped
-  // list — a value carried only by a professional ranked past the cap
-  // would otherwise never appear. Falls back to the loaded list if
-  // the endpoint is unreachable.
+  // Filter options come from the whole table, not the capped
+  // list — a value carried only by a professional ranked past the
+  // cap would otherwise never appear, and the options would
+  // collapse to the narrowed list once a country/city filter is
+  // active. Falls back to the loaded list if the endpoint is
+  // unreachable.
   const [serverFilterOptions, setServerFilterOptions] = useState<{
     countries: string[];
     cities: string[];
+    languages: string[];
+    skills: string[];
+    industries: string[];
   } | null>(null);
   useEffect(() => {
     api.professionalFilterOptions().then(setServerFilterOptions).catch(() => {});
@@ -93,7 +98,7 @@ export default function ProfessionalsPage() {
 
   // Distinct real skills across the loaded professionals, for the
   // Skills dropdown (same source the cards render from: API `skills`).
-  const skillOptions = useMemo(
+  const loadedSkillOptions = useMemo(
     () =>
       [...new Set(allProfessionals.flatMap((p) => p.skillsList ?? []))].sort(
         (a, b) => a.localeCompare(b)
@@ -104,14 +109,14 @@ export default function ProfessionalsPage() {
   // Distinct real languages/industries across the loaded professionals,
   // for the Language / Industry Experience dropdowns (API `languages` /
   // `industries`).
-  const languageOptions = useMemo(
+  const loadedLanguageOptions = useMemo(
     () =>
       [...new Set(allProfessionals.flatMap((p) => p.languagesList ?? []))].sort(
         (a, b) => a.localeCompare(b)
       ),
     [allProfessionals]
   );
-  const industryOptions = useMemo(
+  const loadedIndustryOptions = useMemo(
     () =>
       [...new Set(allProfessionals.flatMap((p) => p.industriesList ?? []))].sort(
         (a, b) => a.localeCompare(b)
@@ -134,6 +139,11 @@ export default function ProfessionalsPage() {
   );
   const countryOptions = serverFilterOptions?.countries ?? loadedCountryOptions;
   const cityOptions = serverFilterOptions?.cities ?? loadedCityOptions;
+  const languageOptions =
+    serverFilterOptions?.languages ?? loadedLanguageOptions;
+  const industryOptions =
+    serverFilterOptions?.industries ?? loadedIndustryOptions;
+  const skillOptions = serverFilterOptions?.skills ?? loadedSkillOptions;
 
   // Arriving from the home-page hero search (?q=...) — start filtered.
   useEffect(() => {

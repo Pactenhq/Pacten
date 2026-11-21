@@ -60,13 +60,17 @@ export default function CreatorsPage() {
     industry: "",
     skill: "",
   });
-  // Country/city options come from the whole table, not the capped
+  // Filter options come from the whole table, not the capped
   // list — a value carried only by a creator ranked past the cap
-  // would otherwise never appear. Falls back to the loaded list if
-  // the endpoint is unreachable.
+  // would otherwise never appear, and the options would collapse
+  // to the narrowed list once a country/city filter is active.
+  // Falls back to the loaded list if the endpoint is unreachable.
   const [serverFilterOptions, setServerFilterOptions] = useState<{
     countries: string[];
     cities: string[];
+    languages: string[];
+    skills: string[];
+    industries: string[];
   } | null>(null);
   useEffect(() => {
     api.creatorFilterOptions().then(setServerFilterOptions).catch(() => {});
@@ -103,14 +107,14 @@ export default function CreatorsPage() {
   // Distinct real languages/industries across the loaded creators, for
   // the Language / Industry Experience dropdowns (same source the
   // cards render from: API `languages` / `industries`).
-  const languageOptions = useMemo(
+  const loadedLanguageOptions = useMemo(
     () =>
       [...new Set(allCreators.flatMap((c) => c.languagesList ?? []))].sort(
         (a, b) => a.localeCompare(b)
       ),
     [allCreators]
   );
-  const industryOptions = useMemo(
+  const loadedIndustryOptions = useMemo(
     () =>
       [...new Set(allCreators.flatMap((c) => c.industriesList ?? []))].sort(
         (a, b) => a.localeCompare(b)
@@ -134,16 +138,21 @@ export default function CreatorsPage() {
   );
   const countryOptions = serverFilterOptions?.countries ?? loadedCountryOptions;
   const cityOptions = serverFilterOptions?.cities ?? loadedCityOptions;
+  const languageOptions =
+    serverFilterOptions?.languages ?? loadedLanguageOptions;
+  const industryOptions =
+    serverFilterOptions?.industries ?? loadedIndustryOptions;
 
   // Distinct real skills across the loaded creators, for the Skills
   // dropdown (same source the profile pages render from: API `skills`).
-  const skillOptions = useMemo(
+  const loadedSkillOptions = useMemo(
     () =>
       [...new Set(allCreators.flatMap((c) => c.skillsList ?? []))].sort(
         (a, b) => a.localeCompare(b)
       ),
     [allCreators]
   );
+  const skillOptions = serverFilterOptions?.skills ?? loadedSkillOptions;
 
   // Arriving from the home-page hero search (?q=...) — start filtered.
   useEffect(() => {

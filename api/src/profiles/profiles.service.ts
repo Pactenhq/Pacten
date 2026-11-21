@@ -208,10 +208,11 @@ export class ProfilesService {
     return qb.getMany();
   }
 
-  // Distinct countries/cities across the whole table, not just the
-  // capped list the pages load — a value carried only by a profile
-  // ranked past the list cap would otherwise never appear as an
-  // option. Only profiles the list itself shows (available now).
+  // Distinct countries/cities/languages/skills/industries across the
+  // whole table, not just the capped list the pages load — a value
+  // carried only by a profile ranked past the list cap would otherwise
+  // never appear as an option. Only profiles the list itself shows
+  // (available now).
   async getCreatorFilterOptions() {
     return this.profileFilterOptions(this.creatorRepo, 'c');
   }
@@ -224,7 +225,32 @@ export class ProfilesService {
     return {
       countries: await this.distinctValues(repo, alias, 'country'),
       cities: await this.distinctValues(repo, alias, 'city'),
+      languages: await this.distinctArrayValues(repo, alias, 'languages'),
+      skills: await this.distinctArrayValues(repo, alias, 'skills'),
+      industries: await this.distinctArrayValues(repo, alias, 'industries'),
     };
+  }
+
+  // Same distinct/sort rules as distinctValues, for text[] columns:
+  // unnest the array, then trim and dedupe in JS (an empty array
+  // yields no rows; a NULL element yields a NULL row, skipped here).
+  private async distinctArrayValues(repo: Repository<any>, alias: string, column: string): Promise<string[]> {
+    const rows = await repo
+      .createQueryBuilder(alias)
+      .select(`DISTINCT TRIM(unnest(${alias}.${column}))`, 'value')
+      .where(`${alias}.availableNow = :available`, { available: true })
+      .andWhere(`${alias}.${column} IS NOT NULL`)
+      .getRawMany();
+    const seen = new Set<string>();
+    const values: string[] = [];
+    for (const row of rows) {
+      if (row.value == null) continue;
+      const value = String(row.value).trim();
+      if (!value || seen.has(value.toLowerCase())) continue;
+      seen.add(value.toLowerCase());
+      values.push(value);
+    }
+    return values.sort((a, b) => a.localeCompare(b));
   }
 
   private async distinctValues(repo: Repository<any>, alias: string, column: string): Promise<string[]> {
