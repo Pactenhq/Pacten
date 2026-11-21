@@ -17,6 +17,7 @@ import {
   type ProfessionalFilters,
 } from "@/components/marketplace/Filters";
 import { useMarketplaceProfessionals } from "@/components/marketplace/useMarketplace";
+import { api } from "@/lib/api";
 
 // Years-of-experience buckets for the "Experience Level" check group.
 function expBucket(years: number | null): "Entry" | "Mid" | "Expert" | null {
@@ -39,7 +40,33 @@ function categoryMatches(pill: string, p: { role?: string; category?: string; sk
 // Filter drawer content matches "Filter professional" (407:56824).
 export default function ProfessionalsPage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const allProfessionals = useMarketplaceProfessionals();
+  const [filters, setFilters] = useState<ProfessionalFilters>({
+    category: "All",
+    hourlyRate: null,
+    availableNow: false,
+    country: "",
+    city: "",
+    openToProjects: false,
+    experience: [],
+    skill: "",
+    language: "",
+    industry: "",
+  });
+  // Country/city options come from the whole table, not the capped
+  // list — a value carried only by a professional ranked past the cap
+  // would otherwise never appear. Falls back to the loaded list if
+  // the endpoint is unreachable.
+  const [serverFilterOptions, setServerFilterOptions] = useState<{
+    countries: string[];
+    cities: string[];
+  } | null>(null);
+  useEffect(() => {
+    api.professionalFilterOptions().then(setServerFilterOptions).catch(() => {});
+  }, []);
+  const allProfessionals = useMarketplaceProfessionals({
+    country: filters.country || undefined,
+    city: filters.city || undefined,
+  });
   // The hook returns a NEW array identity when its fetch resolves — even
   // for zero rows — so identity change (not length) is the "loaded"
   // signal. The timeout covers an unreachable API, which otherwise
@@ -61,18 +88,6 @@ export default function ProfessionalsPage() {
     setClearKey((k) => k + 1);
     setPage(1);
   };
-  const [filters, setFilters] = useState<ProfessionalFilters>({
-    category: "All",
-    hourlyRate: null,
-    availableNow: false,
-    country: "",
-    city: "",
-    openToProjects: false,
-    experience: [],
-    skill: "",
-    language: "",
-    industry: "",
-  });
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 9;
 
@@ -103,20 +118,22 @@ export default function ProfessionalsPage() {
       ),
     [allProfessionals]
   );
-  const countryOptions = useMemo(
+  const loadedCountryOptions = useMemo(
     () =>
       [...new Set(allProfessionals.map((p) => (p.country ?? "").trim()).filter(Boolean))].sort(
         (a, b) => a.localeCompare(b)
       ),
     [allProfessionals]
   );
-  const cityOptions = useMemo(
+  const loadedCityOptions = useMemo(
     () =>
       [...new Set(allProfessionals.map((p) => (p.city ?? "").trim()).filter(Boolean))].sort(
         (a, b) => a.localeCompare(b)
       ),
     [allProfessionals]
   );
+  const countryOptions = serverFilterOptions?.countries ?? loadedCountryOptions;
+  const cityOptions = serverFilterOptions?.cities ?? loadedCityOptions;
 
   // Arriving from the home-page hero search (?q=...) — start filtered.
   useEffect(() => {

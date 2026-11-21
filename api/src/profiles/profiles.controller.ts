@@ -48,6 +48,11 @@ export class ProfilesController {
     return this.profilesService.searchCreators({ niche, skill, language, industry, platform, country, city, query, limit, offset, sort, excludeTest });
   }
 
+  @Get('creators/filter-options')
+  getCreatorFilterOptions() {
+    return this.profilesService.getCreatorFilterOptions();
+  }
+
   @Get('creators/for-deal')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(UserRole.BRAND)
@@ -73,6 +78,11 @@ export class ProfilesController {
     @Query('excludeTest') excludeTest?: string,
   ) {
     return this.profilesService.searchProfessionals({ skill, language, industry, platform, country, city, query, limit, offset, sort, excludeTest });
+  }
+
+  @Get('professionals/filter-options')
+  getProfessionalFilterOptions() {
+    return this.profilesService.getProfessionalFilterOptions();
   }
 
   // Declared BEFORE the ':id' routes below: 'by-user' would otherwise

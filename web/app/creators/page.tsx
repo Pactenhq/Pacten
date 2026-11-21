@@ -15,6 +15,7 @@ import {
 import { CreatorCard } from "@/components/marketplace/Cards";
 import { FilterPanel, type CreatorFilters } from "@/components/marketplace/Filters";
 import { useMarketplaceCreators } from "@/components/marketplace/useMarketplace";
+import { api } from "@/lib/api";
 
 // 
 // Hero copy, result count, card data and filter sections come from the
@@ -48,8 +49,32 @@ export default function CreatorsPage() {
     const t = setTimeout(() => setServerQuery(searchQuery.trim()), 400);
     return () => clearTimeout(t);
   }, [searchQuery]);
+  const [filters, setFilters] = useState<CreatorFilters>({
+    category: "All",
+    followers: null,
+    price: null,
+    availableNow: false,
+    country: "",
+    city: "",
+    language: "",
+    industry: "",
+    skill: "",
+  });
+  // Country/city options come from the whole table, not the capped
+  // list — a value carried only by a creator ranked past the cap
+  // would otherwise never appear. Falls back to the loaded list if
+  // the endpoint is unreachable.
+  const [serverFilterOptions, setServerFilterOptions] = useState<{
+    countries: string[];
+    cities: string[];
+  } | null>(null);
+  useEffect(() => {
+    api.creatorFilterOptions().then(setServerFilterOptions).catch(() => {});
+  }, []);
   const allCreators = useMarketplaceCreators({
     query: serverQuery || undefined,
+    country: filters.country || undefined,
+    city: filters.city || undefined,
   });
   // The hook returns a NEW array identity when its fetch resolves — even
   // for zero rows — so identity change (not length) is the "loaded"
@@ -72,17 +97,6 @@ export default function CreatorsPage() {
     setPage(1);
   };
   const [activeTab, setActiveTab] = useState("All");
-  const [filters, setFilters] = useState<CreatorFilters>({
-    category: "All",
-    followers: null,
-    price: null,
-    availableNow: false,
-    country: "",
-    city: "",
-    language: "",
-    industry: "",
-    skill: "",
-  });
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 9;
 
@@ -104,20 +118,22 @@ export default function CreatorsPage() {
     [allCreators]
   );
 
-  const countryOptions = useMemo(
+  const loadedCountryOptions = useMemo(
     () =>
       [...new Set(allCreators.map((c) => (c.country ?? "").trim()).filter(Boolean))].sort(
         (a, b) => a.localeCompare(b)
       ),
     [allCreators]
   );
-  const cityOptions = useMemo(
+  const loadedCityOptions = useMemo(
     () =>
       [...new Set(allCreators.map((c) => (c.city ?? "").trim()).filter(Boolean))].sort(
         (a, b) => a.localeCompare(b)
       ),
     [allCreators]
   );
+  const countryOptions = serverFilterOptions?.countries ?? loadedCountryOptions;
+  const cityOptions = serverFilterOptions?.cities ?? loadedCityOptions;
 
   // Distinct real skills across the loaded creators, for the Skills
   // dropdown (same source the profile pages render from: API `skills`).

@@ -208,6 +208,45 @@ export class ProfilesService {
     return qb.getMany();
   }
 
+  // Distinct countries/cities across the whole table, not just the
+  // capped list the pages load — a value carried only by a profile
+  // ranked past the list cap would otherwise never appear as an
+  // option. Only profiles the list itself shows (available now).
+  async getCreatorFilterOptions() {
+    return this.profileFilterOptions(this.creatorRepo, 'c');
+  }
+
+  async getProfessionalFilterOptions() {
+    return this.profileFilterOptions(this.professionalRepo, 'p');
+  }
+
+  private async profileFilterOptions(repo: Repository<any>, alias: string) {
+    return {
+      countries: await this.distinctValues(repo, alias, 'country'),
+      cities: await this.distinctValues(repo, alias, 'city'),
+    };
+  }
+
+  private async distinctValues(repo: Repository<any>, alias: string, column: string): Promise<string[]> {
+    const rows = await repo
+      .createQueryBuilder(alias)
+      .select(`DISTINCT TRIM(${alias}.${column})`, 'value')
+      .where(`${alias}.availableNow = :available`, { available: true })
+      .andWhere(`${alias}.${column} IS NOT NULL`)
+      .andWhere(`TRIM(${alias}.${column}) <> ''`)
+      .getRawMany();
+    const seen = new Set<string>();
+    const values: string[] = [];
+    for (const row of rows) {
+      const value = String(row.value).trim();
+      if (!seen.has(value.toLowerCase())) {
+        seen.add(value.toLowerCase());
+        values.push(value);
+      }
+    }
+    return values.sort((a, b) => a.localeCompare(b));
+  }
+
   async searchCreatorsForDeal(limit?: number, query?: string) {
     const qb = this.creatorRepo
       .createQueryBuilder('c')

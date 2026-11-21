@@ -146,6 +146,11 @@ export interface MarketplaceListOptions {
    *  again. Other filters (language/industry/skill/…) still apply
    *  client-side over the server's matches. */
   query?: string;
+  /** Server-side country/city match. The list is capped (limit 100)
+   *  and filtered client-side, so a match ranked past the cap would
+   *  never load unless the filter also reaches the server. */
+  country?: string;
+  city?: string;
   excludeTest?: boolean;
 }
 
@@ -153,6 +158,8 @@ function buildListParams(options?: MarketplaceListOptions): string {
   const params = new URLSearchParams();
   params.set("limit", String(options?.limit ?? 100));
   if (options?.query) params.set("q", options.query);
+  if (options?.country) params.set("country", options.country);
+  if (options?.city) params.set("city", options.city);
   if (options?.sort) params.set("sort", options.sort);
   if (options?.excludeTest) params.set("excludeTest", "true");
   return `?${params.toString()}`;
@@ -172,11 +179,13 @@ export function useMarketplaceCreators(options?: MarketplaceListOptions): Creato
   const limit = options?.limit;
   const excludeTest = options?.excludeTest;
   const query = options?.query;
+  const country = options?.country;
+  const city = options?.city;
   const [list, setList] = useState<CreatorFilterData[]>([]);
   useEffect(() => {
     let alive = true;
     api
-      .creators(buildListParams({ sort, limit, excludeTest, query }))
+      .creators(buildListParams({ sort, limit, excludeTest, query, country, city }))
       .then((rows) => {
         if (alive && Array.isArray(rows)) {
           setList(rows.map(mapCreator));
@@ -188,7 +197,7 @@ export function useMarketplaceCreators(options?: MarketplaceListOptions): Creato
     return () => {
       alive = false;
     };
-  }, [sort, limit, excludeTest, query]);
+  }, [sort, limit, excludeTest, query, country, city]);
   return list;
 }
 
@@ -196,11 +205,13 @@ export function useMarketplaceProfessionals(options?: MarketplaceListOptions): P
   const sort = options?.sort;
   const limit = options?.limit;
   const excludeTest = options?.excludeTest;
+  const country = options?.country;
+  const city = options?.city;
   const [list, setList] = useState<ProfessionalFilterData[]>([]);
   useEffect(() => {
     let alive = true;
     api
-      .professionals(buildListParams({ sort, limit, excludeTest }))
+      .professionals(buildListParams({ sort, limit, excludeTest, country, city }))
       .then((rows) => {
         if (alive && Array.isArray(rows)) {
           setList(rows.map(mapProfessional));
@@ -212,6 +223,6 @@ export function useMarketplaceProfessionals(options?: MarketplaceListOptions): P
     return () => {
       alive = false;
     };
-  }, [sort, limit, excludeTest]);
+  }, [sort, limit, excludeTest, country, city]);
   return list;
 }
