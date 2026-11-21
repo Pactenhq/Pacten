@@ -47,17 +47,11 @@ export class Campaign {
   @Column('simple-array', { nullable: true })
   niches: string[];
 
-  // M5 fix (Nov 20): campaign REQUIREMENTS the brand sets at creation
-  // (all optional). The Country / Language / Skills / Industry filters
-  // on /campaigns derive their options from these fields — before this,
-  // campaigns carried none of that data, so the four dropdowns rendered
-  // with no options at all. Legacy campaigns keep null here and appear
-  // only under "All" for each filter (no backfill).
-  // Industry is a NEW field (not niches): the campaign create form
-  // never sets niches, so wiring the Industry filter to niches would
-  // have produced an always-empty dropdown.
   @Column({ nullable: true })
   country: string;
+
+  @Column({ nullable: true })
+  city: string;
 
   @Column({ nullable: true })
   language: string;

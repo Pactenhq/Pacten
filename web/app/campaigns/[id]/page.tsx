@@ -45,9 +45,6 @@ function CampaignDetailContent() {
             // GAP-4: the status pill used to show the raw enum value
             // ("open"). It now uses the shared canonical label so it
             // matches My Campaigns and the brand dashboard overview.
-            // Follow-up fix (Nov 12): keep the RAW status too — the
-            // Apply gate below needs it (a closed campaign must not
-            // offer "Apply Now"; the label alone can't be compared).
             type: campaignStatusLabel(data.status),
             status: data.status ?? "",
             location: "",
@@ -61,8 +58,8 @@ function CampaignDetailContent() {
             deliverables: data.deliverables ?? "",
             notes: data.notes ?? "",
             niches: data.niches ?? [],
-            // M5 fix (Nov 20): campaign requirements (optional).
             country: data.country ?? "",
+            city: data.city ?? "",
             language: data.language ?? "",
             industry: data.industry ?? "",
             skills: data.skills ?? [],
@@ -90,11 +87,6 @@ function CampaignDetailContent() {
   }, [user, id]);
 
   const canApply = !!user && (user.role === "creator" || user.role === "professional");
-  // Follow-up fix (Nov 12): a Closed campaign must not offer "Apply
-  // Now" or the application form — the server already blocks the
-  // submit ("Campaign is not open for applications"), but the button
-  // was still offered (browser-verified). Raw status is draft | open |
-  // closed | completed; only "open" accepts applications.
   const isOpen = String(campaign?.status ?? "").toLowerCase() === "open";
 
   const submitApplication = async (e: React.FormEvent) => {
@@ -192,10 +184,8 @@ function CampaignDetailContent() {
                 </div>
               )}
 
-              {/* M5 fix (Nov 20): campaign requirements, shown only when
-                  the brand set at least one — so creators see what the
-                  campaign needs before applying. */}
               {(campaign.country ||
+                campaign.city ||
                 campaign.language ||
                 campaign.industry ||
                 campaign.skills?.length > 0) && (
@@ -210,6 +200,14 @@ function CampaignDetailContent() {
                           Country
                         </dt>
                         <dd>{campaign.country}</dd>
+                      </div>
+                    )}
+                    {campaign.city && (
+                      <div className="flex gap-2">
+                        <dt className="w-24 shrink-0 font-medium text-ink-500 dark:text-ink-300">
+                          City
+                        </dt>
+                        <dd>{campaign.city}</dd>
                       </div>
                     )}
                     {campaign.language && (
@@ -280,9 +278,6 @@ function CampaignDetailContent() {
                 </p>
               )}
 
-              {/* Apply to this campaign — creators & professionals only,
-                  open campaigns only (follow-up fix Nov 12: a closed
-                  campaign shows this note instead of "Apply Now"). */}
               {campaign && !isOpen && (
                 <div className="mt-8 rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 p-6">
                   <h2 className="text-lg font-bold text-ink-900 dark:text-ink-50">

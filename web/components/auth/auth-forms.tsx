@@ -53,9 +53,6 @@ export function useLoginForm() {
   const [values, setValues] = useState<FieldBag>({ email: "", password: "" });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  // Login gate (user-ordered, Nov 19): a post-gate account that has not
-  // verified its email gets the EMAIL_NOT_VERIFIED error from the API.
-  // The login page then offers a "Resend verification email" action.
   const [needsVerification, setNeedsVerification] = useState(false);
   const [resendState, setResendState] = useState<
     "idle" | "sending" | "sent" | "error"
@@ -124,8 +121,6 @@ export function useSignupForm(role: Role) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [checkEmail, setCheckEmail] = useState(false);
-  // TOS (Nov 13): user must confirm 18+ and agree to the Terms of
-  // Service and Privacy Policy before an account is created.
   const [termsAccepted, setTermsAccepted] = useState(false);
 
   const field = (name: string) => ({
@@ -154,7 +149,6 @@ export function useSignupForm(role: Role) {
     }
     setLoading(true);
     try {
-      // Referral attribution (M5): ?ref=CODE on the signup URL.
       const ref =
         typeof window !== "undefined"
           ? new URLSearchParams(window.location.search).get("ref") || undefined

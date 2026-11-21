@@ -37,20 +37,17 @@ export class ProfilesController {
     @Query('language') language?: string,
     @Query('industry') industry?: string,
     @Query('platform') platform?: string,
+    @Query('country') country?: string,
+    @Query('city') city?: string,
     @Query('q') query?: string,
     @Query('limit') limit?: number,
     @Query('offset') offset?: number,
     @Query('sort') sort?: string,
     @Query('excludeTest') excludeTest?: string,
   ) {
-    return this.profilesService.searchCreators({ niche, skill, language, industry, platform, query, limit, offset, sort, excludeTest });
+    return this.profilesService.searchCreators({ niche, skill, language, industry, platform, country, city, query, limit, offset, sort, excludeTest });
   }
 
-  // D2 (dropdown disambiguation): brand-only creator directory WITH
-  // emails. Declared BEFORE the ':id' routes below so 'for-deal' is
-  // not captured as a profile id. The public /creators list stays
-  // email-free (privacy); only a logged-in brand hiring a creator
-  // sees emails here, so two same-named creators can be told apart.
   @Get('creators/for-deal')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(UserRole.BRAND)
@@ -67,13 +64,15 @@ export class ProfilesController {
     @Query('language') language?: string,
     @Query('industry') industry?: string,
     @Query('platform') platform?: string,
+    @Query('country') country?: string,
+    @Query('city') city?: string,
     @Query('q') query?: string,
     @Query('limit') limit?: number,
     @Query('offset') offset?: number,
     @Query('sort') sort?: string,
     @Query('excludeTest') excludeTest?: string,
   ) {
-    return this.profilesService.searchProfessionals({ skill, language, industry, platform, query, limit, offset, sort, excludeTest });
+    return this.profilesService.searchProfessionals({ skill, language, industry, platform, country, city, query, limit, offset, sort, excludeTest });
   }
 
   // Declared BEFORE the ':id' routes below: 'by-user' would otherwise

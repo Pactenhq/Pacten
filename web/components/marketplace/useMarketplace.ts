@@ -48,8 +48,9 @@ export function parseYears(raw: unknown): number | null {
 
 /** Card data plus the raw fields the filter panel needs. */
 export interface CreatorFilterData extends CreatorCardData {
-  isVerified?: boolean;
   availableNow?: boolean;
+  country?: string;
+  city?: string;
   followersCount: number | null;
   rateValue: number | null;
   languagesList: string[];
@@ -58,8 +59,9 @@ export interface CreatorFilterData extends CreatorCardData {
 }
 
 export interface ProfessionalFilterData extends ProfessionalCardData {
-  isVerified?: boolean;
   availableNow?: boolean;
+  country?: string;
+  city?: string;
   openToProjects?: boolean;
   hourlyRateValue: number | null;
   yearsExp: number | null;
@@ -90,8 +92,9 @@ function mapCreator(p: any): CreatorFilterData {
     // No stock-photo fallback: when there is no real avatar, photo is
     // empty and the card renders the initials Avatar instead.
     photo: p.avatarUrl || p.photo || "",
-    isVerified: p.isVerified,
     availableNow: p.availableNow,
+    country: p.country ?? "",
+    city: p.city ?? "",
     followersCount: parseCompactCount(p.followers),
     rateValue: parseMoney(p.rate),
   };
@@ -119,8 +122,9 @@ function mapProfessional(p: any): ProfessionalFilterData {
     // No stock-photo fallback: when there is no real avatar, photo is
     // empty and the card renders the initials Avatar instead.
     photo: p.avatarUrl || p.photo || "",
-    isVerified: p.isVerified,
     availableNow: p.availableNow,
+    country: p.country ?? "",
+    city: p.city ?? "",
     openToProjects: p.openToProjects,
     hourlyRateValue: parseMoney(p.hourlyRate),
     yearsExp: parseYears(p.yearsExperience ?? p.experience),
@@ -142,10 +146,6 @@ export interface MarketplaceListOptions {
    *  again. Other filters (language/industry/skill/…) still apply
    *  client-side over the server's matches. */
   query?: string;
-  /** F-1: pass excludeTest=true to the API so test/demo-domain owners
-   *  are left out. Opt-in and OFF by default — /creators,
-   *  /professionals, search and for-deal are UNCHANGED. Only the
-   *  homepage showcase passes it. */
   excludeTest?: boolean;
 }
 

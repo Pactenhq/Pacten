@@ -1,23 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
+import { usePlans, type Plan, type PlanRole } from "./usePlans";
 
-export type PlanRole = "brand" | "creator" | "professional";
-
-type Plan = {
-  id: string;
-  role: string;
-  code: string;
-  name: string;
-  tier: string;
-  priceCentsMonthly: number;
-  currency: string;
-  benefits: string[];
-};
+export type { PlanRole };
 
 function PlanIcon({ highlighted, index }: { highlighted?: boolean; index: number }) {
   const kinds = ["diamond", "briefcase", "gift"] as const;
@@ -88,20 +76,10 @@ const fmtPrice = (p: Plan) =>
     ? "$0"
     : `$${(p.priceCentsMonthly / 100).toFixed(p.priceCentsMonthly % 100 === 0 ? 0 : 2)}`;
 
-// Pricing plan cards — same design as before, now driven by the real
-// subscription plans API (M4). Prices/benefits are configurable server-side.
+// Pricing plan cards, driven by the real subscription plans API.
+// Prices/benefits are configurable server-side.
 export function PricingCards({ role }: { role: PlanRole }) {
-  const [plans, setPlans] = useState<Plan[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    setLoading(true);
-    api
-      .subscriptionPlans(role)
-      .then((data) => setPlans(Array.isArray(data) ? data : []))
-      .catch(() => setPlans([]))
-      .finally(() => setLoading(false));
-  }, [role]);
+  const { plans, loading } = usePlans(role);
 
   if (loading) {
     return <p className="text-center text-[15px] text-ink-500 dark:text-ink-300">Loading plans...</p>;

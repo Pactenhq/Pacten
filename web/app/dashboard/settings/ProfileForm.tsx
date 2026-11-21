@@ -20,6 +20,8 @@ export function SettingsProfileForm() {
   const [values, setValues] = useState({
     fullName: "",
     location: "",
+    country: "",
+    city: "",
     website: "",
     bio: "",
     // Comma-separated in the form; sent as arrays. Only shown for
@@ -52,6 +54,8 @@ export function SettingsProfileForm() {
       setValues({
         fullName: name,
         location: p.location || "",
+        country: p.country || "",
+        city: p.city || "",
         website: p.website || "",
         bio: user.role === "brand" ? p.description || "" : p.bio || "",
         languages: Array.isArray(p.languages) ? p.languages.join(", ") : "",
@@ -107,6 +111,10 @@ export function SettingsProfileForm() {
       const payload: Record<string, unknown> = {
         location: values.location,
       };
+      if (user.role !== "brand") {
+        payload.country = values.country.trim();
+        payload.city = values.city.trim();
+      }
       if (user.role === "brand") {
         payload.companyName = values.fullName;
         payload.website = values.website;
@@ -154,19 +162,9 @@ export function SettingsProfileForm() {
             >
               {initials}
             </span>
-            <div>
-              <div className="flex gap-3">
-                <Button type="button" variant="outline" size="sm">
-                  Upload
-                </Button>
-                <Button type="button" variant="ghost" size="sm">
-                  Remove
-                </Button>
-              </div>
-              <p className="mt-2 text-xs text-ink-400 dark:text-ink-300">
-                JPG, PNG or GIF. Max size 5MB.
-              </p>
-            </div>
+            <p className="mt-2 text-xs text-ink-400 dark:text-ink-300">
+              Your initials show until a photo is added.
+            </p>
           </div>
         </div>
         <div className="grid gap-5 sm:grid-cols-2">
@@ -176,6 +174,22 @@ export function SettingsProfileForm() {
             {...field("fullName")}
           />
           <TextField label="Location" {...field("location")} />
+          {user?.role !== "brand" && (
+            <>
+              <TextField
+                label="Country"
+                placeholder="e.g. United Kingdom"
+                hint="Feeds the marketplace Country filter."
+                {...field("country")}
+              />
+              <TextField
+                label="City"
+                placeholder="e.g. London"
+                hint="Feeds the marketplace City filter."
+                {...field("city")}
+              />
+            </>
+          )}
           {/* Website is a brand-profile field only: creator/professional
               profiles have no website column, so the input was silently
               discarded for them (same class as the removed Username

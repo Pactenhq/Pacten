@@ -14,7 +14,7 @@ import { TiltCard } from "@/components/ui/TiltCard";
 import { GlowOrb } from "@/components/ui/Animated";
 import { cn } from "@/lib/cn";
 import { homeSearchChips } from "@/lib/mock";
-import { api } from "@/lib/api";
+import { usePlans } from "@/components/pricing/usePlans";
 import { HomeShowcase } from "@/components/home/Showcase";
 import {
   HomeCreatorsStrip,
@@ -35,11 +35,6 @@ function SparkleIcon({ className }: { className?: string }) {
 }
 
 function RocketIcon({ className }: { className?: string }) {
-  // Follow-up fix (Nov 12, user order): the old icon was a stroke-only
-  // scribble that did not read as a rocket. This is a proper solid
-  // silhouette — pointed nose, body, round window (punched through
-  // with fill-rule evenodd so the banner blue shows as the window),
-  // fins and flame — white via currentColor, same 40px placement.
   return (
     <svg width="40" height="40" viewBox="0 0 40 40" fill="currentColor" aria-hidden className={className}>
       <path
@@ -77,9 +72,6 @@ function BuildingIcon({ className }: { className?: string }) {
   );
 }
 
-// Restored Nov 2026 (user decision): the Figma-style pricing cards used
-// these icons; they were removed when the showcase pack switched the
-// homepage pricing to the /pricing PricingCards rendering.
 function CheckIcon({ className }: { className?: string }) {
   return (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden className={className}>
@@ -238,57 +230,23 @@ function Hero() {
         </div>
       </div>
 
-      {/* Homepage showcase (Nov 2026, REDESIGN Nov 12): real
-          creator/professional cards render directly below the hero
-          search bar, exactly like Figma — no section headings, no
-          Browse-all links, newest first, at most 4 cards per rail.
-          Never render hardcoded names, follower counts, or ratings. */}
       </div>
     </section>
   );
 }
 
 /* ------------------------------------------------------------------ */
-/* Extension point (removed Nov 2026, client instruction): the
- * "Trusted by" logo strip lived here. Genuine client logos may
- * return here only with written permission and real usage —
- * never hardcoded brand logos. See the M5 backlog pack README. */
 /* ------------------------------------------------------------------ */
 
 /* ------------------------------ pricing ----------------------------- */
 
-// Pricing cards — Figma-style (user decision Nov 2026): light cards in
-// light mode, dark cards in dark mode (ONE structure with dark:
-// variants — Card already renders dark:bg-ink-900 and the text carries
-// dark: classes), NO dark highlighted Pro card, NO "Most popular" badge,
-// CTAs to /signup/[role]. Prices + benefits come from the real
-// subscription plans API; the hardcoded homePricingPlans copy from
-// @/lib/mock is no longer used on the homepage.
-
-type HomePlan = {
-  id: string;
-  name: string;
-  tier: string;
-  priceCentsMonthly: number;
-  benefits: string[];
-};
 
 function HomePricingCards({
   role,
 }: {
   role: "brand" | "creator" | "professional";
 }) {
-  const [plans, setPlans] = useState<HomePlan[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    setLoading(true);
-    api
-      .subscriptionPlans(role)
-      .then((data) => setPlans(Array.isArray(data) ? data : []))
-      .catch(() => setPlans([]))
-      .finally(() => setLoading(false));
-  }, [role]);
+  const { plans, loading } = usePlans(role);
 
   if (loading) {
     return <p className="text-center text-[15px] text-ink-500 dark:text-ink-300">Loading plans...</p>;
@@ -521,9 +479,11 @@ function HowItWorks() {
             <div className="mt-1.5 rounded-lg border border-ink-200 dark:border-ink-700 px-3 py-2.5 text-[13px] text-ink-400 dark:text-ink-500">
               Enter your budget
             </div>
-            <Button className="mt-4 w-full" size="md">
-              Post Brief
-            </Button>
+            <Link href="/dashboard/campaigns/new" className="mt-4 block w-full">
+              <Button className="w-full" size="md">
+                Post Brief
+              </Button>
+            </Link>
             <span aria-hidden className="absolute -right-5 top-1/2 hidden -translate-y-1/2 lg:block">
               <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
                 <circle cx="36" cy="36" r="26" fill="#eef2ff" />
@@ -574,9 +534,11 @@ function HowItWorks() {
             <div className="mt-1.5 rounded-lg border border-ink-200 dark:border-ink-700 px-3 py-2.5 text-[13px] text-ink-400 dark:text-ink-500">
               Set your rate
             </div>
-            <Button className="mt-4 w-full" size="md">
-              Create Profile
-            </Button>
+            <Link href="/signup/creator" className="mt-4 block w-full">
+              <Button className="w-full" size="md">
+                Create Profile
+              </Button>
+            </Link>
             <span aria-hidden className="absolute -right-5 top-1/2 hidden -translate-y-1/2 lg:block">
               <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
                 <circle cx="36" cy="36" r="26" fill="#eef2ff" />
@@ -611,8 +573,6 @@ function HowItWorks() {
                 className="w-full max-w-[420px] object-contain"
               />
             </div>
-            {/* Real users (Nov 2026): the newest real creators, live only —
-                renders nothing on staging or when no eligible creators exist. */}
             <HomeCreatorsStrip />
           </Card>
           {/* step 03 */}
@@ -729,7 +689,7 @@ function CtaBanner() {
           <div>
             <p className="text-2xl font-extrabold text-white">Ready to get started?</p>
             <p className="mt-1 text-[15px] text-brand-100">
-              Join businesses and creators growing together.
+              Join businesses, creators and professionals growing together.
             </p>
           </div>
         </div>
@@ -775,8 +735,6 @@ function Professionals() {
             </Button>
           </Link>
         </div>
-        {/* Real users (Nov 2026): the newest real professionals, live only —
-            renders nothing on staging or when no eligible professionals exist. */}
         <HomeProfessionalsStrip />
       </Reveal>
     </section>
@@ -784,122 +742,10 @@ function Professionals() {
 }
 
 /* ------------------------------------------------------------------ */
-/* Extension point (removed Nov 2026, client instruction): the
- * client-stories and platform-numbers section lived here. Genuine
- * stories and numbers may return here only from real users and real
- * platform data — never hardcoded. See the M5 backlog pack README. */
 /* ------------------------------------------------------------------ */
-
-/* ----------------------------- bottom CTA --------------------------- */
-
-function BottomCta() {
-  const copy = (
-    <>
-      <h2 className="text-4xl font-extrabold tracking-tight text-white lg:whitespace-nowrap lg:text-[4.32cqi] lg:leading-[1.05]">
-        Ready to grow with Pacten?
-      </h2>
-      <p className="mt-4 max-w-[520px] text-lg text-brand-100 lg:whitespace-nowrap lg:text-[1.35cqi]">
-        Join the marketplace built for creators and businesses to connect,
-        collaborate and grow.
-      </p>
-      <div className="mt-8 flex flex-wrap gap-3 lg:flex-nowrap lg:mt-[2.2cqi]">
-        <Link href="/signup/creator">
-          <Button size="lg" className="bg-white dark:bg-ink-900 text-brand dark:text-brand-200 hover:bg-brand-50 dark:hover:bg-white/10 lg:px-[3.04cqi]">
-            Join as a Creator
-          </Button>
-        </Link>
-        <Link href="/signup/brand">
-          <Button
-            size="lg"
-            variant="outline"
-            className="border-white/50 bg-transparent text-white hover:bg-white/10 hover:text-white lg:px-[3.04cqi]"
-          >
-            Join as a Business
-          </Button>
-        </Link>
-        <Link href="/signup/professional">
-          <Button size="lg" className="bg-white dark:bg-ink-900 text-brand dark:text-brand-200 hover:bg-brand-50 dark:hover:bg-white/10 lg:px-[3.04cqi]">
-            Join as a Professional
-          </Button>
-        </Link>
-      </div>
-    </>
-  );
-  return (
-    <section className="mx-auto max-w-[1380px] px-6 py-16 lg:px-12 lg:pb-28">
-      <Reveal from="scale">
-      {/* Desktop: fixed panel proportions, phone visual positioned to the right */}
-      <div className="relative hidden rounded-[24px] bg-brand lg:block lg:aspect-[1480/360] lg:[container-type:inline-size]">
-        <div className="absolute inset-y-0 left-0 flex w-[62%] flex-col px-14 lg:pt-[7.5cqi]">
-          {copy}
-        </div>
-        <div
-          aria-hidden
-          className="absolute animate-floaty-slow"
-          style={{ left: "60.9%", top: "-15.6%", width: "40.8%" }}
-        >
-          <Image
-            src="/assets/home/cta-visual-v4.webp"
-            alt=""
-            width={553}
-            height={475}
-            className="h-auto w-full"
-          />
-        </div>
-      </div>
-      </Reveal>
-      {/* Mobile: stacked layout with centered text and phone below */}
-      <div className="relative rounded-[24px] bg-gradient-to-r from-[#0d2bb5] via-[#0e2090] to-[#0a1748] px-6 pb-0 pt-14 text-center lg:hidden">
-        <h2 className="text-[30px] font-extrabold leading-[1.2] tracking-tight text-white">
-          Ready to grow with
-          <br />
-          Pacten?
-        </h2>
-        <p className="mx-auto mt-4 max-w-[290px] text-[14px] leading-relaxed text-white/90">
-          Join the marketplace built for creators and businesses to connect,
-          collaborate and grow.
-        </p>
-        <div className="mt-6 flex items-stretch justify-center gap-3">
-          <Link href="/signup/creator" className="flex-1">
-            <Button className="h-[52px] w-full bg-white dark:bg-ink-900 px-4 text-[15px] font-semibold text-brand dark:text-brand-200 hover:bg-brand-50 dark:hover:bg-white/10">
-              Join as a Creator
-            </Button>
-          </Link>
-          <Link href="/signup/brand" className="flex-1">
-            <Button
-              variant="outline"
-              className="h-[52px] w-full border-white/70 bg-white/10 px-4 text-[15px] font-semibold text-white hover:bg-white/20 hover:text-white"
-            >
-              Join as a Business
-            </Button>
-          </Link>
-        </div>
-        <div className="relative -mb-10 mt-4">
-          <Image
-            src="/assets/home/cta-visual-mobile-v4.webp"
-            alt="Pacten app dashboard on a phone"
-            width={553}
-            height={475}
-            className="h-auto w-full"
-          />
-        </div>
-      </div>
-    </section>
-  );
-}
 
 /* ------------------------- homepage scroll -------------------------- */
 
-// Homepage scroll-to-top (Nov 2026, fix 8): this Next.js version's
-// <Link> default is to MAINTAIN scroll position across client-side
-// navigation (see node_modules/next/dist/docs Link `scroll`), so
-// returning to '/' from another page landed mid-page (logo click landed
-// at scrollY 4677 of 6115 in the repro) instead of the top. Every
-// return to '/' must land at the top, so the homepage scrolls itself
-// to the top on mount — immediately and once more on the next frame,
-// because the router's scroll handling can land after the first paint.
-// Homepage-scoped only: no other page is touched and no global router
-// behaviour changes.
 function useScrollToTopOnMount() {
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -923,7 +769,6 @@ export default function HomePage() {
         <HowItWorks />
         <CtaBanner />
         <Professionals />
-        <BottomCta />
       </main>
       <Footer logoTone="brand" />
     </>

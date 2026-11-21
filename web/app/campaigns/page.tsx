@@ -30,9 +30,6 @@ export default function CampaignsPage() {
   const [allCampaigns, setAllCampaigns] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  // FINAL fix (Nov 12): "Clear all" must also clear the hero box's
-  // DRAFT value (see MarketplaceHero clearSignal). The parent term
-  // alone cannot signal the clear — it may already be "".
   const [clearKey, setClearKey] = useState(0);
   const handleClearSearch = () => {
     setSearchQuery("");
@@ -41,11 +38,9 @@ export default function CampaignsPage() {
   };
   const [activeFilters, setActiveFilters] = useState<CampaignFilters>({
     type: "All",
-    timelines: [],
-    locations: [],
     budget: null,
-    verifiedOnly: false,
     country: "",
+    city: "",
     language: "",
     skill: "",
     industry: "",
@@ -54,13 +49,7 @@ export default function CampaignsPage() {
   const PAGE_SIZE = 6;
 
   // Arriving from the home-page hero search (?q=...) — start filtered.
-  // FINAL fix (Nov 12): ?page= also initialises the page on load
-  // (same defect class as /creators?page=2 rendering page 1). A
-  // search term wins and resets to page 1; a bare ?page= keeps it.
   useEffect(() => {
-    // Follow-up fix (Nov 12): ?search= also populates the box — the
-    // browser-verified defect was /creators?search=... leaving the
-    // box empty. ?q= (hero search) still wins when both are present.
     const params = new URLSearchParams(window.location.search);
     const q = params.get("q") ?? params.get("search");
     if (q) {
@@ -78,11 +67,8 @@ export default function CampaignsPage() {
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
           // Map API shape to card shape, fallback to mock when empty.
-          // _live marks rows posted by registered brand accounts (the
-          // "Verified" filter keeps only these).
           const mapped = data.map((c: any) => ({
             ...c,
-            _live: true,
             id: c.id,
             title: c.title,
             brand: c.brand?.displayName ?? "Business",
@@ -105,14 +91,17 @@ export default function CampaignsPage() {
     setPage(1);
   };
 
-  // M5 fix (Nov 20): distinct real requirement values across the loaded
-  // campaigns, for the Country / Language / Skills / Industry dropdowns
-  // — same pattern as /creators (options come from the rows themselves,
-  // never hardcoded). A field with no values anywhere yields no options.
   const countryOptions = useMemo(
     () =>
       distinctValues(allCampaigns, (c) =>
         String(c.country ?? "").trim() ? [String(c.country).trim()] : []
+      ),
+    [allCampaigns]
+  );
+  const cityOptions = useMemo(
+    () =>
+      distinctValues(allCampaigns, (c) =>
+        String(c.city ?? "").trim() ? [String(c.city).trim()] : []
       ),
     [allCampaigns]
   );
@@ -171,14 +160,14 @@ export default function CampaignsPage() {
         String(c.type ?? "").toLowerCase() === activeFilters.type.toLowerCase()
       );
     }
-    // M5 fix (Nov 20): requirement filters. A selected value keeps only
-    // campaigns whose field matches it (case-insensitive); campaigns
-    // with no value for that field (null/empty — incl. all legacy
-    // campaigns) match nothing here, so they appear only under "All"
-    // (filter ""), exactly like the nullable `type` precedent.
     if (activeFilters.country) {
       result = result.filter((c: any) =>
         String(c.country ?? "").toLowerCase() === activeFilters.country.toLowerCase()
+      );
+    }
+    if (activeFilters.city) {
+      result = result.filter((c: any) =>
+        String(c.city ?? "").toLowerCase() === activeFilters.city.toLowerCase()
       );
     }
     if (activeFilters.language) {
@@ -200,20 +189,6 @@ export default function CampaignsPage() {
         )
       );
     }
-    if (activeFilters.timelines.length > 0) {
-      result = result.filter((c: any) =>
-        activeFilters.timelines.some((t) =>
-          String(c.timeline ?? "").toLowerCase().includes(t.toLowerCase().split(" ")[0])
-        )
-      );
-    }
-    if (activeFilters.locations.length > 0) {
-      result = result.filter((c: any) =>
-        activeFilters.locations.some((l) =>
-          String(c.location ?? "").toLowerCase().includes(l.toLowerCase())
-        )
-      );
-    }
     if (activeFilters.budget) {
       const [lo, hi] = activeFilters.budget;
       result = result.filter((c: any) => {
@@ -222,25 +197,12 @@ export default function CampaignsPage() {
         return r === null ? true : r[1] >= lo && r[0] <= hi;
       });
     }
-    if (activeFilters.verifiedOnly) {
-      result = result.filter((c: any) => c._live === true);
-    }
     setCampaigns(result);
-    // FINAL fix (Nov 12): this effect used to reset the page on EVERY
-    // run — including the initial data load, which clobbered a ?page=
-    // deep link back to 1. The page now resets only on explicit user
-    // actions (handleSearch / handleFilterChange / handleClearSearch
-    // below), never when the list itself loads.
   }, [searchQuery, activeFilters, allCampaigns]);
 
   const totalPages = Math.max(1, Math.ceil(campaigns.length / PAGE_SIZE));
   const pagedCampaigns = campaigns.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  // FINAL fix (Nov 12): a ?page= past the last page (or a page that
-  // shrinks away when filters change) must clamp to the last page
-  // instead of rendering an empty list — but ONLY once the list has
-  // loaded. On first render totalPages is 1 (empty list), so an
-  // unguarded clamp would clobber ?page=2 before the list loads.
   useEffect(() => {
     if (!loading && page > totalPages) setPage(totalPages);
   }, [totalPages, loading]);
@@ -277,7 +239,7 @@ export default function CampaignsPage() {
           <div className="flex gap-8">
             <aside className="hidden w-[300px] shrink-0 lg:block">
               <div className="sticky top-24 rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 p-5 shadow-card">
-                <FilterPanel kind="campaigns" countryOptions={countryOptions} languageOptions={languageOptions} skillOptions={skillOptions} industryOptions={industryOptions} onFilterChange={handleFilterChange} onClearSearch={handleClearSearch} />
+                <FilterPanel kind="campaigns" countryOptions={countryOptions} cityOptions={cityOptions} languageOptions={languageOptions} skillOptions={skillOptions} industryOptions={industryOptions} onFilterChange={handleFilterChange} onClearSearch={handleClearSearch} />
               </div>
             </aside>
             <div className="min-w-0 flex-1">
@@ -327,7 +289,7 @@ export default function CampaignsPage() {
         onClose={() => setDrawerOpen(false)}
         title="Filters"
       >
-        <FilterPanel kind="campaigns" countryOptions={countryOptions} languageOptions={languageOptions} skillOptions={skillOptions} industryOptions={industryOptions} onFilterChange={handleFilterChange} onClearSearch={handleClearSearch} />
+        <FilterPanel kind="campaigns" countryOptions={countryOptions} cityOptions={cityOptions} languageOptions={languageOptions} skillOptions={skillOptions} industryOptions={industryOptions} onFilterChange={handleFilterChange} onClearSearch={handleClearSearch} />
       </Drawer>
     </>
   );

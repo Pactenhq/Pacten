@@ -2,10 +2,11 @@ import { Footer } from "@/components/ui/Footer";
 import { Navbar } from "@/components/ui/Navbar";
 
 // Full Platform Terms and Conditions, verbatim from the client-supplied
-// document (PACTEN_-_TOS.docx, v1.0 "Draft for review"). The effective
-// date in the source is a blank placeholder, shown here as
-// "To be confirmed". Do not paraphrase, summarise or drop clauses:
-// this page is the binding text.
+// document (PACTEN_-_TOS.docx, v1.0). Do not paraphrase, summarise or
+// drop clauses: this page is the binding text.
+// EFFECTIVE DATE — WORKING VALUE: the source document leaves the date
+// blank ("[EFFECTIVE DATE]") and Leonid has not stated one. 22 November
+// 2026 is shown until Leonid confirms the real date; replace it then.
 export default function TermsPage() {
   return (
     <div className="min-h-screen bg-white dark:bg-ink-900">
@@ -29,8 +30,8 @@ export default function TermsPage() {
               hello@pacten.info
             </a>
           </p>
-          <p>Version 1.0 &mdash; Draft for review</p>
-          <p>Effective date: To be confirmed</p>
+          <p>Version 1.0</p>
+          <p>Effective date: 22 November 2026</p>
         </div>
         <div className="mt-8 space-y-6 text-[15px] leading-relaxed text-ink-700 dark:text-ink-200">
       <section>

@@ -206,9 +206,6 @@ export default function ManageCampaignPage() {
                         <p className="text-[15px] font-bold text-ink-900 dark:text-ink-50">
                           {[a.applicant?.firstName, a.applicant?.lastName].filter(Boolean).join(" ") || "Applicant"}
                         </p>
-                        {/* LABEL fix (Nov 12): the Tag used to render
-                            the raw enum — a converted application showed
-                            the literal "converted_to_deal". */}
                         {a.status ? <Tag tone="neutral">{applicationStatusLabel(a.status)}</Tag> : null}
                       </div>
                       {a.coverLetter ? (

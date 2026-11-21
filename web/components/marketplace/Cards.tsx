@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/Card";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
-import { VerifiedBadge } from "@/components/ui/Stars";
 import type {
   CreatorCardData,
   ProfessionalCardData,
@@ -48,11 +47,6 @@ function PhotoTags({ tags }: { tags: string[] }) {
       {tags.map((t) => (
         <span
           key={t}
-          // Follow-up fix (Nov 12): the old pill was bg-white/20 +
-          // text-white over the photo — white-on-white and unreadable
-          // on light photos (browser-verified: "Gaming" only visible
-          // in an enlarged crop). Solid dark scrim reads on light AND
-          // dark photos, in light AND dark mode.
           className="inline-flex h-8 items-center rounded-full border border-black/10 bg-black/60 px-3.5 text-[13px] font-medium text-white backdrop-blur-sm"
         >
           {t}
@@ -65,18 +59,12 @@ function PhotoTags({ tags }: { tags: string[] }) {
 //: photo with niche tags
 // overlaid, name + verified badge, followers + rating, "View Profile"
 // pill button and platform glyphs.
-// F-2 (Nov 12, user order): the small label at the TOP of each card
-// comes from the user's own Industries field — first entry of
-// industriesList — NOT niches/skills. Empty industries => NO label at
-// all (never an empty pill, never a fallback). These are SHARED
-// components, so the label corrects on the homepage showcase AND on
-// the /creators + /professionals marketplace lists.
 function industryLabel(industriesList?: string[]): string[] {
   const first = (industriesList ?? []).find((i) => i?.trim());
   return first ? [first] : [];
 }
 
-export function CreatorCard({ creator }: { creator: CreatorCardData & { isVerified?: boolean; industriesList?: string[] } }) {
+export function CreatorCard({ creator }: { creator: CreatorCardData & { industriesList?: string[] } }) {
   return (
     <Card className="card-lift zoom-on-hover overflow-hidden p-0">
       <div className="relative h-[200px] w-full overflow-hidden bg-ink-50 dark:bg-ink-900 sm:h-[300px]">
@@ -98,7 +86,6 @@ export function CreatorCard({ creator }: { creator: CreatorCardData & { isVerifi
       <div className="p-3 sm:p-5">
         <div className="flex items-center gap-1.5">
           <p className="truncate text-base font-bold text-ink-900 dark:text-ink-50 sm:text-xl">{creator.name}</p>
-          {creator.isVerified ? <VerifiedBadge /> : null}
         </div>
         <div className="mt-1 flex items-center justify-between gap-1">
           <p className="truncate text-xs text-ink-600 dark:text-ink-300 sm:text-[15px]">
@@ -138,7 +125,7 @@ export function CreatorCard({ creator }: { creator: CreatorCardData & { isVerifi
 export function ProfessionalCard({
   professional,
 }: {
-  professional: ProfessionalCardData & { isVerified?: boolean; industriesList?: string[] };
+  professional: ProfessionalCardData & { industriesList?: string[] };
 }) {
   return (
     <Card className="card-lift zoom-on-hover overflow-hidden p-0">
@@ -177,7 +164,6 @@ export function ProfessionalCard({
       <div className="p-5">
         <div className="flex items-center gap-2">
           <p className="truncate text-xl font-bold text-ink-900 dark:text-ink-50">{professional.name}</p>
-          {professional.isVerified ? <VerifiedBadge /> : null}
         </div>
         <div className="mt-1.5 flex items-center justify-between">
           <p className="text-[15px] text-ink-600 dark:text-ink-300">

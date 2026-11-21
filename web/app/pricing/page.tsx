@@ -14,8 +14,8 @@ import { cn } from "@/lib/cn";
 
 // 
 // Sections: hero ("Pricing that rewards growth.") with For Business /
-// For Creator / For Professional tabs, 4 plan cards, "Why Pacten?"
-// comparison table vs Collabstr, Creator Rate Calculator, FAQ
+// For Creator / For Professional tabs, plan cards, "Why Pacten?"
+// feature table, Creator Rate Calculator, FAQ
 // ("Pricing questions, answered"), footer.
 
 function SparkleIcon() {
@@ -83,20 +83,6 @@ function BlueCheck() {
   );
 }
 
-function RedCross() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-label="Not included" className="mx-auto text-danger dark:text-danger-bright">
-      <circle cx="11" cy="11" r="9.5" stroke="currentColor" strokeWidth="1.8" />
-      <path
-        d="m8.5 8.5 5 5m0-5-5 5"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
 function ComparisonTable() {
   return (
     <section className="mx-auto max-w-[1061px] px-6 py-16 lg:py-20">
@@ -120,9 +106,6 @@ function ComparisonTable() {
               <th className="px-5 py-4 text-center text-[15px] font-semibold text-ink-900 dark:text-ink-50">
                 Pacten
               </th>
-              <th className="px-5 py-4 text-center text-[15px] font-semibold text-ink-900 dark:text-ink-50">
-                Collabstr
-              </th>
             </tr>
           </thead>
           <tbody>
@@ -136,15 +119,6 @@ function ComparisonTable() {
                 </td>
                 <td className="px-5 py-4 text-center text-[15px] font-semibold text-ink-900 dark:text-ink-50">
                   {row.pacten === true ? <BlueCheck /> : row.pacten}
-                </td>
-                <td className="px-5 py-4 text-center text-[15px] text-ink-700 dark:text-ink-200">
-                  {row.collabstr === true || row.collabstr === "check" ? (
-                    <BlueCheck />
-                  ) : row.collabstr === "x" ? (
-                    <RedCross />
-                  ) : (
-                    row.collabstr
-                  )}
                 </td>
               </tr>
             ))}

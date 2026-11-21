@@ -31,8 +31,8 @@ export class ProfilesService {
   async updateMyProfile(userId: string, role: UserRole, data: any) {
     const allowedFields: Record<string, string[]> = {
       [UserRole.BRAND]: ['companyName', 'website', 'industry', 'description', 'logoUrl', 'location'],
-      [UserRole.CREATOR]: ['displayName', 'bio', 'avatarUrl', 'niches', 'languages', 'industries', 'skills', 'platforms', 'followers', 'location', 'availableNow', 'rate'],
-      [UserRole.PROFESSIONAL]: ['displayName', 'title', 'bio', 'avatarUrl', 'skills', 'languages', 'industries', 'platforms', 'hourlyRate', 'location', 'availableNow', 'openToProjects', 'yearsExperience'],
+      [UserRole.CREATOR]: ['displayName', 'bio', 'avatarUrl', 'niches', 'languages', 'industries', 'skills', 'platforms', 'followers', 'location', 'country', 'city', 'availableNow', 'rate'],
+      [UserRole.PROFESSIONAL]: ['displayName', 'title', 'bio', 'avatarUrl', 'skills', 'languages', 'industries', 'platforms', 'hourlyRate', 'location', 'country', 'city', 'availableNow', 'openToProjects', 'yearsExperience'],
     };
 
     const fields = allowedFields[role];
@@ -104,23 +104,16 @@ export class ProfilesService {
     return publicProfile;
   }
 
-  async searchCreators(filters: { niche?: string; skill?: string; language?: string; industry?: string; platform?: string; query?: string; limit?: number; offset?: number; sort?: string; excludeTest?: boolean | string }) {
+  async searchCreators(filters: { niche?: string; skill?: string; language?: string; industry?: string; platform?: string; country?: string; city?: string; query?: string; limit?: number; offset?: number; sort?: string; excludeTest?: boolean | string }) {
     const qb = this.creatorRepo.createQueryBuilder('c')
       .where('c.availableNow = :available', { available: true });
 
     if (filters.niche) {
       qb.andWhere(':niche = ANY(c.niches)', { niche: filters.niche });
     }
-    // Skill parity with searchProfessionals (Nov 2026): same
-    // `:skill = ANY(c.skills)` clause — the creators Skills filter
-    // already filters client-side, this is server-side parity only.
     if (filters.skill) {
       qb.andWhere(':skill = ANY(c.skills)', { skill: filters.skill });
     }
-    // D-1: server-side language + industry filtering, mirroring the
-    // skill clause above (both are text arrays on the profile). The
-    // web previously filtered these client-side over the loaded page
-    // only, so matches beyond page 1 were never found.
     if (filters.language) {
       qb.andWhere(':language = ANY(c.languages)', { language: filters.language });
     }
@@ -130,11 +123,12 @@ export class ProfilesService {
     if (filters.platform) {
       qb.andWhere(':platform = ANY(c.platforms)', { platform: filters.platform });
     }
-    // Small-fixes (Nov 2026): keyword search is now fully server-side.
-    // `q` matches name/bio (as before) AND the niches/platforms arrays —
-    // the old /creators page filtered client-side over name + niches +
-    // platforms, so those two arrays stay searchable or a keyword that
-    // used to match (e.g. a platform name) would silently stop matching.
+    if (filters.country) {
+      qb.andWhere('LOWER(c.country) = LOWER(:country)', { country: filters.country });
+    }
+    if (filters.city) {
+      qb.andWhere('LOWER(c.city) = LOWER(:city)', { city: filters.city });
+    }
     if (filters.query) {
       qb.andWhere(
         '(c.displayName ILIKE :q OR c.bio ILIKE :q ' +
@@ -143,10 +137,6 @@ export class ProfilesService {
         { q: `%${filters.query}%` },
       );
     }
-    // F-1 (showcase): opt-in exclusion of test/demo-domain owners.
-    // Raw EXISTS subquery (not a join) so the linked user row is never
-    // loaded into — or leaked by — this public response. Default OFF:
-    // /creators, /professionals, search and for-deal are unchanged.
     if (isTruthy(filters.excludeTest)) {
       qb.andWhere(
         `NOT EXISTS (SELECT 1 FROM "users" "u" WHERE "u"."id" = "c"."userId" AND (LOWER("u"."email") LIKE :exTest OR LOWER("u"."email") LIKE :exExample OR LOWER("u"."email") LIKE :exDemo))`,
@@ -172,14 +162,13 @@ export class ProfilesService {
     return qb.getMany();
   }
 
-  async searchProfessionals(filters: { skill?: string; language?: string; industry?: string; platform?: string; query?: string; limit?: number; offset?: number; sort?: string; excludeTest?: boolean | string }) {
+  async searchProfessionals(filters: { skill?: string; language?: string; industry?: string; platform?: string; country?: string; city?: string; query?: string; limit?: number; offset?: number; sort?: string; excludeTest?: boolean | string }) {
     const qb = this.professionalRepo.createQueryBuilder('p')
       .where('p.availableNow = :available', { available: true });
 
     if (filters.skill) {
       qb.andWhere(':skill = ANY(p.skills)', { skill: filters.skill });
     }
-    // D-1: server-side language + industry filtering, mirroring skill.
     if (filters.language) {
       qb.andWhere(':language = ANY(p.languages)', { language: filters.language });
     }
@@ -189,10 +178,15 @@ export class ProfilesService {
     if (filters.platform) {
       qb.andWhere(':platform = ANY(p.platforms)', { platform: filters.platform });
     }
+    if (filters.country) {
+      qb.andWhere('LOWER(p.country) = LOWER(:country)', { country: filters.country });
+    }
+    if (filters.city) {
+      qb.andWhere('LOWER(p.city) = LOWER(:city)', { city: filters.city });
+    }
     if (filters.query) {
       qb.andWhere('(p.displayName ILIKE :q OR p.bio ILIKE :q OR p.title ILIKE :q)', { q: `%${filters.query}%` });
     }
-    // F-1 (showcase): same opt-in test-domain exclusion as creators.
     if (isTruthy(filters.excludeTest)) {
       qb.andWhere(
         `NOT EXISTS (SELECT 1 FROM "users" "u" WHERE "u"."id" = "p"."userId" AND (LOWER("u"."email") LIKE :exTest OR LOWER("u"."email") LIKE :exExample OR LOWER("u"."email") LIKE :exDemo))`,
@@ -214,21 +208,6 @@ export class ProfilesService {
     return qb.getMany();
   }
 
-  // D2 (dropdown disambiguation): creator directory WITH the linked
-  // user's email, for the New Deal form's creator dropdown. The public
-  // /creators list deliberately omits emails (privacy — see
-  // getPublicCreatorProfile); this method is only ever served behind
-  // the brand-only /creators/for-deal route, so a brand hiring a
-  // creator can tell two same-named creators apart. Only the fields
-  // the dropdown needs are selected — no user row is ever returned
-  // whole.
-  // Small-fixes (Nov 2026): server-side search + newest-first ordering.
-  // The dropdown used to take the top 100 by rating — with every rating
-  // at 0 that is effectively the 100 OLDEST creators, so a brand-new
-  // creator could never be selected. Now: `q` filters server-side by
-  // name/bio/email, and the default order is newest first, so a new
-  // creator is at the top even before anything is typed. Limit stays
-  // capped at 100 (a sensible bound for a dropdown).
   async searchCreatorsForDeal(limit?: number, query?: string) {
     const qb = this.creatorRepo
       .createQueryBuilder('c')
@@ -269,10 +248,6 @@ function assertUuid(id: string): void {
   }
 }
 
-/**
- * F-1: query params arrive as strings — 'true'/'1' opt in, anything
- * else (including 'false' and absent) leaves the default behaviour.
- */
 function isTruthy(v: boolean | string | undefined): boolean {
   return v === true || v === 'true' || v === '1';
 }

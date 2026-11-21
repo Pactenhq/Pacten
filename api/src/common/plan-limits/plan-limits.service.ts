@@ -18,25 +18,6 @@ import { Application } from '../../campaigns/application.entity';
 import { Deal } from '../../deals/deal.entity';
 import { Message } from '../../messaging/message.entity';
 
-/**
- * Free-plan caps (client final rules, Oct 2026). "Free" = the user holds
- * no active PAID subscription. Any active paid plan removes all caps.
- * Limits are env-configurable:
- *   FREE_BRAND_JOB_LIMIT   (default 1)  — total campaigns a free brand owns
- *   FREE_BRAND_HIRE_LIMIT  (default 1)  — total deals a free brand creates
- *   FREE_APPLICATION_LIMIT (default 5)  — total applications by a free
- *                                         creator/professional
- *   FREE_NEW_CONVERSATION_LIMIT (default 5) — NEW conversations a free
- *                                         user starts per calendar month.
- *                                         Replies inside an existing
- *                                         conversation are unlimited and
- *                                         never count (client-confirmed
- *                                         rule, Oct 31 2026).
- * Enforcement queries the user's CURRENT subscription state at action
- * time, so upgrades take effect immediately.
- * Limits are admin-editable on /admin/settings (M4); the settings
- * table is seeded from these env vars on first boot.
- */
 @Injectable()
 export class PlanLimitsService {
   constructor(
@@ -110,14 +91,6 @@ export class PlanLimitsService {
     if (count >= limit) throw this.limitError('application(s)', limit);
   }
 
-  /**
-   * Free-plan message cap (client-confirmed rule, Oct 31 2026): a free
-   * user may START up to `limit` new conversations per calendar month.
-   * A message in a conversation that already has any message is a
-   * reply — unlimited, exempt, whoever started the conversation.
-   * "Started" means the earliest message of the conversation overall
-   * was sent by this user. Paid users bypass all caps (unchanged).
-   */
   async assertCanSendMessage(
     userId: string,
     conversationId?: string,

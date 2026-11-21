@@ -59,10 +59,6 @@ export class User {
   @Column({ nullable: true })
   verificationExpiresAt: Date;
 
-  // Login gate (user-ordered, Nov 19): accounts created AFTER the gate
-  // deploy must verify their email before they can log in. Older
-  // accounts have this false (the column default) and are never gated,
-  // verified or not. Signup sets it true; nothing else sets it.
   @Column({ default: false })
   verificationRequired: boolean;
 

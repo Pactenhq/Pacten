@@ -55,9 +55,6 @@ export default function ProfessionalsPage() {
     return () => clearTimeout(t);
   }, []);
   const [searchQuery, setSearchQuery] = useState("");
-  // FINAL fix (Nov 12): "Clear all" must also clear the hero box's
-  // DRAFT value (see MarketplaceHero clearSignal). The parent term
-  // alone cannot signal the clear — it may already be "".
   const [clearKey, setClearKey] = useState(0);
   const handleClearSearch = () => {
     setSearchQuery("");
@@ -67,8 +64,9 @@ export default function ProfessionalsPage() {
   const [filters, setFilters] = useState<ProfessionalFilters>({
     category: "All",
     hourlyRate: null,
-    verifiedOnly: false,
     availableNow: false,
+    country: "",
+    city: "",
     openToProjects: false,
     experience: [],
     skill: "",
@@ -105,16 +103,23 @@ export default function ProfessionalsPage() {
       ),
     [allProfessionals]
   );
+  const countryOptions = useMemo(
+    () =>
+      [...new Set(allProfessionals.map((p) => (p.country ?? "").trim()).filter(Boolean))].sort(
+        (a, b) => a.localeCompare(b)
+      ),
+    [allProfessionals]
+  );
+  const cityOptions = useMemo(
+    () =>
+      [...new Set(allProfessionals.map((p) => (p.city ?? "").trim()).filter(Boolean))].sort(
+        (a, b) => a.localeCompare(b)
+      ),
+    [allProfessionals]
+  );
 
   // Arriving from the home-page hero search (?q=...) — start filtered.
-  // FINAL fix (Nov 12): ?page= also initialises the page on load
-  // (staging-verified: /creators?page=2 rendered page 1 — same pattern
-  // here). A search term wins and resets to page 1; a bare ?page=
-  // keeps its page.
   useEffect(() => {
-    // Follow-up fix (Nov 12): ?search= also populates the box — the
-    // browser-verified defect was /creators?search=... leaving the
-    // box empty. ?q= (hero search) still wins when both are present.
     const params = new URLSearchParams(window.location.search);
     const q = params.get("q") ?? params.get("search");
     if (q) {
@@ -159,7 +164,12 @@ export default function ProfessionalsPage() {
       const [lo, hi] = filters.hourlyRate;
       if (p.hourlyRateValue < lo || p.hourlyRateValue > hi) return false;
     }
-    if (filters.verifiedOnly && p.isVerified === false) return false;
+    if (filters.country && (p.country ?? "") !== filters.country) {
+      return false;
+    }
+    if (filters.city && (p.city ?? "") !== filters.city) {
+      return false;
+    }
     if (filters.availableNow && p.availableNow === false) return false;
     if (filters.openToProjects && p.openToProjects === false) return false;
     if (filters.experience.length > 0) {
@@ -172,11 +182,6 @@ export default function ProfessionalsPage() {
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  // FINAL fix (Nov 12): a ?page= past the last page (or a page that
-  // shrinks away when filters change) must clamp to the last page
-  // instead of rendering an empty list — but ONLY once the list has
-  // settled. On first render totalPages is 1 (empty list), so an
-  // unguarded clamp would clobber ?page=2 before the list loads.
   useEffect(() => {
     if (listSettled && page > totalPages) setPage(totalPages);
   }, [totalPages, listSettled]);
@@ -207,14 +212,13 @@ export default function ProfessionalsPage() {
         <div className="mt-10">
           <ResultCount
             count={`Showing ${filtered.length} professionals`}
-            quickFilters={["Top Rated", "Verified", "Available Now"]}
           />
         </div>
         <div className="mx-auto mt-8 max-w-[1380px] px-6 lg:px-12">
           <div className="flex gap-8">
             <aside className="hidden w-[300px] shrink-0 lg:block">
               <div className="sticky top-24 rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 p-5 shadow-card">
-                <FilterPanel kind="professionals" skillOptions={skillOptions} languageOptions={languageOptions} industryOptions={industryOptions} onProfessionalFilterChange={handleFilter} onClearSearch={handleClearSearch} />
+                <FilterPanel kind="professionals" countryOptions={countryOptions} cityOptions={cityOptions} skillOptions={skillOptions} languageOptions={languageOptions} industryOptions={industryOptions} onProfessionalFilterChange={handleFilter} onClearSearch={handleClearSearch} />
               </div>
             </aside>
             <div className="min-w-0 flex-1">
@@ -266,7 +270,7 @@ export default function ProfessionalsPage() {
         onClose={() => setDrawerOpen(false)}
         title="Filters"
       >
-        <FilterPanel kind="professionals" skillOptions={skillOptions} languageOptions={languageOptions} industryOptions={industryOptions} onProfessionalFilterChange={handleFilter} onClearSearch={handleClearSearch} />
+        <FilterPanel kind="professionals" countryOptions={countryOptions} cityOptions={cityOptions} skillOptions={skillOptions} languageOptions={languageOptions} industryOptions={industryOptions} onProfessionalFilterChange={handleFilter} onClearSearch={handleClearSearch} />
       </Drawer>
     </>
   );

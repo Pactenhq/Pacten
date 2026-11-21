@@ -1,19 +1,3 @@
-/**
- * Pacten Simple Transaction Agreement — the client-supplied wording
- * for the simpler agreement option (PACTEN_-Simple_contract.docx,
- * supplied by the client 14 Nov 2026; 11 sections, all placeholders).
- *
- * This text is stored VERBATIM as flat text. It is the default wording
- * for newly generated SIMPLE contracts. It can still be overridden
- * without a code change by setting the CONTRACT_LEGAL_WORDING env var
- * (the env value wins when set) — see contracts.service.ts legalWording().
- *
- * Rendering substitutes the [BRACKETED] placeholders per transaction
- * (contracts.service.ts renderSimpleAgreement): values frozen at
- * generation time in fieldValues, signature-block values computed at
- * render time from the signature columns. Blank values render as
- * "Not applicable". Already-generated contracts keep their snapshot.
- */
 export const PLACEHOLDER_LEGAL_WORDING = `PACTEN
 SIMPLE TRANSACTION AGREEMENT
 Agreement Date: [DATE]

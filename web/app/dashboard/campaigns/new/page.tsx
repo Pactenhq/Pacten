@@ -46,11 +46,6 @@ export default function CampaignRequestPage() {
     }
     setFieldErrors({});
     setLoading(true);
-    // M5 fix (Nov 20): optional campaign requirements. Empty values are
-    // sent as undefined (dropped from the JSON body) so the columns stay
-    // null; skills are a comma-separated list in the form, an array in
-    // the API. Nothing here is required — the create flow stays
-    // friction-free.
     const skillList = ((form.get("skills") as string) ?? "")
       .split(",")
       .map((s) => s.trim())
@@ -65,6 +60,7 @@ export default function CampaignRequestPage() {
         deadline: form.get("deadline") as string,
         notes: form.get("notes") as string,
         country: ((form.get("country") as string) ?? "").trim() || undefined,
+        city: ((form.get("city") as string) ?? "").trim() || undefined,
         language:
           ((form.get("language") as string) ?? "").trim() || undefined,
         industry:
@@ -216,10 +212,6 @@ export default function CampaignRequestPage() {
                   placeholder="e.g. Nov 30, 2026"
                 />
               </div>
-              {/* M5 fix (Nov 20): campaign requirements (all optional).
-                  These power the Country / Language / Skills / Industry
-                  filters on the campaigns page. Leave blank anything
-                  that does not apply. */}
               <div>
                 <p className="mb-1.5 text-sm font-medium text-ink-900 dark:text-ink-50">
                   Campaign requirements{" "}
@@ -229,7 +221,7 @@ export default function CampaignRequestPage() {
                 </p>
                 <p className="mb-3 text-[13px] text-ink-500 dark:text-ink-300">
                   Tell creators what this campaign needs — these power the
-                  Country, Language, Skills and Industry filters on the
+                  Country, City, Language, Skills and Industry filters on the
                   campaigns page. Leave blank anything that does not apply.
                 </p>
                 <div className="grid gap-5 sm:grid-cols-2">
@@ -237,6 +229,11 @@ export default function CampaignRequestPage() {
                     label="Country"
                     name="country"
                     placeholder="e.g. United Kingdom"
+                  />
+                  <TextField
+                    label="City"
+                    name="city"
+                    placeholder="e.g. London"
                   />
                   <TextField
                     label="Language"

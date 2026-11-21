@@ -26,9 +26,6 @@ export class AuthController {
     return this.authService.verifyEmail(token);
   }
 
-  // Login gate (user-ordered, Nov 19): resend the verification email
-  // to a gated, unverified account. Always returns the same generic
-  // message so the endpoint cannot enumerate accounts.
   @Post('resend-verification')
   @HttpCode(HttpStatus.OK)
   resendVerification(@Body() dto: ResendVerificationDto) {

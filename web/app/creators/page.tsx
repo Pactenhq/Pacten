@@ -43,11 +43,6 @@ function FilterButton({ onClick }: { onClick: () => void }) {
 export default function CreatorsPage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  // Server-side keyword search (small-fixes, Nov 2026): the typed term
-  // is sent to the API as `q` (debounced so typing does not fire a
-  // request per keystroke) instead of filtering client-side over the
-  // first 100 profiles — a brand-new creator past the 100th could
-  // never be found that way. The hook re-fetches when it changes.
   const [serverQuery, setServerQuery] = useState("");
   useEffect(() => {
     const t = setTimeout(() => setServerQuery(searchQuery.trim()), 400);
@@ -70,9 +65,6 @@ export default function CreatorsPage() {
     const t = setTimeout(() => setListSettled(true), 30000);
     return () => clearTimeout(t);
   }, []);
-  // FINAL fix (Nov 12): "Clear all" must also clear the hero box's
-  // DRAFT value (see MarketplaceHero clearSignal). The parent term
-  // alone cannot signal the clear — it may already be "".
   const [clearKey, setClearKey] = useState(0);
   const handleClearSearch = () => {
     setSearchQuery("");
@@ -84,8 +76,9 @@ export default function CreatorsPage() {
     category: "All",
     followers: null,
     price: null,
-    verifiedOnly: false,
     availableNow: false,
+    country: "",
+    city: "",
     language: "",
     industry: "",
     skill: "",
@@ -111,6 +104,21 @@ export default function CreatorsPage() {
     [allCreators]
   );
 
+  const countryOptions = useMemo(
+    () =>
+      [...new Set(allCreators.map((c) => (c.country ?? "").trim()).filter(Boolean))].sort(
+        (a, b) => a.localeCompare(b)
+      ),
+    [allCreators]
+  );
+  const cityOptions = useMemo(
+    () =>
+      [...new Set(allCreators.map((c) => (c.city ?? "").trim()).filter(Boolean))].sort(
+        (a, b) => a.localeCompare(b)
+      ),
+    [allCreators]
+  );
+
   // Distinct real skills across the loaded creators, for the Skills
   // dropdown (same source the profile pages render from: API `skills`).
   const skillOptions = useMemo(
@@ -122,13 +130,7 @@ export default function CreatorsPage() {
   );
 
   // Arriving from the home-page hero search (?q=...) — start filtered.
-  // FINAL fix (Nov 12): ?page= also initialises the page on load
-  // (staging-verified: /creators?page=2 rendered page 1). A search
-  // term wins and resets to page 1; a bare ?page= keeps its page.
   useEffect(() => {
-    // Follow-up fix (Nov 12): ?search= also populates the box — the
-    // browser-verified defect was /creators?search=... leaving the
-    // box empty. ?q= (hero search) still wins when both are present.
     const params = new URLSearchParams(window.location.search);
     const q = params.get("q") ?? params.get("search");
     if (q) {
@@ -167,6 +169,12 @@ export default function CreatorsPage() {
     if (filters.skill && !(c.skillsList ?? []).includes(filters.skill)) {
       return false;
     }
+    if (filters.country && (c.country ?? "") !== filters.country) {
+      return false;
+    }
+    if (filters.city && (c.city ?? "") !== filters.city) {
+      return false;
+    }
     // Range/boolean filters only exclude items that actually carry data;
     // items without the field pass through so the panel never empties the
     // list just because a profile hasn't filled that field in yet.
@@ -178,7 +186,6 @@ export default function CreatorsPage() {
       const [lo, hi] = filters.price;
       if (c.rateValue < lo || c.rateValue > hi) return false;
     }
-    if (filters.verifiedOnly && c.isVerified === false) return false;
     if (filters.availableNow && c.availableNow === false) return false;
     return true;
   });
@@ -186,11 +193,6 @@ export default function CreatorsPage() {
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  // FINAL fix (Nov 12): a ?page= past the last page (or a page that
-  // shrinks away when filters change) must clamp to the last page
-  // instead of rendering an empty list — but ONLY once the list has
-  // settled. On first render totalPages is 1 (empty list), so an
-  // unguarded clamp would clobber ?page=2 before the list loads.
   useEffect(() => {
     if (listSettled && page > totalPages) setPage(totalPages);
   }, [totalPages, listSettled]);
@@ -216,7 +218,7 @@ export default function CreatorsPage() {
           eyebrow="Creator Marketplace"
           titleBlue="Hire content creators"
           titleDark="for your next campaign."
-          subtitle="Browse verified TikTok, Instagram, YouTube, Twitch, LinkedIn and UGC creators."
+          subtitle="Browse TikTok, Instagram, YouTube, Twitch, LinkedIn and UGC creators."
           placeholder="Search creators, niches or platforms..."
           onSearch={handleSearch}
           defaultQuery={searchQuery}
@@ -228,16 +230,13 @@ export default function CreatorsPage() {
           onTabChange={handleTab}
         />
         <div className="mt-10">
-          <ResultCount
-            count={`Showing ${filtered.length} creators`}
-            quickFilters={["Top Rated", "Verified", "Available Now"]}
-          />
+          <ResultCount count={`Showing ${filtered.length} creators`} />
         </div>
         <div className="mx-auto mt-8 max-w-[1380px] px-6 lg:px-12">
           <div className="flex gap-8">
             <aside className="hidden w-[300px] shrink-0 lg:block">
               <div className="sticky top-24 rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 p-5 shadow-card">
-                <FilterPanel kind="creators" languageOptions={languageOptions} industryOptions={industryOptions} skillOptions={skillOptions} onCreatorFilterChange={handleFilter} onClearSearch={handleClearSearch} />
+                <FilterPanel kind="creators" countryOptions={countryOptions} cityOptions={cityOptions} languageOptions={languageOptions} industryOptions={industryOptions} skillOptions={skillOptions} onCreatorFilterChange={handleFilter} onClearSearch={handleClearSearch} />
               </div>
             </aside>
             <div className="min-w-0 flex-1">
@@ -271,7 +270,7 @@ export default function CreatorsPage() {
         onClose={() => setDrawerOpen(false)}
         title="Filters"
       >
-        <FilterPanel kind="creators" languageOptions={languageOptions} industryOptions={industryOptions} skillOptions={skillOptions} onCreatorFilterChange={handleFilter} onClearSearch={handleClearSearch} />
+        <FilterPanel kind="creators" countryOptions={countryOptions} cityOptions={cityOptions} languageOptions={languageOptions} industryOptions={industryOptions} skillOptions={skillOptions} onCreatorFilterChange={handleFilter} onClearSearch={handleClearSearch} />
       </Drawer>
     </>
   );

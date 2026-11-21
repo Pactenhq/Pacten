@@ -37,9 +37,6 @@ const columns: Array<{ title: string; links: Array<[string, string]> }> = [
   },
 ];
 
-// Pacten's official social accounts (client-supplied, Nov 2026).
-// External links: plain <a>, new tab, text label only (no platform
-// icons — client asked Nov 17, 2026: names only, "the logo doesn't flow").
 const socialLinks: Array<{ label: string; href: string }> = [
   {
     label: "Instagram",

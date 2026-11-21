@@ -25,7 +25,6 @@ import { EmailsModule } from '../emails/emails.module';
       // (user id) and the creator-profile row (profile id).
       User,
       CreatorProfile,
-      // Payee fix (Nov 12): professional profile ids resolve too.
       ProfessionalProfile,
     ]),
     PaymentsModule,

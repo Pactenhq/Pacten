@@ -10,29 +10,6 @@ import {
   useMarketplaceProfessionals,
 } from "@/components/marketplace/useMarketplace";
 
-// Homepage real-user strips (Nov 2026, user order): the "Match with
-// Creators" step and the "Find Best Professionals" section show REAL
-// users once the site is live — the same pattern as the main showcase
-// (HomeShowcase): real profiles from the API, newest first
-// (sort "createdAt:desc"), capped at the FIRST 8 users per section.
-// "Top users" by rating is not possible (no reviews/ratings module —
-// ratings are always 0), so newest-first is the ranking: fresh signups
-// signal a live marketplace and no fake "top" ranking is invented. If
-// fewer than 8 real users exist, only those render — never padded with
-// fake/mock profiles. excludeTest=true so test/demo-domain owners
-// (@test.com, @example.com, @pacten.demo) never appear, and NO
-// hardcoded names, counts or ratings anywhere. The cards are the same
-// CreatorCard / ProfessionalCard the marketplace pages and the showcase
-// use, so they link to the same profile pages.
-//
-// STAGING BEHAVIOUR (same as the showcase): the strips render NOTHING
-// unless the page runs on the production hostname (pacten.net /
-// www.pacten.net). On staging, localhost and any other host they render
-// no section, no empty-state box, no heading — the homepage looks
-// exactly as it did before this change. When ZERO eligible users exist
-// they also render nothing. No code change is needed at production
-// deploy — the same build turns the strips on the moment it runs on
-// pacten.net.
 
 const PRODUCTION_HOSTNAMES = ["pacten.net", "www.pacten.net"];
 

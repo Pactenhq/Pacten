@@ -1,13 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-/**
- * Transactional emails (M4 — Admin, Disputes & Notifications). Provider:
- * Resend (client-owned account). Without RESEND_API_KEY the service runs
- * in log-only mode — templates are still built and every send is logged,
- * so flows can be verified locally. Set EMAIL_FROM to override the
- * default sender (sending domain pacten.info, verified in Resend).
- */
 @Injectable()
 export class EmailsService {
   private readonly logger = new Logger('Emails');
@@ -48,28 +41,40 @@ ${body}
       );
       return { sent: false, reason: 'not_configured' };
     }
-    try {
-      const res = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ from: this.from, to, subject, html }),
-        // A hung provider must not stall signup / forgot-password: abort
-        // after 10s (caught below, logged, reported as not sent).
-        signal: AbortSignal.timeout(10_000),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        this.logger.error(`[email:failed] to=${to} ${JSON.stringify(data)}`);
-        return { sent: false, reason: 'provider_error' };
+    // 30s timeout with one retry after a short backoff: a slow provider
+    // (cold start, transient 5xx) must not silently drop the mail.
+    // Callers still fire-and-forget where the flow must not block.
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const res = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${this.apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ from: this.from, to, subject, html }),
+          signal: AbortSignal.timeout(30_000),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          this.logger.error(`[email:failed] to=${to} attempt=${attempt} ${JSON.stringify(data)}`);
+          if (attempt === 0) {
+            await new Promise((r) => setTimeout(r, 1000));
+            continue;
+          }
+          return { sent: false, reason: 'provider_error' };
+        }
+        return { sent: true, id: data.id };
+      } catch (e: any) {
+        this.logger.error(`[email:error] to=${to} attempt=${attempt} ${e?.message}`);
+        if (attempt === 0) {
+          await new Promise((r) => setTimeout(r, 1000));
+          continue;
+        }
+        return { sent: false, reason: 'error' };
       }
-      return { sent: true, id: data.id };
-    } catch (e: any) {
-      this.logger.error(`[email:error] to=${to} ${e?.message}`);
-      return { sent: false, reason: 'error' };
     }
+    return { sent: false, reason: 'error' };
   }
 
   sendVerificationEmail(to: string, name: string, token: string) {

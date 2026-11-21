@@ -77,13 +77,6 @@ export function ConversationPanel({
   }, [user]);
 
   // Keep local state in sync when the parent loads real messages —
-  // MERGE, don't replace (Nov 2026). The parent refetches after load
-  // and again when the session resolves, and a plain replace wiped a
-  // message the user just sent (or the socket just delivered) whenever
-  // the refetch raced the send — the bubble then only came back after a
-  // page reload. Local-only rows (optimistic `m-…` ids) survive a
-  // refetch; a temp whose body already arrived in the incoming list
-  // (refetch raced the REST response) is a duplicate and is dropped.
   useEffect(() => {
     setMessages((prev) => {
       const incoming = initialMessages ?? [];
@@ -228,11 +221,6 @@ export function ConversationPanel({
     setDraft("");
     setSendError("");
     if (isReal && convId) {
-      // Optimistic: the bubble renders immediately (Nov 2026 — the old
-      // code only added it after the REST round-trip, which awaits the
-      // email send server-side, so on slow staging the user saw nothing
-      // until a reload). The temp row is swapped for the real message
-      // when the response lands; a socket echo dedups by id.
       const tempId = `m-${Date.now()}`;
       setMessages((prev) => [
         ...prev,
@@ -328,9 +316,6 @@ export function ConversationPanel({
 
       {/* Thread */}
       <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-5">
-        {/* Date divider: the FIRST message's real date (Nov 2026 — was
-            the hardcoded Figma placeholder "Sep 2" on every thread).
-            No divider on an empty thread — there is no date to show. */}
         {messages.length > 0 && (
           <div className="flex items-center gap-3">
             <hr className="flex-1 border-ink-100 dark:border-ink-800" />

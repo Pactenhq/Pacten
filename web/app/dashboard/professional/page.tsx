@@ -11,7 +11,6 @@ import {
   QuickActions,
   RequestRowCard,
   SectionCard,
-  ServicesCard,
   StatCard,
   WelcomeHeader,
 } from "@/components/dashboard/widgets";
@@ -179,8 +178,7 @@ export default function ProfessionalDashboardPage() {
           </div>
         </section>
 
-        <div className="grid gap-8 lg:grid-cols-2">
-          <ServicesCard filledAdd />
+        <div>
           <QuickActions
             buttons={[
               { label: "Edit Profile", href: "/dashboard/settings" },

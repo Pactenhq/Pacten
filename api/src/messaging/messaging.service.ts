@@ -65,8 +65,6 @@ export class MessagingService {
     if (conversations.length === 0) return conversations;
 
     // Attach last message and unread count — two aggregate queries for
-    // the whole list, NOT two queries per conversation (Nov 2026: the
-    // per-conversation loop was N+1 and made the messages list slow).
     const ids = conversations.map((c) => c.id);
     const lastMessages = await this.messagesRepo
       .createQueryBuilder('m')
@@ -192,10 +190,6 @@ export class MessagingService {
 
     // Notify the other participant by email (transactional email).
     // One email per message; the in-app realtime feed stays the
-    // primary channel. Fire-and-forget (Nov 2026): awaiting the Resend
-    // round-trip inside the request made every send wait seconds
-    // before the sender's own bubble could render — the email is
-    // best-effort and must never delay the message response.
     const recipient =
       conversation.participant1Id === userId
         ? conversation.participant2

@@ -31,15 +31,6 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationType } from '../notifications/notification.entity';
 import { StripeService } from '../payments/stripe.service';
 
-// ---- Client FINAL referral rules (Oct 2026, replaces the demo system) ----
-// - NO cash reward for a free signup alone.
-// - Referrer earns 20% of a referred user's first THREE subscription payments.
-// - Referrer earns 10% of Pacten's commission on the referred user's FIRST
-//   completed paid deal.
-// - $25 minimum withdrawal; payouts are approved manually by Admin,
-//   monthly. Approval initiates a Stripe transfer for payees with a
-//   connected account; otherwise the transfer stays manual/off-platform.
-// - No rewards on refunds / chargebacks / fraudulent referrals (reversals).
 const SUBSCRIPTION_EARNING_BPS = 2000; // 20%
 const DEAL_EARNING_BPS = 1000; // 10% of the platform commission
 const MAX_PAID_SUBSCRIPTION_PAYMENTS = 3;

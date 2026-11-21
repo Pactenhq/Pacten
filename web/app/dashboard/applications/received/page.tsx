@@ -155,11 +155,6 @@ export default function BrandApplicationsPage() {
                               : "rounded-full bg-amber-100 px-3 py-1 text-[13px] font-semibold text-amber-700"
                         }
                       >
-                        {/* LABEL fix (Nov 12): the pill used to render
-                            the raw enum — a converted application showed
-                            the literal "converted_to_deal". Human label
-                            via applicationStatusLabel; converted stays
-                            green like accepted. */}
                         {applicationStatusLabel(a.status)}
                       </span>
                       {a.status === "pending" && (

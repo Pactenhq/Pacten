@@ -9,24 +9,22 @@ export interface ComparisonRow {
   feature: string;
   /** true renders a checkmark; otherwise the literal cell value */
   pacten: string | true;
-  /** true/"check" renders a checkmark, "x" a red cross, else literal text */
-  collabstr: string | true;
 }
 
-/**
- * // "Why Pacten?" comparison table.
- * Feature names verbatim. Pacten column: check or literal value.
- * Collabstr column: check, "Limited", or "x" (renders a red cross).
- */
+// "Why Pacten?" table. Every row is a real MVP feature. The competitor
+// column is gone: the old Collabstr values were never verified against
+// any source, so the table no longer claims anything about Collabstr.
+// Messaging is not unlimited on Free — free users get 5 new
+// conversations a month, replies unlimited; paid plans are unlimited.
 export const pricingComparison: ComparisonRow[] = [
-  { feature: "Free Plan", pacten: true, collabstr: "check" },
-  { feature: "Lowest Creator Commission", pacten: "5%", collabstr: "15%" },
-  { feature: "Creator Teams", pacten: true, collabstr: "x" },
-  { feature: "Hire Creative Professionals", pacten: true, collabstr: "x" },
-  { feature: "Unlimited Messaging", pacten: true, collabstr: "check" },
-  { feature: "Portfolio Hosting", pacten: true, collabstr: "check" },
-  { feature: "Advanced Analytics", pacten: true, collabstr: "Limited" },
-  { feature: "Referral Rewards", pacten: true, collabstr: "x" },
+  { feature: "Free Plan", pacten: true },
+  { feature: "Lowest Creator Commission", pacten: "5% (Elite plan)" },
+  { feature: "Hire Creative Professionals", pacten: true },
+  {
+    feature: "Messaging",
+    pacten: "5 new conversations a month on Free, unlimited on paid plans",
+  },
+  { feature: "Referral Rewards", pacten: true },
 ];
 
 export interface RateTier {

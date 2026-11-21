@@ -28,10 +28,6 @@ import { parseBudgetNumber } from './budget.util';
 import { CreateUpfrontPaymentDto } from './dto/payments.dto';
 import { ReferralsService } from '../referrals/referrals.service';
 
-// Client FINAL commission rates (Oct 2026, basis points). Commission is
-// deducted from the creator/professional's earnings, keyed by THEIR
-// current subscription tier. Brands are never charged a percentage.
-// Still configurable via the commission_rules table — no code change.
 const FINAL_COMMISSION_SEED: Array<{
   role: string;
   tier: string;
@@ -394,7 +390,6 @@ export class PaymentsService implements OnModuleInit {
       );
     }
 
-    // Transactional email (M5). Best-effort.
     try {
       const payer = await this.usersRepo.findOne({
         where: { id: payment.payerId },

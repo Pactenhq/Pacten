@@ -5,14 +5,10 @@ import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import {
   AnalyticsGrid,
   CommissionHistory,
-  DiscountHistory,
-  Leaderboard,
   RecentReferrals,
   ReferralHero,
   RewardsCards,
-  SectionCard,
   StatCard,
-  ViewAllPill,
 } from "@/components/dashboard/widgets";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -23,7 +19,6 @@ import { api } from "@/lib/api";
 // "mob Referral dashboard" (374:34045) mobile. Invite header, referral
 // link/code cards, five stat cards, recent referrals, analytics, rewards,
 // earnings history and the top-referrers
-// leaderboard. Wired to the real referrals API (M5); design unchanged.
 
 const fmt$ = (cents: number) => `$${(cents / 100).toFixed(2)}`;
 const fmtDate = (d: string) =>
@@ -40,7 +35,6 @@ export default function ReferralsDashboardPage() {
   const [amount, setAmount] = useState("");
   const [requesting, setRequesting] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
-  // Stripe Connect (M5): onboarding state for the caller's own account.
   const [connect, setConnect] = useState<any>(null);
   const [connectBusy, setConnectBusy] = useState(false);
   const [connectMsg, setConnectMsg] = useState<string | null>(null);
@@ -212,6 +206,15 @@ export default function ReferralsDashboardPage() {
     amount: fmt$(e.amountCents ?? 0),
   }));
 
+  // Rewards cards show the same real earnings, split by status — never
+  // invented rows. FA §5.6 covers pending / earned / paid views only.
+  const rewardEntries = (dash?.earnings || []).map((e: any) => ({
+    label: earningLabel(e),
+    date: fmtDate(e.createdAt),
+    amount: fmt$(e.amountCents ?? 0),
+    status: e.status === "paid" ? "Paid" : "Pending",
+  }));
+
   return (
     <DashboardShell
       nav={referralNav}
@@ -232,7 +235,6 @@ export default function ReferralsDashboardPage() {
             <h2 className="text-[22px] font-extrabold text-ink-900 dark:text-ink-50">
               Recent Referrals
             </h2>
-            <ViewAllPill />
           </div>
           <RecentReferrals rows={recent} />
         </section>
@@ -252,9 +254,8 @@ export default function ReferralsDashboardPage() {
         <section>
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-[22px] font-extrabold text-ink-900 dark:text-ink-50">Rewards</h2>
-            <ViewAllPill />
           </div>
-          <RewardsCards />
+          <RewardsCards entries={rewardEntries} />
         </section>
 
         {/* Cash payouts — requested by the user, approved manually by admin (Sania). */}
@@ -391,28 +392,10 @@ export default function ReferralsDashboardPage() {
               <h2 className="text-[22px] font-extrabold text-ink-900 dark:text-ink-50">
                 Commission History
               </h2>
-              <ViewAllPill />
             </div>
             <CommissionHistory entries={commissionEntries} />
           </section>
-          <section>
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-[22px] font-extrabold text-ink-900 dark:text-ink-50">
-                Discount History
-              </h2>
-              <ViewAllPill />
-            </div>
-            <DiscountHistory entries={[]} />
-          </section>
         </div>
-
-        <SectionCard
-          title="Leaderboard — Top Referrers"
-          className="border-0 bg-transparent p-0 shadow-none"
-          titleClassName="text-[22px] font-extrabold"
-        >
-          <Leaderboard entries={[]} />
-        </SectionCard>
       </div>
     </DashboardShell>
   );

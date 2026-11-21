@@ -97,11 +97,6 @@ export default function ProfessionalDetailPage() {
                       <h1 className="text-2xl font-extrabold text-ink-900 dark:text-ink-50">
                         {profile.displayName}
                       </h1>
-                      {profile.isVerified && (
-                        <span className="rounded-full bg-green-100 px-2.5 py-0.5 text-[12px] font-bold text-green-700">
-                          ✓ Verified
-                        </span>
-                      )}
                       {profile.availableNow !== false && (
                         <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-[12px] font-bold text-blue-700">
                           Available now
@@ -116,6 +111,8 @@ export default function ProfessionalDetailPage() {
                         ? `${Number(profile.rating).toFixed(1)}★ (${profile.reviewsCount ?? 0} reviews)`
                         : ""}
                       {profile.yearsExperience != null ? ` · ${profile.yearsExperience} yrs experience` : ""}
+                      {profile.country ? ` · ${profile.country}` : ""}
+                      {profile.city ? ` · ${profile.city}` : ""}
                       {profile.location ? ` · ${profile.location}` : ""}
                     </p>
                     <div className="mt-3 flex flex-wrap gap-2">
@@ -123,10 +120,6 @@ export default function ProfessionalDetailPage() {
                         <Pill key={s}>{s}</Pill>
                       ))}
                     </div>
-                    {/* Languages / Industries / Platforms (Nov 2026): the
-                        settings form saves them and the marketplace
-                        filters on them, but the public profile never
-                        showed them — a visitor could not see them. */}
                     {(profile.languages ?? []).length > 0 && (
                       <div className="mt-4">
                         <p className="text-[13px] font-semibold text-ink-500 dark:text-ink-300">Languages</p>

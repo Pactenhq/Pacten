@@ -72,9 +72,6 @@ export class AuthService {
       status: UserStatus.PENDING_VERIFICATION,
       verificationToken,
       verificationExpiresAt,
-      // Login gate (user-ordered, Nov 19): every account created from
-      // this deploy on must verify its email before logging in. Older
-      // accounts keep verificationRequired=false and are never gated.
       verificationRequired: true,
       // TOS §1.4/§2.1: record when the user accepted the Platform Terms.
       ...(dto.termsAccepted ? { termsAcceptedAt: new Date() } : {}),
@@ -108,11 +105,6 @@ export class AuthService {
     // Attribute referral signup (silently ignores bad/self codes).
     await this.referralsService.attributeSignup(user.id, dto.referralCode);
 
-    // Transactional email (M5). Log-only until RESEND_API_KEY is set.
-    // Fire-and-forget: the verification email must not block signup.
-    // The Resend call used to be awaited here, so a slow provider (or a
-    // cold backend) stalled the whole signup request. send() catches its
-    // own errors and logs failures, so this cannot reject unhandled.
     const displayName = `${dto.firstName} ${dto.lastName}`.trim();
     void this.emails.sendVerificationEmail(dto.email, displayName, verificationToken);
 
@@ -237,13 +229,6 @@ export class AuthService {
       throw new UnauthorizedException('Account suspended');
     }
 
-    // Login gate (user-ordered, Nov 19): accounts created after the gate
-    // deploy (verificationRequired=true) must verify their email before
-    // logging in — no token is issued here. Older accounts have
-    // verificationRequired=false and are never gated. The check runs
-    // AFTER the password check, so a wrong password still returns the
-    // generic invalid-credentials error (no leak about which accounts
-    // are gated). Verified means status ACTIVE (verifyEmail sets it).
     if (user.verificationRequired && user.status !== UserStatus.ACTIVE) {
       throw new HttpException(
         {

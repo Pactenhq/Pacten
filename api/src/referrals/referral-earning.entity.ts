@@ -10,7 +10,6 @@ import { User } from '../users/user.entity';
 
 export enum EarningType {
   // Legacy types from the demo milestone system. They no longer generate
-  // cash (client final rules, Oct 2026) but remain for historical rows.
   SIGNUP = 'signup',
   MILESTONE = 'milestone',
   // Client final rules: 20% of a referred user's first 3 subscription

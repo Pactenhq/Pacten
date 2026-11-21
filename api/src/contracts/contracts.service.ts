@@ -631,14 +631,6 @@ export class ContractsService {
     return enriched;
   }
 
-  /**
-   * Two-signature confirmation (M5): BOTH parties must actively confirm
-   * they read and agreed, each with name + title + date/time recorded.
-   * Either party may confirm first. The contract stays SENT (and the
-   * deal stays AGREED) until the SECOND confirmation, which marks the
-   * contract ACCEPTED and activates the deal. Applies to the template
-   * and simple contract paths alike.
-   */
   async accept(
     contractId: string,
     userId: string,

@@ -111,13 +111,6 @@ function NewDealForm() {
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  // FINAL fix (Nov 12): the conversion pre-fill below fetches its
-  // source async — on slow staging the form used to look ready (and
-  // the banner already claimed "details pre-filled") while the fetch
-  // was still in flight, so a deal could be submitted before the
-  // values ever landed. While the source loads, the submit stays
-  // disabled. True only for conversion visits (applicationId /
-  // opportunityId); a plain direct deal never fetches.
   const [prefillLoading, setPrefillLoading] = useState(
     Boolean(applicationId || opportunityId)
   );
@@ -125,12 +118,6 @@ function NewDealForm() {
   // the created deal even if the redirect below ever fails to navigate,
   // so the form never silently sits there after the deal exists.
   const [createdDealId, setCreatedDealId] = useState<string | null>(null);
-  // Searchable creator picker (small-fixes, Nov 2026): the old static
-  // <select> only carried the top 100 by rating, so a brand-new creator
-  // could never be chosen. Now the list is searched server-side —
-  // typing queries /profiles/creators/for-deal?q=… (newest first) —
-  // and the box shows the newest creators before anything is typed.
-  // creatorOptions null = initial load pending, [] = no matches.
   const [creatorOptions, setCreatorOptions] = useState<CreatorOption[] | null>(null);
   const [creatorQuery, setCreatorQuery] = useState("");
   const [creatorOpen, setCreatorOpen] = useState(false);
@@ -142,10 +129,6 @@ function NewDealForm() {
     const query = (q ?? "").trim();
     const params = `?limit=20${query ? `&q=${encodeURIComponent(query)}` : ""}`;
     setCreatorSearching(true);
-    // D2 (dropdown disambiguation): prefer the brand-only directory
-    // WITH emails, so two creators sharing a display name are
-    // distinguishable. Fall back to the public list (name + location /
-    // rate as the distinguishing detail) if the authed call fails.
     api
       .creatorsForDeal(params)
       .then((data) => {
@@ -232,13 +215,6 @@ function NewDealForm() {
           ...f,
           title: app.campaign?.title ? app.campaign.title : f.title,
           creatorId: app.applicantId ?? f.creatorId,
-          // FINAL fix (Nov 12): the budget used to come only from
-          // app.proposedBudget — but the apply form never sends one
-          // (it posts only { coverLetter }), so it was always empty
-          // and the created deal showed Agreed Budget "-". The
-          // campaign's own budget is the real source; the deadline
-          // and deliverables come from the campaign too
-          // (receivedApplications attaches the full campaign object).
           agreedBudget: app.proposedBudget || app.campaign?.budget || f.agreedBudget,
           deadline: app.campaign?.deadline || f.deadline,
           deliverables: app.campaign?.deliverables || f.deliverables,
@@ -272,11 +248,6 @@ function NewDealForm() {
           agreedBudget: opp.budget ?? f.agreedBudget,
           description: opp.description ?? f.description,
           opportunityId,
-          // NOTE (Nov 12): an opportunity carries NO deadline — the
-          // entity, the DTO and the send form have no deadline field
-          // anywhere. The deadline input stays empty by design (never
-          // a fake value); the banner below says exactly what IS
-          // pre-filled instead of claiming "details pre-filled".
         }));
       })
       .catch(() => {})

@@ -39,13 +39,19 @@ export class CreateCampaignDto {
   @IsArray()
   niches?: string[];
 
-  // M5 fix (Nov 20): optional campaign requirements (see entity).
   @IsOptional()
   @IsString()
   @Transform(({ value }) =>
     typeof value === 'string' ? value.trim() : value,
   )
   country?: string;
+
+  @IsOptional()
+  @IsString()
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
+  city?: string;
 
   @IsOptional()
   @IsString()
@@ -106,13 +112,19 @@ export class UpdateCampaignDto {
   @IsArray()
   niches?: string[];
 
-  // M5 fix (Nov 20): optional campaign requirements (see entity).
   @IsOptional()
   @IsString()
   @Transform(({ value }) =>
     typeof value === 'string' ? value.trim() : value,
   )
   country?: string;
+
+  @IsOptional()
+  @IsString()
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
+  city?: string;
 
   @IsOptional()
   @IsString()

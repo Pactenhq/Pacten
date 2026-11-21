@@ -10,23 +10,6 @@ import { Repository } from 'typeorm';
 import { User } from '../users/user.entity';
 import { StripeService } from '../payments/stripe.service';
 
-/**
- * Stripe Connect (Express) onboarding + status.
- *
- * Grounds: Final Agreement §16 Definition of Done — "Stripe Connect
- * payment/payout flow is implemented subject to account/capability
- * availability" — and the client's 2 Nov 2026 message asking which
- * dev-side steps remain before live payouts.
- *
- * Demo mode: onboarding is NOT simulated (there is no Stripe-hosted page
- * to complete). startOnboarding reports demoMode and stores nothing;
- * getStatus reports the demo state. Live TEST mode uses the real
- * sk_test_* key from api/.env and creates real Express test accounts.
- *
- * The Stripe-hosted onboarding pages themselves cannot be completed from
- * this environment (no live browser here) — see the pack README for what
- * still needs a manual pass.
- */
 @Injectable()
 export class ConnectService {
   private readonly logger = new Logger(ConnectService.name);

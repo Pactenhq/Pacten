@@ -8,10 +8,6 @@
 // "converted_to_deal"), and the creator My Applications page fell
 // through to the raw value for every status it did not map. Every
 // surface that displays an application status must use this helper so
-// no raw enum ever reaches a pill again. (Label fix, Nov 12.)
-// NOTE: the brand dashboard Recent Requests table keeps its own
-// vocabulary (Submitted / Accepted / Active) — it does not use this
-// helper.
 export function applicationStatusLabel(
   status: string | null | undefined
 ): string {

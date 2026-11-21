@@ -10,7 +10,6 @@ import type {
   DashboardCampaign,
   RequestRow,
   StatCardData,
-  TrustScoreBreakdown,
 } from "@/lib/mock";
 
 /* ------------------------------------------------------------------ */
@@ -355,21 +354,6 @@ export function CampaignCard({ campaign }: { campaign: DashboardCampaign }) {
           <dd className="mt-1 font-bold text-ink-900 dark:text-ink-50">{campaign.submitted}</dd>
         </div>
       </dl>
-      {completed ? (
-        <Button size="md">Leave a Review</Button>
-      ) : (
-        <button
-          type="button"
-          aria-label="More options"
-          className="cursor-pointer flex h-9 w-9 items-center justify-center rounded-lg text-ink-300 dark:text-ink-200 hover:bg-ink-50 dark:hover:bg-white/5 hover:text-ink-500 dark:hover:text-ink-300"
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-            <circle cx="12" cy="5" r="1.8" />
-            <circle cx="12" cy="12" r="1.8" />
-            <circle cx="12" cy="19" r="1.8" />
-          </svg>
-        </button>
-      )}
     </Card>
   );
 }
@@ -556,70 +540,6 @@ export function ProfileCompleteness({ pct }: { pct: number }) {
   );
 }
 
-export function TrustScore({
-  score,
-  tier,
-  breakdown,
-}: {
-  score: number;
-  tier: string;
-  breakdown: TrustScoreBreakdown[];
-}) {
-  return (
-    <section>
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h2 className="text-[22px] font-extrabold text-ink-900 dark:text-ink-50">
-            Trust Score
-          </h2>
-          <p className="mt-1 text-[15px] text-ink-500 dark:text-ink-300">
-            How businesses perceive your reliability
-          </p>
-        </div>
-        <div className="text-right">
-          <span className="mb-1 inline-flex items-center rounded-full bg-brand-50 dark:bg-white/10 px-3 py-1 text-[12px] font-semibold text-brand dark:text-brand-200">
-            {tier}
-          </span>
-          <p className="text-[32px] font-extrabold tracking-tight">
-            <span className="text-brand dark:text-brand-200">{Math.min(score, 100)}</span>
-            <span className="text-ink-900 dark:text-ink-50">/100</span>
-          </p>
-        </div>
-      </div>
-      <p className="mt-6 text-[15px] font-bold text-ink-900 dark:text-ink-50">Score Breakdown</p>
-      <ul className="mt-3 grid gap-3 sm:grid-cols-2">
-        {breakdown.map((row) => {
-          const [got, total] = row.value.split("/").map(Number);
-          const pct = total > 0 ? Math.round((got / total) * 100) : 0;
-          return (
-            <li key={row.label} className="rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 p-4">
-              <p className="text-[14px] font-medium text-ink-900 dark:text-ink-50">{row.label}</p>
-              <div className="mt-2.5 flex items-center gap-3">
-                <div
-                  className="h-1.5 flex-1 overflow-hidden rounded-full bg-ink-100 dark:bg-ink-800"
-                  role="progressbar"
-                  aria-valuenow={pct}
-                  aria-valuemin={0}
-                  aria-valuemax={100}
-                  aria-label={row.label}
-                >
-                  <div
-                    className="h-full rounded-full bg-brand"
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
-                <span className="text-[13px] font-semibold text-ink-500 dark:text-ink-300">
-                  {row.value}
-                </span>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
-    </section>
-  );
-}
-
 export function AvailabilityCalendar() {
   // Real calendar for the CURRENT month (the widget previously rendered
   // a hard-coded July 2025 grid with invented per-day statuses and dead
@@ -730,47 +650,17 @@ export function AvailabilityCalendar() {
   );
 }
 
-export function ServicesCard({ filledAdd = false }: { filledAdd?: boolean }) {
-  return (
-    <section>
-      <div className="flex items-center justify-between">
-        <h2 className="text-[22px] font-extrabold text-ink-900 dark:text-ink-50">My Services</h2>
-        <Button
-          variant={filledAdd ? "primary" : "outline"}
-          size="md"
-          className={
-            filledAdd
-              ? undefined
-              : "border-brand-300 text-brand dark:text-brand-200 hover:border-brand hover:text-brand dark:hover:text-brand-200"
-          }
-        >
-          {filledAdd ? "+ Add Service" : "Add Service"}
-        </Button>
-      </div>
-      <div className="mt-4">
-        <EmptyState
-          title="No services added yet"
-          body="Add your services and set your rates to help businesses understand what you offer."
-        />
-      </div>
-    </section>
-  );
-}
-
-/** Quick actions: outline buttons + tip card (creator/professional dashboards). */
 export function QuickActions({
   buttons,
 }: {
-  buttons: Array<string | { label: string; href: string }>;
+  buttons: Array<{ label: string; href: string }>;
 }) {
   return (
     <section>
       <h2 className="text-[22px] font-extrabold text-ink-900 dark:text-ink-50">Quick Actions</h2>
       <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {buttons.map((b) => {
-          const label = typeof b === "string" ? b : b.label;
-          const href = typeof b === "string" ? undefined : b.href;
-          const btn = (
+        {buttons.map(({ label, href }) => (
+          <Link key={label} href={href}>
             <Button
               variant="outline"
               size="lg"
@@ -778,17 +668,8 @@ export function QuickActions({
             >
               {label}
             </Button>
-          );
-          // Entries with an href render as real navigation — the widget
-          // previously rendered every quick action as a dead button.
-          return href ? (
-            <Link key={label} href={href}>
-              {btn}
-            </Link>
-          ) : (
-            <span key={label}>{btn}</span>
-          );
-        })}
+          </Link>
+        ))}
       </div>
       <Card className="mt-4 flex items-start gap-4 p-5">
         <IconChip name="lightbulb" />
@@ -801,24 +682,6 @@ export function QuickActions({
         </p>
       </Card>
     </section>
-  );
-}
-
-export function VisibilityBoost() {
-  return (
-    <Card className="p-6">
-      <IconChip name="bolt" />
-      <h2 className="mt-4 text-[19px] font-bold text-ink-900 dark:text-ink-50">
-        Visibility Boost
-      </h2>
-      <p className="mt-2 max-w-[560px] text-[14px] leading-relaxed text-ink-500 dark:text-ink-300">
-        You don&apos;t have an active visibility boost.
-        <br />
-        Boost your profile to appear higher in search results and get
-        discovered by more businesses.
-      </p>
-      <Button className="mt-5">View Boost Plans</Button>
-    </Card>
   );
 }
 
@@ -947,7 +810,11 @@ export function AnalyticsGrid({
   );
 }
 
-export function RewardsCards() {
+export function RewardsCards({
+  entries,
+}: {
+  entries: { label: string; date: string; amount: string; status: string }[];
+}) {
   const groups = [
     {
       title: "Pending Rewards",
@@ -955,6 +822,7 @@ export function RewardsCards() {
       headerClass: "bg-amber-100 text-amber-800",
       badge: "Pending",
       badgeClass: "bg-amber-100 text-amber-800",
+      rows: entries.filter((e) => e.status === "Pending"),
     },
     {
       title: "Paid Rewards",
@@ -962,6 +830,7 @@ export function RewardsCards() {
       headerClass: "bg-brand-50 dark:bg-white/10 text-brand dark:text-brand-200",
       badge: "Paid",
       badgeClass: "bg-brand-50 dark:bg-white/10 text-brand dark:text-brand-200",
+      rows: entries.filter((e) => e.status === "Paid"),
     },
   ];
   return (
@@ -977,101 +846,36 @@ export function RewardsCards() {
             <WidgetIcon name={g.icon} className="h-5 w-5" />
             {g.title}
           </p>
-          <ul className="mt-2 divide-y divide-ink-100 dark:divide-ink-800">
-            {[0, 1].map((i) => (
-              <li
-                key={i}
-                className="flex items-center justify-between py-3.5 text-[14px]"
-              >
-                <span className="text-ink-700 dark:text-ink-200">Referral Bonus</span>
-                <span
-                  className={cn(
-                    "rounded-full px-3 py-1 text-[12px] font-semibold",
-                    g.badgeClass
-                  )}
+          {g.rows.length === 0 ? (
+            <p className="mt-4 text-[14px] text-ink-500 dark:text-ink-300">
+              No {g.badge.toLowerCase()} rewards yet.
+            </p>
+          ) : (
+            <ul className="mt-2 divide-y divide-ink-100 dark:divide-ink-800">
+              {g.rows.map((r, idx) => (
+                <li
+                  key={`${r.label}-${r.date}-${idx}`}
+                  className="flex items-center justify-between gap-3 py-3.5 text-[14px]"
                 >
-                  {g.badge}
-                </span>
-                <span className="font-bold text-ink-900 dark:text-ink-50">$0</span>
-              </li>
-            ))}
-          </ul>
+                  <span className="text-ink-700 dark:text-ink-200">
+                    {r.label} · {r.date}
+                  </span>
+                  <span
+                    className={cn(
+                      "rounded-full px-3 py-1 text-[12px] font-semibold",
+                      g.badgeClass
+                    )}
+                  >
+                    {g.badge}
+                  </span>
+                  <span className="font-bold text-ink-900 dark:text-ink-50">{r.amount}</span>
+                </li>
+              ))}
+            </ul>
+          )}
         </Card>
       ))}
     </div>
-  );
-}
-
-export function RewardMilestones({
-  milestones,
-}: {
-  milestones: { count: string; reward: string }[];
-}) {
-  return (
-    <Card className="p-6">
-      <h3 className="text-[19px] font-bold text-ink-900 dark:text-ink-50">Reward Milestones</h3>
-      <p className="mt-1 text-[14px] text-ink-500 dark:text-ink-300">
-        Unlock rewards as you refer more friends
-      </p>
-      <div className="mt-8 px-1">
-        <div className="relative h-1.5 rounded-full bg-ink-100 dark:bg-ink-800">
-          <div className="absolute inset-y-0 left-0 w-[30%] rounded-full bg-brand" />
-          <span className="absolute -top-[7px] left-0 h-[20px] w-[20px] rounded-full border-[3px] border-brand bg-white dark:bg-ink-900" />
-          <span className="absolute -top-[7px] left-[30%] h-[20px] w-[20px] rounded-full border-[3px] border-brand bg-white dark:bg-ink-900" />
-          <span className="absolute -top-[7px] left-[62%] h-[20px] w-[20px] rounded-full border-[3px] border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900" />
-          <span className="absolute -top-[7px] right-0 h-[20px] w-[20px] rounded-full border-[3px] border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900" />
-        </div>
-        <ol className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
-          {milestones.map((m) => (
-            <li key={m.count}>
-              <p className="text-[14px] font-bold text-ink-900 dark:text-ink-50">{m.count}</p>
-              <p className="mt-1 text-[13px] text-ink-500 dark:text-ink-300">{m.reward}</p>
-            </li>
-          ))}
-        </ol>
-      </div>
-    </Card>
-  );
-}
-
-export function Leaderboard({
-  entries,
-}: {
-  entries: { rank: number; name: string; referrals: number; earnings: string }[];
-}) {
-  return (
-    <Card className="p-6">
-      <ol className="divide-y divide-ink-100 dark:divide-ink-800">
-        {entries.map((e) => (
-          <li key={e.rank} className="flex items-center gap-4 py-4">
-            <span className="w-4 text-[15px] font-bold text-brand dark:text-brand-200">
-              {e.rank}
-            </span>
-            <span
-              aria-hidden
-              className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 dark:bg-white/10 text-brand dark:text-brand-200"
-            >
-              <WidgetIcon name="trophy" />
-            </span>
-            <span className="min-w-0 flex-1 text-[15px] font-bold text-ink-900 dark:text-ink-50">
-              {e.name}
-            </span>
-            <span className="text-center">
-              <span className="block text-[15px] font-bold text-ink-900 dark:text-ink-50">
-                {e.referrals}
-              </span>
-              <span className="block text-[12px] text-ink-400 dark:text-ink-300">Referrals</span>
-            </span>
-            <span className="w-16 text-right">
-              <span className="block text-[15px] font-bold text-ink-900 dark:text-ink-50">
-                {e.earnings}
-              </span>
-              <span className="block text-[12px] text-ink-400 dark:text-ink-300">Earnings</span>
-            </span>
-          </li>
-        ))}
-      </ol>
-    </Card>
   );
 }
 
@@ -1122,52 +926,6 @@ export function CommissionHistory({
   );
 }
 
-export function DiscountHistory({
-  entries,
-}: {
-  entries: { campaign: string; date: string; amount: string }[];
-}) {
-  if (entries.length === 0) {
-    return (
-      <Card>
-        <EmptyState
-          title="No discount history yet"
-          body="Your referral and milestone discounts will appear here once you earn them."
-        />
-      </Card>
-    );
-  }
-  return (
-    <div>
-      <div className="overflow-hidden rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900">
-        <ul className="divide-y divide-ink-100 dark:divide-ink-800">
-          {entries.map((e, i) => (
-            <li
-              key={i}
-              className="flex items-center justify-between gap-4 px-5 py-4"
-            >
-              <p className="text-[15px] font-bold text-ink-900 dark:text-ink-50">{e.campaign}</p>
-              <p className="text-center">
-                <span className="block text-[14px] font-medium text-ink-900 dark:text-ink-50">
-                  {e.date}
-                </span>
-                <span className="block text-[12px] text-ink-400 dark:text-ink-300">Date</span>
-              </p>
-              <p className="text-right">
-                <span className="block text-[14px] font-medium text-ink-900 dark:text-ink-50">
-                  {e.amount}
-                </span>
-                <span className="block text-[12px] text-ink-400 dark:text-ink-300">Amount</span>
-              </p>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  );
-}
-
-/** Recent referrals list + empty state (). */
 export function RecentReferrals({
   rows,
 }: {
@@ -1225,23 +983,5 @@ export function RecentReferrals({
         </ul>
       </div>
     </div>
-  );
-}
-
-/** "View All →" pill link used on referral section headers. */
-export function ViewAllPill() {
-  return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 dark:bg-white/10 px-3.5 py-1.5 text-[13px] font-semibold text-brand dark:text-brand-200">
-      View All
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-        <path
-          d="M4 12h15m0 0-5-5m5 5-5 5"
-          stroke="currentColor"
-          strokeWidth={1.8}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    </span>
   );
 }

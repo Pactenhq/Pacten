@@ -275,9 +275,6 @@ export interface RequestRow {
   name: string;
   handle: string;
   campaign: string;
-  // FINAL fix (Nov 12): "Accepted" is a request status — an application
-  // converted to a deal is accepted, not "Completed" (nothing is
-  // complete; the deal is only proposed).
   status: "Active" | "Submitted" | "Completed" | "Accepted";
   date: string;
 }
@@ -297,11 +294,6 @@ export interface CreatorStats {
   completeness: number;
   earnings: string;
   earningsDelta: string;
-}
-
-export interface TrustScoreBreakdown {
-  label: string;
-  value: string;
 }
 
 /* ------------------------- Referral dashboard ------------------------- */
@@ -329,9 +321,6 @@ export interface HomePlan {
 }
 
 // Per-role home pricing cards — names/prices follow the client's FINAL
-// pricing (Oct 21, 2026): every role Free $0 / Pro $29; top tier is
-// "Business" ($79) for brands and "Elite" ($79) for creators/professionals.
-// The transactional source of truth stays the subscription plans API.
 export type HomePlanRole = "brand" | "creator" | "professional";
 
 export const homeSearchChips = [

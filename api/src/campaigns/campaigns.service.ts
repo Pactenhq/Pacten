@@ -279,7 +279,6 @@ export class CampaignsService {
     });
     const saved = await this.applications.save(application);
 
-    // Transactional email (M5). Best-effort.
     try {
       await this.emails.sendApplicationReceived(
         applicant.email,

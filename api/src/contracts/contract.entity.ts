@@ -37,9 +37,6 @@ export class Contract {
   termsSnapshot: string;
 
   // Legal wording for simple contracts: the client-supplied Simple
-  // Transaction Agreement text (Nov 2026), or the CONTRACT_LEGAL_WORDING
-  // env-var override when set. Frozen at generation time.
-  // For standard-template contracts this holds the verbatim template text.
   @Column('text')
   legalWording: string;
 
@@ -91,14 +88,6 @@ export class Contract {
   @Column({ nullable: true })
   acceptedAt: Date;
 
-  /**
-   * Two-signature record (M5): BOTH parties must actively confirm they
-   * read and agreed. Either party may confirm first; the deal becomes
-   * ACTIVE only after both have confirmed. The brand is Party A
-   * (client/buyer) and the creator is Party B (provider/seller).
-   * acceptedById/acceptedAt are kept for backward compatibility and are
-   * set on the SECOND confirmation.
-   */
   @Column({ type: 'timestamptz', nullable: true })
   brandSignedAt: Date | null;
 

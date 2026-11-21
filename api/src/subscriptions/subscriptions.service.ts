@@ -21,10 +21,6 @@ import { EmailsService } from '../emails/emails.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationType } from '../notifications/notification.entity';
 
-// Seed plans — the client's FINAL pricing (Oct 2026). Configurable via
-// the subscription_plans table afterwards. Tiers: brands free/pro/business;
-// creators + professionals free/pro/elite. Paid tiers carry the visibility/
-// promotion perks; reduced fees come from the commission table by tier.
 const SEED_PLANS: Array<{
   role: string;
   code: string;
@@ -49,7 +45,7 @@ const SEED_PLANS: Array<{
     name: 'Pro',
     tier: 'pro',
     priceCentsMonthly: 2900,
-    benefits: ['Everything in Free', 'Unlimited job posts & hires', 'Featured campaigns', 'Priority support'],
+    benefits: ['Everything in Free', 'Unlimited job posts & hires', 'Priority support'],
     sortOrder: 2,
   },
   {
@@ -58,7 +54,7 @@ const SEED_PLANS: Array<{
     name: 'Business',
     tier: 'business',
     priceCentsMonthly: 7900,
-    benefits: ['Everything in Pro', 'Dedicated manager', 'Promoted visibility', 'Advanced analytics'],
+    benefits: ['Everything in Pro', 'Priority support'],
     sortOrder: 3,
   },
   {
@@ -76,7 +72,7 @@ const SEED_PLANS: Array<{
     name: 'Pro',
     tier: 'pro',
     priceCentsMonthly: 2900,
-    benefits: ['Promoted / featured profile', 'Increased visibility', 'Unlimited applications', '10% transaction commission'],
+    benefits: ['Unlimited applications', '10% transaction commission', 'Priority support'],
     sortOrder: 2,
   },
   {
@@ -85,7 +81,7 @@ const SEED_PLANS: Array<{
     name: 'Elite',
     tier: 'elite',
     priceCentsMonthly: 7900,
-    benefits: ['Everything in Pro', 'Top-tier promotion', '5% transaction commission', 'Priority support'],
+    benefits: ['Everything in Pro', '5% transaction commission', 'Priority support'],
     sortOrder: 3,
   },
   {
@@ -103,7 +99,7 @@ const SEED_PLANS: Array<{
     name: 'Pro',
     tier: 'pro',
     priceCentsMonthly: 2900,
-    benefits: ['Promoted / featured profile', 'Increased visibility', 'Unlimited applications', '10% transaction commission'],
+    benefits: ['Unlimited applications', '10% transaction commission', 'Priority support'],
     sortOrder: 2,
   },
   {
@@ -112,7 +108,7 @@ const SEED_PLANS: Array<{
     name: 'Elite',
     tier: 'elite',
     priceCentsMonthly: 7900,
-    benefits: ['Everything in Pro', 'Top-tier promotion', '5% transaction commission', 'Priority support'],
+    benefits: ['Everything in Pro', '5% transaction commission', 'Priority support'],
     sortOrder: 3,
   },
 ];

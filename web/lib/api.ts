@@ -6,15 +6,6 @@ const API_BASE =
 
 const TOKEN_KEY = "pacten_token";
 
-// B-1 (Nov 12): "Remember me" wiring. The token lives in exactly one
-// store: localStorage when the user checked Remember me (survives tab
-// close / browser restart), sessionStorage when unchecked (session-only:
-// a new tab starts logged out; a same-tab reload keeps the session,
-// which is sessionStorage semantics — it is NOT cleared by reload).
-// getToken reads localStorage first, then sessionStorage, so a token
-// stored by either login path — and any legacy localStorage token —
-// is honoured by every caller (apiFetch, AuthProvider, ProtectedRoute,
-// ConversationPanel socket auth).
 export function getToken(): string | null {
   if (typeof window === "undefined") return null;
   try {
@@ -125,8 +116,6 @@ export const api = {
       body: d,
     }),
 
-  // Login gate (user-ordered, Nov 19): resend the verification email
-  // to a gated, unverified account. Always returns the generic message.
   resendVerificationEmail: (email: string) =>
     apiFetch<{ message: string }>("/auth/resend-verification", {
       method: "POST",
@@ -439,7 +428,6 @@ export const api = {
   cancelSubscription: () =>
     apiFetch<any>("/subscriptions/cancel", { method: "POST", auth: true }),
 
-  // Referrals (M5)
   referralDashboard: () =>
     apiFetch<any>("/referrals/me", { auth: true }),
 
@@ -468,7 +456,6 @@ export const api = {
       auth: true,
     }),
 
-  // Stripe Connect (M5): onboarding + status for the caller's own account.
   connectOnboarding: (country?: string) =>
     apiFetch<any>("/connect/onboarding", {
       method: "POST",
@@ -478,7 +465,6 @@ export const api = {
 
   connectStatus: () => apiFetch<any>("/connect/status", { auth: true }),
 
-  // Disputes (M5)
   fileDispute: (dealId: string, reason: string, description: string) =>
     apiFetch<any>("/disputes", {
       method: "POST",
@@ -504,7 +490,6 @@ export const api = {
       auth: true,
     }),
 
-  // Admin (M5)
   adminStats: () => apiFetch<any>("/admin/stats", { auth: true }),
 
   adminUsers: (params?: { role?: string; status?: string; search?: string }) => {

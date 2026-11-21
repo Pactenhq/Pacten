@@ -60,6 +60,12 @@ export class ProfessionalProfile {
   @Column({ nullable: true })
   location: string;
 
+  @Column({ nullable: true })
+  country: string;
+
+  @Column({ nullable: true })
+  city: string;
+
   @Column({ default: false })
   isVerified: boolean;
 

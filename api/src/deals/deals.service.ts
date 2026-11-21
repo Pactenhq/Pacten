@@ -87,10 +87,6 @@ export class DealsService {
     private usersRepo: Repository<User>,
     @InjectRepository(CreatorProfile)
     private creatorProfilesRepo: Repository<CreatorProfile>,
-    // Payee fix (Nov 12): professionals are valid deal payees too
-    // (commission rules define professional tiers; m3fa expects an
-    // Elite professional deal at 5%), so a professional profile id
-    // must resolve the same way a creator profile id does.
     @InjectRepository(ProfessionalProfile)
     private professionalProfilesRepo: Repository<ProfessionalProfile>,
     private payoutsService: PayoutsService,
@@ -105,10 +101,6 @@ export class DealsService {
   // the deals.creatorId foreign key and surfaced as a bare 500
   // "Internal server error". Runs FIRST so application/opportunity
   // conversion checks compare against the resolved user id too.
-  // Payee fix (Nov 12): the payee may be a creator OR a professional —
-  // commission rules define professional tiers and m3fa expects an
-  // Elite professional deal at 5%. Only brands (and other non-payee
-  // roles) are rejected here.
   private async resolveCreatorUserId(creatorId: string): Promise<string> {
     const user = await this.usersRepo.findOne({ where: { id: creatorId } });
     if (user) {

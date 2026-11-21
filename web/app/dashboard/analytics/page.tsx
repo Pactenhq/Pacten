@@ -11,7 +11,6 @@ import {
   StatCard,
   WelcomeHeader,
 } from "@/components/dashboard/widgets";
-import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { brandNav, creatorNav, dashboardUser } from "@/lib/mock";
@@ -32,74 +31,11 @@ import { dashboardPathForRole } from "@/lib/api";
 // happens later, when an analytics data source exists.
 // ---------------------------------------------------------------------------
 
-const selectClassName =
-  "rounded-xl border border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900 px-4 py-2.5 text-[14px] font-medium text-ink-900 dark:text-ink-50 outline-none focus:border-brand";
-
-const RANGES = ["7 days", "30 days", "90 days", "All time"] as const;
-
-function AnalyticsFilters({
-  range,
-  onRange,
-}: {
-  range: string;
-  onRange: (r: string) => void;
-}) {
-  return (
-    <div className="flex flex-wrap items-center gap-3">
-      <label className="flex items-center gap-2 text-[14px] font-semibold text-ink-500 dark:text-ink-300">
-        Filter by client
-        {/* Design-only: no client data source yet, so "All clients" is the
-            only option. The real client list is wired here once a client data source exists. */}
-        <select aria-label="Filter by client" className={selectClassName} defaultValue="all">
-          <option value="all">All clients</option>
-        </select>
-      </label>
-      <div
-        className="flex flex-wrap rounded-xl border border-ink-200 dark:border-ink-700 p-1"
-        role="group"
-        aria-label="Date range"
-      >
-        {RANGES.map((r) => (
-          <button
-            key={r}
-            type="button"
-            onClick={() => onRange(r)}
-            aria-pressed={range === r}
-            className={
-              range === r
-                ? "cursor-pointer rounded-lg bg-brand px-3 py-1.5 text-[13px] font-bold text-white"
-                : "cursor-pointer rounded-lg px-3 py-1.5 text-[13px] font-semibold text-ink-600 dark:text-ink-200 hover:text-ink-900 dark:hover:text-ink-50"
-            }
-          >
-            {r}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function EarningsSummary() {
-  const [period, setPeriod] = useState("Last 30 days");
   // Figma placeholder: every bar is £0 (no earnings data source in MVP).
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   return (
-    <SectionCard
-      title="Earnings Summary"
-      action={
-        <select
-          aria-label="Earnings period"
-          className={selectClassName}
-          value={period}
-          onChange={(e) => setPeriod(e.target.value)}
-        >
-          <option>Last 7 days</option>
-          <option>Last 30 days</option>
-          <option>Last 90 days</option>
-          <option>All time</option>
-        </select>
-      }
-    >
+    <SectionCard title="Earnings Summary">
       <p className="text-[30px] font-extrabold tracking-tight text-ink-900 dark:text-ink-50">
         £0
       </p>
@@ -119,8 +55,7 @@ function EarningsSummary() {
         ))}
       </div>
       <p className="mt-4 text-[14px] text-ink-500 dark:text-ink-300">
-        No earnings yet — earnings from completed campaigns will appear here
-        once analytics data is connected.
+        No earnings yet — no completed campaigns have reported earnings.
       </p>
     </SectionCard>
   );
@@ -131,14 +66,7 @@ function CampaignPerformance() {
   // Design-only: no campaign data source, so "All campaigns" is the only
   // option and every metric is the Figma placeholder (£0 / 0).
   return (
-    <SectionCard
-      title="Campaign Performance"
-      action={
-        <select aria-label="Select campaign" className={selectClassName} defaultValue="all">
-          <option value="all">All campaigns</option>
-        </select>
-      }
-    >
+    <SectionCard title="Campaign Performance">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {[
           { value: "£0", label: "Avg. per Creator" },
@@ -154,28 +82,15 @@ function CampaignPerformance() {
         ))}
       </div>
       <p className="mt-4 text-[14px] text-ink-500 dark:text-ink-300">
-        No campaigns yet — campaign performance will appear here once
-        analytics data is connected.
+No campaigns yet — there is no campaign performance to show.
       </p>
     </SectionCard>
   );
 }
 
 function ContentPerformance() {
-  const [exportNote, setExportNote] = useState(false);
   return (
-    <SectionCard
-      title="Content Performance"
-      action={
-        <Button
-          size="md"
-          variant="outline"
-          onClick={() => setExportNote(true)}
-        >
-          Export
-        </Button>
-      }
-    >
+    <SectionCard title="Content Performance">
       {/* Column structure from the Figma frame; no rows yet — no data
           source in MVP, so the Figma empty state renders instead. */}
       <div className="mb-4 hidden grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-4 border-b border-ink-100 dark:border-ink-800 pb-3 text-[12px] font-bold uppercase tracking-wide text-ink-400 dark:text-ink-300 sm:grid">
@@ -187,13 +102,8 @@ function ContentPerformance() {
       </div>
       <EmptyState
         title="No performance data yet"
-        body="Content performance will appear here once analytics data is connected."
+        body="There is no content performance data to show."
       />
-      {exportNote && (
-        <p className="mt-4 text-[14px] font-medium text-ink-700 dark:text-ink-200">
-          Export will be available once real analytics data is connected.
-        </p>
-      )}
     </SectionCard>
   );
 }
@@ -203,7 +113,7 @@ function CompletedCampaigns() {
     <SectionCard title="Completed Campaigns">
       <EmptyState
         title="No campaigns yet"
-        body="Completed campaigns will appear here once analytics data is connected."
+        body="No completed campaigns to show."
       />
     </SectionCard>
   );
@@ -223,7 +133,7 @@ function TopPerformingCreators() {
       </div>
       <EmptyState
         title="No top-performing creators yet"
-        body="Top-performing creators will appear here once analytics data is connected."
+        body="No creator performance data to show."
       />
     </SectionCard>
   );
@@ -234,7 +144,7 @@ function RecentCampaignActivity() {
     <SectionCard title="Recent Campaign Activity">
       <EmptyState
         title="No recent campaign activity"
-        body="Recent campaign activity will appear here once analytics data is connected."
+        body="No recent campaign activity to show."
       />
     </SectionCard>
   );
@@ -264,10 +174,6 @@ function PerformanceSummary({ items }: { items: { value: string; label: string }
 export default function AnalyticsDashboardPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const [range, setRange] = useState<string>("30 days");
-  // "2 Reports" is a visual design element only (Figma brand frame) — it
-  // links NOWHERE and there is no /dashboard/analytics/reports route.
-  const [reportsNote, setReportsNote] = useState(false);
   const role = user?.role;
 
   // Figma has no analytics screen for professional or admin — send those
@@ -331,26 +237,7 @@ export default function AnalyticsDashboardPage() {
               ? "Track campaign results, creator performance, and revenue across all clients."
               : "Track your content performance, earnings, and business collaborations."
           }
-          action={
-            isBrand ? (
-              <Button
-                size="md"
-                variant="outline"
-                onClick={() => setReportsNote(true)}
-              >
-                2 Reports
-              </Button>
-            ) : undefined
-          }
         />
-
-        {reportsNote && (
-          <p className="text-[14px] font-medium text-ink-700 dark:text-ink-200">
-            Campaign Reports will be available once real analytics data is connected.
-          </p>
-        )}
-
-        <AnalyticsFilters range={range} onRange={setRange} />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {statCards.map((s) => (

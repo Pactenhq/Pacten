@@ -78,10 +78,6 @@ function RangeSlider({
   };
   const toValue = (pct: number) =>
     Math.round(scaleOf(min) + (pct / 100) * (scaleOf(max) - scaleOf(min)));
-  // FINAL fix (Nov 12): the slider's values are percents (0-100) but
-  // its labels claim the real scale (0..10M / 0..100K), so a probe
-  // reading the slider saw "max 100" next to a "10M" label. Format the
-  // scaled value compactly for the readout and the accessible value.
   const formatCompact = (n: number) => {
     if (n >= 1e6) {
       const v = n / 1e6;
@@ -193,10 +189,6 @@ function RangeSlider({
         </div>
         <div className="mt-1.5 flex items-center justify-between text-xs text-ink-500 dark:text-ink-300">
           <span>{min}</span>
-          {/* FINAL fix (Nov 12): show the currently selected range in
-              the labelled scale, so what the slider commits is visible
-              — previously only the end labels (0 / 10M) showed and the
-              slider's own value read 100 (percent). */}
           <span className="font-semibold text-ink-900 dark:text-ink-50">
             {formatCompact(toValue(lo))} – {formatCompact(toValue(hi))}
           </span>
@@ -342,14 +334,12 @@ function SelectRow({
 
 export interface CampaignFilters {
   type: string;
-  timelines: string[];
-  locations: string[];
   /** Dollar range from the Budget slider; null = no budget filter. */
   budget: [number, number] | null;
-  /** True = only campaigns posted by registered brand accounts (live API data). */
-  verifiedOnly: boolean;
   /** Selected country from the Country dropdown; "" = no filter. */
   country: string;
+  /** Selected city from the City dropdown; "" = no filter. */
+  city: string;
   /** Selected language from the Language dropdown; "" = no filter. */
   language: string;
   /** Selected skill from the Skills dropdown; "" = no skill filter. */
@@ -365,8 +355,11 @@ export interface CreatorFilters {
   followers: [number, number] | null;
   /** Campaign-rate range from the Price slider; null = no filter. */
   price: [number, number] | null;
-  verifiedOnly: boolean;
   availableNow: boolean;
+  /** Selected country from the Country dropdown; "" = no filter. */
+  country: string;
+  /** Selected city from the City dropdown; "" = no filter. */
+  city: string;
   /** Selected language from the Language dropdown; "" = no filter. */
   language: string;
   /** Selected industry from the Industry Experience dropdown; "" = no filter. */
@@ -380,8 +373,11 @@ export interface ProfessionalFilters {
   category: string;
   /** Hourly-rate range from the Hourly Rate slider; null = no filter. */
   hourlyRate: [number, number] | null;
-  verifiedOnly: boolean;
   availableNow: boolean;
+  /** Selected country from the Country dropdown; "" = no filter. */
+  country: string;
+  /** Selected city from the City dropdown; "" = no filter. */
+  city: string;
   openToProjects: boolean;
   /** Selected experience levels ("Entry" | "Mid" | "Expert"); empty = no filter. */
   experience: string[];
@@ -397,8 +393,9 @@ const DEFAULT_CREATOR_FILTERS: CreatorFilters = {
   category: "All",
   followers: null,
   price: null,
-  verifiedOnly: false,
   availableNow: false,
+  country: "",
+  city: "",
   language: "",
   industry: "",
   skill: "",
@@ -407,8 +404,9 @@ const DEFAULT_CREATOR_FILTERS: CreatorFilters = {
 const DEFAULT_PROFESSIONAL_FILTERS: ProfessionalFilters = {
   category: "All",
   hourlyRate: null,
-  verifiedOnly: false,
   availableNow: false,
+  country: "",
+  city: "",
   openToProjects: false,
   experience: [],
   skill: "",
@@ -419,6 +417,7 @@ const DEFAULT_PROFESSIONAL_FILTERS: ProfessionalFilters = {
 export function FilterPanel({
   kind,
   countryOptions,
+  cityOptions,
   skillOptions,
   languageOptions,
   industryOptions,
@@ -430,6 +429,8 @@ export function FilterPanel({
   kind: FilterKind;
   /** Distinct real countries across the loaded rows; feeds the Country dropdown. */
   countryOptions?: string[];
+  /** Distinct real cities across the loaded rows; feeds the City dropdown. */
+  cityOptions?: string[];
   /** Distinct real skills across the loaded rows; feeds the Skills dropdown. */
   skillOptions?: string[];
   /** Distinct real languages across the loaded rows; feeds the Language dropdown. */
@@ -439,20 +440,14 @@ export function FilterPanel({
   onFilterChange?: (filters: CampaignFilters) => void;
   onCreatorFilterChange?: (filters: CreatorFilters) => void;
   onProfessionalFilterChange?: (filters: ProfessionalFilters) => void;
-  // Follow-up fix (Nov 12): "Clear all" used to reset only the panel
-  // filters — the search keyword (owned by the parent page) stayed in
-  // the box. The parent passes its search reset here so Clear all
-  // clears everything, including the keyword.
   onClearSearch?: () => void;
 }) {
   const [resetKey, setResetKey] = useState(0);
   const filtersRef = useRef<CampaignFilters>({
     type: "All",
-    timelines: [],
-    locations: [],
     budget: null,
-    verifiedOnly: false,
     country: "",
+    city: "",
     language: "",
     skill: "",
     industry: "",
@@ -478,11 +473,9 @@ export function FilterPanel({
   const clearAll = () => {
     filtersRef.current = {
       type: "All",
-      timelines: [],
-      locations: [],
       budget: null,
-      verifiedOnly: false,
       country: "",
+      city: "",
       language: "",
       skill: "",
       industry: "",
@@ -492,7 +485,6 @@ export function FilterPanel({
     onFilterChange?.(filtersRef.current);
     onCreatorFilterChange?.(creatorRef.current);
     onProfessionalFilterChange?.(professionalRef.current);
-    // Follow-up fix (Nov 12): Clear all also clears the search keyword.
     onClearSearch?.();
     setResetKey((k) => k + 1);
   };
@@ -530,16 +522,19 @@ export function FilterPanel({
             onChange={(price) => emitCreator({ price })}
           />
           <ToggleRow
-            label="Verified"
-            onChange={(verifiedOnly) => emitCreator({ verifiedOnly })}
-          />
-          <ToggleRow
             label="Available Now"
             onChange={(availableNow) => emitCreator({ availableNow })}
           />
-          <CheckGroup label="Audience Gender" options={["Male", "Female", "Other"]} />
-          <SelectRow label="Country" />
-          <SelectRow label="City" />
+          <SelectRow
+            label="Country"
+            options={countryOptions}
+            onChange={(country) => emitCreator({ country })}
+          />
+          <SelectRow
+            label="City"
+            options={cityOptions}
+            onChange={(city) => emitCreator({ city })}
+          />
           <SelectRow
             label="Language"
             options={languageOptions}
@@ -555,12 +550,6 @@ export function FilterPanel({
             options={industryOptions}
             onChange={(industry) => emitCreator({ industry })}
           />
-          <SelectRow label="Engagement Rate" />
-          <SelectRow label="Avg Views" />
-          <SelectRow label="Featured" />
-          <SelectRow label="Years Experience" />
-          <SelectRow label="Audience Country" />
-          <SelectRow label="Response Time" />
         </div>
       )}
 
@@ -578,10 +567,6 @@ export function FilterPanel({
             onChange={(hourlyRate) => emitProfessional({ hourlyRate })}
           />
           <ToggleRow
-            label="Verified"
-            onChange={(verifiedOnly) => emitProfessional({ verifiedOnly })}
-          />
-          <ToggleRow
             label="Available Now"
             onChange={(availableNow) => emitProfessional({ availableNow })}
           />
@@ -594,7 +579,16 @@ export function FilterPanel({
             options={["Entry", "Mid", "Expert"]}
             onChange={(experience) => emitProfessional({ experience })}
           />
-          <SelectRow label="Country" />
+          <SelectRow
+            label="Country"
+            options={countryOptions}
+            onChange={(country) => emitProfessional({ country })}
+          />
+          <SelectRow
+            label="City"
+            options={cityOptions}
+            onChange={(city) => emitProfessional({ city })}
+          />
           <SelectRow
             label="Language"
             options={languageOptions}
@@ -626,37 +620,15 @@ export function FilterPanel({
             max="100K"
             onChange={(budget) => emit({ budget })}
           />
-          <ToggleRow
-            label="Verified"
-            onChange={(verifiedOnly) => emit({ verifiedOnly })}
-          />
-          <CheckGroup
-            label="Timeline"
-            options={[
-              "Urgent (within 1 week)",
-              "Within 1 month",
-              "1–3 months",
-              "3+ months",
-              "Flexible",
-            ]}
-            onChange={(timelines) => emit({ timelines })}
-          />
-          <CheckGroup
-            label="Location"
-            options={["Remote", "Hybrid", "On-site"]}
-            onChange={(locations) => emit({ locations })}
-          />
-          {/* M5 fix (Nov 20): the four requirement dropdowns are back,
-              RESTORED as working filters. Campaigns now carry optional
-              country / language / industry / skills fields (set by the
-              brand at creation), and the options below are derived from
-              the loaded campaigns' own data — the same pattern as the
-              creators filters. A campaign with no value for a field
-              appears only under "All" for that filter. */}
           <SelectRow
             label="Country"
             options={countryOptions}
             onChange={(country) => emit({ country })}
+          />
+          <SelectRow
+            label="City"
+            options={cityOptions}
+            onChange={(city) => emit({ city })}
           />
           <SelectRow
             label="Language"

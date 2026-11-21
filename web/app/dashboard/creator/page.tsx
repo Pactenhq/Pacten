@@ -13,7 +13,6 @@ import {
   RequestRowCard,
   SectionCard,
   StatCard,
-  VisibilityBoost,
   WelcomeHeader,
 } from "@/components/dashboard/widgets";
 import {
@@ -28,12 +27,8 @@ import { api } from "@/lib/api";
 // Stat cards, Recent Requests aur campaign rows AB REAL API DATA se
 // aate hain (pehle sab mock tha): earnings = completed deals ke budgets,
 // active campaigns = active deals, requests = received opportunities.
-// "Profile Views" ka koi data source MVP me nahi (analytics Phase 2) —
-// us ki jagah real Pending Requests count hai. Profile completeness
-// asal profile fields se gintee hai. Availability /
-// Services abhi design blocks hain (backend source MVP scope me nahi) —
-// ServicesCard is hidden from the dashboard until the feature is built
-// (its dead "Add Service" button confused users).
+// No "Profile Views" data source in MVP — Pending Requests count is
+// shown instead. Profile completeness is computed from real fields.
 
 function moneyOf(v: any): number {
   if (v == null) return 0;
@@ -171,9 +166,6 @@ export default function CreatorDashboardPage() {
           </div>
         </section>
 
-        {/* ServicesCard hidden: "My Services" / "Add Service" is design-only
-            (no services backend in MVP scope) and the button led nowhere.
-            The card returns when the services feature is built. */}
         <QuickActions
           buttons={[
             { label: "View Public Profile", href: "/profile/creator" },
@@ -220,8 +212,6 @@ export default function CreatorDashboardPage() {
         </SectionCard>
 
         <AvailabilityCalendar />
-
-        <VisibilityBoost />
       </div>
     </DashboardShell>
   );
