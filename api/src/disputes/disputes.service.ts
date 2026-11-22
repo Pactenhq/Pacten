@@ -93,9 +93,9 @@ export class DisputesService {
         description: description.trim(),
       }),
     );
-    // D-2: filing moves the deal to DISPUTED — but only where the
-    // backend state machine allows it (ACTIVE / SUBMITTED / APPROVED
-    // per VALID_TRANSITIONS, which is NOT changed here). A deal still
+    // Filing moves the deal to DISPUTED — but only where the backend
+    // state machine allows it (ACTIVE / SUBMITTED / APPROVED per
+    // VALID_TRANSITIONS, which is NOT changed here). A deal still
     // in PROPOSED / NEGOTIATING / AGREED keeps its status: filing is
     // not rejected, matching the existing suite that files on a freshly
     // created (PROPOSED) deal — the dispute is recorded either way.

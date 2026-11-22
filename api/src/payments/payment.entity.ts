@@ -21,8 +21,7 @@ export class Payment {
   id: string;
 
   // Null for subscription payments: a subscription checkout has no deal.
-  // (Billing History lists payments by payer, not by deal.) Made nullable
-  // by the M5 staging fixpack — needs a TYPEORM_SYNC=true boot once.
+  // (Billing History lists payments by payer, not by deal.)
   @Column({ nullable: true })
   dealId: string | null;
 
@@ -51,8 +50,7 @@ export class Payment {
   // Renewal invoices: the Stripe invoice id (in_...). Unique: each
   // invoice settles exactly one Payment row — a redelivery or replay of
   // the same invoice.payment_succeeded event must not create a duplicate
-  // (see recordRenewalPayment). Added by the M5 staging fixpack renewal
-  // fix — needs the same one TYPEORM_SYNC=true boot as payments.dealId.
+  // (see recordRenewalPayment).
   // Nulls stay non-conflicting in Postgres.
   @Column({ nullable: true, unique: true })
   stripeInvoiceId: string;

@@ -36,7 +36,7 @@ export class Opportunity {
   })
   status: OpportunityStatus;
 
-  // Forward-compat for M3: an accepted opportunity can progress to a deal.
+  // Forward-compat: an accepted opportunity can progress to a deal.
   @Column({ nullable: true })
   dealId: string;
 

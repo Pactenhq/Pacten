@@ -5,8 +5,6 @@ import { dashboardUser, brandNav } from "@/lib/mock";
 
 // desktop +
 // "mob Cancel Subscription compled" (426:67623) mobile.
-// Button labels inside unexpanded component instances were not recoverable
-// from cache (APPROX): "Resubscribe" / "Go to Dashboard".
 export default function SubscriptionCancelledPage() {
   return (
     <DashboardShell

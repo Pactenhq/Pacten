@@ -13,9 +13,7 @@ export const dynamic = "force-dynamic";
 // desktop +
 // "mob Notification" (376:36317) mobile.
 // NOTE: the frame uses the public nav (no dashboard sidebar); followed as
-// drawn. The list is REAL: GET /notifications/me. It previously rendered
-// fabricated notification groups for every visitor; the QA pack replaced
-// them with an empty state, and this build wires the real list.
+// drawn. The list is real: GET /notifications/me.
 
 interface PageNotification {
   id: string;

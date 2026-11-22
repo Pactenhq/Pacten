@@ -16,17 +16,17 @@ import { Message } from './message.entity';
 
 // Realtime gateway for messaging.
 //
-// Design: REST API rehta hai source of truth (messages DB me save hote hain).
-// Ye gateway sirf naye save-shuda messages ko conversation ke members tak
-// foran pahunchata hai — har 5 second poll karne ki zaroorat nahi.
+// Design: the REST API stays the source of truth (messages are saved
+// to the DB). This gateway only pushes newly saved messages to the
+// conversation members right away — no 5-second polling needed.
 //
 // Flow:
-//  1. Client socket connect karte waqt apna JWT bhejta hai (auth.token).
-//  2. Client "joinConversation" bhejta hai → server membership check karke
-//     use conversation ke room me daal deta hai.
-//  3. Jab REST se naya message save hota hai, controller
-//     broadcastNewMessage() bulata hai → room ke sab members ko "newMessage"
-//     event mil jata hai.
+//  1. The client sends its JWT when the socket connects (auth.token).
+//  2. The client sends "joinConversation" → the server checks membership
+//     and puts it in the conversation's room.
+//  3. When a new message is saved via REST, the controller calls
+//     broadcastNewMessage() → every member of the room gets the
+//     "newMessage" event.
 
 @WebSocketGateway({
   cors: {
@@ -65,7 +65,7 @@ export class MessagingGateway
   }
 
   handleDisconnect(_client: Socket) {
-    // socket.io rooms khud saaf kar deta hai
+    // socket.io cleans up its rooms itself
   }
 
   @SubscribeMessage('joinConversation')
@@ -91,7 +91,7 @@ export class MessagingGateway
     return { ok: true };
   }
 
-  // Controller isko tab bulata hai jab REST se message save ho jaye.
+  // The controller calls this when a message is saved via REST.
   broadcastNewMessage(conversationId: string, message: Message) {
     if (!this.server) return;
     this.server

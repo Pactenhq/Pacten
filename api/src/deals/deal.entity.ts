@@ -15,7 +15,7 @@ export enum DealStatus {
   NEGOTIATING = 'negotiating',
   AGREED = 'agreed',
   ACTIVE = 'active',
-  // M4: work completion → brand approval → payout release
+  // Work completion → brand approval → payout release
   SUBMITTED = 'submitted', // creator submitted the work
   APPROVED = 'approved', // brand approved the work
   COMPLETED = 'completed',

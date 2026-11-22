@@ -23,9 +23,7 @@ const distinctValues = (rows: any[], get: (c: any) => string[]) =>
 // Filter drawer content matches "Filter campagns" (411:58388).
 export default function CampaignsPage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
-  // Start EMPTY: the page previously seeded itself with mock demo
-  // campaigns and only replaced them when the API returned rows, so
-  // fake demo cards flashed (and lingered when the API was empty).
+  // Start EMPTY: rows come only from the real API.
   const [campaigns, setCampaigns] = useState<any[]>([]);
   const [allCampaigns, setAllCampaigns] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -225,7 +223,7 @@ export default function CampaignsPage() {
             // While the fetch is still in flight the list is empty, NOT
             // loaded-empty: showing "Showing 0 campaigns" during a slow
             // fetch reads as "no campaigns exist" (this is what made the
-            // first campaign look missing on slow staging). Say loading
+            // first campaign look missing while loading). Say loading
             // until the fetch resolves; the !loading empty-state below
             // already handles the truly-empty case.
             count={

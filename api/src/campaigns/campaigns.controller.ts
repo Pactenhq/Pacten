@@ -43,7 +43,7 @@ export class CampaignsController {
     return this.campaignsService.findAll({ search, niche });
   }
 
-  // Admin: all campaigns (M4)
+  // Admin: all campaigns
   @Get('admin/all')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)

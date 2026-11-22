@@ -7,8 +7,6 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Card } from "@/components/ui/Card";
-import { Tag } from "@/components/ui/Tag";
-import { Button } from "@/components/ui/Button";
 import { MessagePanel } from "@/components/campaigns/MessagePanel";
 import { campaignNavFor } from "@/lib/mock-campaigns";
 import { dashboardUser } from "@/lib/mock";

@@ -56,7 +56,7 @@ export const VALID_TRANSITIONS: Record<DealStatus, DealStatus[]> = {
   [DealStatus.DISPUTED]: [DealStatus.ACTIVE, DealStatus.CANCELLED],
 };
 
-// Same 500-vs-400 class as D-3 (by-user endpoints): a non-UUID deal id
+// Same 500-vs-400 class as the by-user endpoints: a non-UUID deal id
 // in a :id route is a client error (400), not a server error — without
 // this, Postgres rejects the uuid comparison and Nest returns 500.
 // Every :id method funnels through findOne, so one check covers them all
@@ -270,7 +270,7 @@ export class DealsService {
     return deal;
   }
 
-  // ---------- Admin (M4: deal/payment overview) ----------
+  // ---------- Admin (deal/payment overview) ----------
 
   async adminList(opts: {
     status?: string;
@@ -371,7 +371,7 @@ export class DealsService {
     const saved = await this.dealsRepo.save(deal);
     await this.snapshot(saved, userId);
 
-    // M4: completing the deal releases the supported payout.
+    // Completing the deal releases the supported payout.
     if (dto.status === DealStatus.COMPLETED) {
       try {
         await this.payoutsService.createForDeal(deal.id);
@@ -384,7 +384,7 @@ export class DealsService {
   }
 
   /**
-   * M4: creator submits the finished work for brand approval.
+   * Creator submits the finished work for brand approval.
    */
   async submitWork(dealId: string, userId: string): Promise<Deal> {
     const deal = await this.findOne(dealId, userId);
@@ -397,7 +397,7 @@ export class DealsService {
   }
 
   /**
-   * M4: brand approves the submitted work. Payout is released when the
+   * Brand approves the submitted work. Payout is released when the
    * deal is then marked completed.
    */
   async approveWork(dealId: string, userId: string): Promise<Deal> {

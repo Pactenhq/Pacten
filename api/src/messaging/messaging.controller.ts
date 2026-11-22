@@ -58,7 +58,7 @@ export class MessagingController {
     @Param('id') id: string,
     @Body() dto: SendMessageDto,
   ) {
-    // REST source of truth hai: pehle DB me save, phir realtime broadcast
+    // REST is the source of truth: save to the DB first, then broadcast in realtime
     const message = await this.messagingService.sendMessage(id, req.user.id, dto);
     this.messagingGateway.broadcastNewMessage(id, message);
     return message;

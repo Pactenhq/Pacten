@@ -42,8 +42,7 @@ function CampaignDetailContent() {
             description: data.description ?? "",
             budget: data.budget ?? "",
             timeline: data.deadline ?? "",
-            // GAP-4: the status pill used to show the raw enum value
-            // ("open"). It now uses the shared canonical label so it
+            // The status pill uses the shared canonical label so it
             // matches My Campaigns and the brand dashboard overview.
             type: campaignStatusLabel(data.status),
             status: data.status ?? "",

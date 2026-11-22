@@ -23,12 +23,10 @@ const statCards = [
 ];
 
 export default function CreatorApplicationsPage() {
-  // Start EMPTY (the page previously seeded mock application rows and
-  // kept them whenever the API returned an empty list, contradicting
-  // the zeroed stat cards above them).
+  // Start EMPTY: rows come only from the real API.
   const [rows, setRows] = useState<any[]>([]);
   const [stats, setStats] = useState(statCards);
-  // B-2: loading flag so the empty state below never flashes while the
+  // Loading flag so the empty state below never flashes while the
   // API is still answering — it renders only once zero rows is real.
   const [loading, setLoading] = useState(true);
 
@@ -105,10 +103,8 @@ export default function CreatorApplicationsPage() {
           ))}
         </div>
 
-        {/* B-2: matching empty state to the brand-side received-
-            applications page ("No applications yet…") — previously a
-            creator with zero applications saw 0-stat cards above an
-            empty table and no message at all. */}
+        {/* Matching empty state to the brand-side received-applications
+            page ("No applications yet…"). */}
         {loading ? (
           <p className="text-ink-500 dark:text-ink-300">Loading applications...</p>
         ) : rows.length === 0 ? (

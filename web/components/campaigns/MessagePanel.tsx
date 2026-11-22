@@ -8,7 +8,7 @@ import type { CampaignMessage } from "@/lib/mock-campaigns";
 // Rebuilt from the  (292:12953) messages
 // section and the "Management" frame (416:64240) messages section:
 // "Messages" heading (blue) with a blue count badge, the dark-blue
-// creator card (avatar, name, handle, "View Profile"), the "Sep 2" date
+// creator card (avatar, name, handle, "View Profile"), the date
 // divider, message bubbles, and the composer: "Type your message..."
 // input with a paperclip icon and a "Send Message" button.
 export function MessagePanel({

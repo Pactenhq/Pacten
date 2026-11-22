@@ -97,8 +97,8 @@ function RangeSlider({
     if (!el) return;
     const rect = el.getBoundingClientRect();
     const pct = Math.min(100, Math.max(0, ((clientX - rect.left) / rect.width) * 100));
-    if (dragRef.current === "lo") setLo((prev) => Math.min(pct, hi - 4));
-    else if (dragRef.current === "hi") setHi((prev) => Math.max(pct, lo + 4));
+    if (dragRef.current === "lo") setLo(Math.min(pct, hi - 4));
+    else if (dragRef.current === "hi") setHi(Math.max(pct, lo + 4));
   };
 
   useEffect(() => {

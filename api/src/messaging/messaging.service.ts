@@ -139,9 +139,8 @@ export class MessagingService {
       );
     }
 
-    // Frontend har message ko isMine se pehchanta hai (apna = right,
-    // doosre ka = left). Ye field pehle missing tha — is liye saare
-    // messages "them" ban kar left par render ho rahe thay.
+    // The frontend tells messages apart with isMine (own = right,
+    // other = left).
     for (const m of messages) {
       (m as any).isMine = m.senderId === userId;
     }

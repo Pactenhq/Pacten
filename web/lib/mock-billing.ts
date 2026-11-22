@@ -11,9 +11,8 @@ export interface ComparisonRow {
   pacten: string | true;
 }
 
-// "Why Pacten?" table. Every row is a real MVP feature. The competitor
-// column is gone: the old Collabstr values were never verified against
-// any source, so the table no longer claims anything about Collabstr.
+// "Why Pacten?" table. Every row is a real MVP feature; the table
+// claims nothing about competitors.
 // Messaging is not unlimited on Free — free users get 5 new
 // conversations a month, replies unlimited; paid plans are unlimited.
 export const pricingComparison: ComparisonRow[] = [

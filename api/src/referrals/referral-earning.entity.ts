@@ -12,7 +12,7 @@ export enum EarningType {
   // Legacy types from the demo milestone system. They no longer generate
   SIGNUP = 'signup',
   MILESTONE = 'milestone',
-  // Client final rules: 20% of a referred user's first 3 subscription
+  // Final rules: 20% of a referred user's first 3 subscription
   // payments; 10% of Pacten's commission on their first completed paid deal.
   SUBSCRIPTION = 'subscription',
   DEAL = 'deal',

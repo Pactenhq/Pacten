@@ -9,9 +9,8 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { api, dashboardPathForRole } from "@/lib/api";
 
 // Legacy route: shows the signed-in creator's own public profile.
-// It previously rendered a fabricated showcase profile ("Sophia
-// Bennett", fake stats, fake reviews). It now redirects to the real
-// public profile page (/creators/[id]) backed by the profiles API.
+// It redirects to the real public profile page (/creators/[id])
+// backed by the profiles API.
 export default function CreatorProfilePage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();

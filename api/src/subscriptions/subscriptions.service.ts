@@ -134,7 +134,7 @@ export class SubscriptionsService implements OnModuleInit {
 
   async onModuleInit() {
     // Upsert by plan code so existing installs move from the demo prices
-    // to the client's final pricing without losing plan ids (existing
+    // to the final pricing without losing plan ids (existing
     // subscriptions keep pointing at the same rows).
     for (const seed of SEED_PLANS) {
       const existing = await this.plansRepo.findOne({
@@ -225,7 +225,7 @@ export class SubscriptionsService implements OnModuleInit {
         plan.priceCentsMonthly,
         session.id,
       );
-      // Billing History (defect #1): record the Payment row — without
+      // Billing History: record the Payment row — without
       // it GET /payments/my is empty for a paying subscriber.
       await this.payments.recordSubscriptionPayment({
         userId,
@@ -296,7 +296,7 @@ export class SubscriptionsService implements OnModuleInit {
       plan.priceCentsMonthly,
       sessionId,
     );
-    // Billing History (defect #1): record the Payment row — deduped by
+    // Billing History: record the Payment row — deduped by
     // session id, so a webhook that already settled this checkout is a
     // no-op here.
     await this.payments.recordSubscriptionPayment({

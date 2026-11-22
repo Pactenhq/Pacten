@@ -91,7 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     refresh();
   }, [refresh]);
 
-  // B-1: `remember` selects the token store — true (default) writes
+  // `remember` selects the token store — true (default) writes
   // localStorage, false writes sessionStorage (see lib/api.ts).
   const login = useCallback(
     async (email: string, password: string, remember = true) => {

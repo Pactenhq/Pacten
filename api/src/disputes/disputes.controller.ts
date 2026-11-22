@@ -12,7 +12,6 @@ import {
   IsEnum,
   IsString,
   MinLength,
-  IsOptional,
   IsIn,
 } from 'class-validator';
 import { DisputesService } from './disputes.service';

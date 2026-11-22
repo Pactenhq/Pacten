@@ -36,7 +36,7 @@ export class Contract {
   @Column('text')
   termsSnapshot: string;
 
-  // Legal wording for simple contracts: the client-supplied Simple
+  // Legal wording for simple contracts: the supplied Simple
   @Column('text')
   legalWording: string;
 

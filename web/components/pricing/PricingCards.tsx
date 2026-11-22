@@ -101,8 +101,7 @@ export function PricingCards({ role }: { role: PlanRole }) {
       )}
     >
       {plans.map((plan, i) => {
-        // Only the Pro tier is highlighted / badged — previously EVERY
-        // paid plan rendered a "Most popular" badge at the same time.
+        // Only the Pro tier is highlighted / badged.
         const highlighted =
           (plan as any).tier === "pro" ||
           (plan.priceCentsMonthly === 2900 && !(plan as any).tier);

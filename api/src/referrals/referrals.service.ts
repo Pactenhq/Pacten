@@ -415,7 +415,7 @@ export class ReferralsService implements OnModuleInit {
       order: { createdAt: 'ASC' },
     });
     const balance = available.reduce((a, e) => a + e.amountCents, 0);
-    // Client rule: $25 minimum withdrawal.
+    // Platform rule: $25 minimum withdrawal.
     if (balance < MIN_WITHDRAWAL_CENTS) {
       throw new BadRequestException(
         `Minimum withdrawal is $${(MIN_WITHDRAWAL_CENTS / 100).toFixed(0)} — your available referral balance is below the minimum`,

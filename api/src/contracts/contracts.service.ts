@@ -545,7 +545,7 @@ export class ContractsService {
       : this.buildSimpleFieldValues(saved, deal, brand, creator);
     await this.contractsRepo.save(saved);
 
-    // Notify the other party (M5 transactional email).
+    // Notify the other party.
     try {
       const recipientId =
         userId === deal.brandId ? deal.creatorId : deal.brandId;

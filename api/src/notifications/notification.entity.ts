@@ -37,7 +37,7 @@ export class Notification {
   id: string;
 
   // Recipient. Plain id column only — the list endpoints must never load
-  // the full user relation (see the M5 QA public-profile email leak, F8).
+  // the full user relation.
   @Column()
   userId: string;
 

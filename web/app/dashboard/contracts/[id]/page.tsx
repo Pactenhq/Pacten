@@ -42,10 +42,10 @@ export default function ContractDetailPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  // GAP-3: the other party can sign while this page is open (or in
-  // another tab); the signature block would stay stale until a manual
-  // reload. Refetch when the page regains focus or becomes visible
-  // again, on top of the refetch-after-accept in act().
+  // The other party can sign while this page is open (or in another
+  // tab); the signature block would stay stale until a manual reload.
+  // Refetch when the page regains focus or becomes visible again, on
+  // top of the refetch-after-accept in act().
   useEffect(() => {
     const refetch = () => {
       api
@@ -88,12 +88,10 @@ export default function ContractDetailPage() {
               signatoryTitle: signatoryTitle.trim() || undefined,
             })
           : await api.declineContract(id);
-      // Re-read the contract from the server after signing (triage (a)):
-      // the signature rows must show the persisted state, not whatever
-      // the POST response happened to carry. The page previously trusted
-      // the POST body alone, so a stale-looking "Awaiting signature"
-      // could survive until a manual reload. If the refetch fails, fall
-      // back to the POST response instead of blanking the page.
+      // Re-read the contract from the server after signing: the
+      // signature rows must show the persisted state, not whatever the
+      // POST response happened to carry. If the refetch fails, fall back
+      // to the POST response instead of blanking the page.
       setContract(updated);
       try {
         setContract(await api.contractDetail(id));

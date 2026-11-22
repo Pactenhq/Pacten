@@ -143,8 +143,8 @@ export function ProfessionalCard({
             <Avatar name={professional.name} size="lg" />
           </div>
         )}
-        {/* F-2: top label is industriesList[0], NOT category (first
-            skill). Empty industries => PhotoTags renders no pill. */}
+        {/* Top label is industriesList[0], NOT category (first skill).
+            Empty industries => PhotoTags renders no pill. */}
         <PhotoTags tags={industryLabel(professional.industriesList)} />
         <button
           type="button"

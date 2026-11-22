@@ -23,11 +23,11 @@ import { api } from "@/lib/api";
 
 // desktop +
 // "mob Professional dashboard" (365:23596) mobile.
-// Stat cards, Hiring Requests aur campaign rows AB REAL API DATA se
-// aate hain (pehle sab mock tha): earnings = completed deals,
-// active services = active deals, requests = received opportunities.
-// "Profile Views" ka koi data source MVP me nahi (analytics Phase 2) —
-// us ki jagah real Pending Requests count hai.
+// Stat cards, Hiring Requests and campaign rows come from the real API:
+// earnings = completed deals, active services = active deals, requests
+// = received opportunities. "Profile Views" has no data source in the
+// MVP (analytics is Phase 2) — the real Pending Requests count is
+// shown instead.
 
 function moneyOf(v: any): number {
   if (v == null) return 0;

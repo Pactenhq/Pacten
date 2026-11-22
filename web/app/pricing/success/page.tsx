@@ -12,9 +12,6 @@ import { api } from "@/lib/api";
 
 // desktop +
 // "mob pricing Upgrade Successful" (426:70959) mobile.
-// Button labels inside unexpanded component instances were not recoverable
-// from cache (APPROX): "Go to Dashboard" / "Explore Plans".
-//
 // Live mode: Stripe returns here with ?session_id={CHECKOUT_SESSION_ID}.
 // The checkout.session.completed webhook targets the deployed backend, so
 // on a local run the plan would never activate — settle it from the

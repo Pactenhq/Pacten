@@ -1,8 +1,6 @@
-// Conversation API shape ko UI shape me badalne wale helpers.
-// Doosra participant = jo main NAHI hun. Pehle code hamesha
-// participant2 utha leta tha — jo user khud participant2 ho
-// (doosre ne conversation shuru ki ho) use apna hi email
-// partner ke taur par nazar aata tha.
+// Helpers that convert the conversation API shape to the UI shape.
+// The other participant is whoever is NOT me — never just
+// participant2, which can be the user themselves.
 export function otherParticipant(c: any, myId?: string) {
   const parts = [c?.participant1, c?.participant2].filter(Boolean);
   return (
@@ -30,8 +28,8 @@ export function mapConversation(c: any, myId?: string) {
     avatar: other.avatar ?? "",
     // The other party's identity, for the thread header's "View Profile"
     // button: the public profile routes are keyed by PROFILE id, so the
-    // panel resolves the profile via the by-user lookup. Without these
-    // fields the button had nothing to link to (defect #2).
+    // panel resolves the profile via the by-user lookup. These fields are
+    // what the button links to.
     otherUserId: other.id ?? null,
     otherRole: other.role ?? null,
     preview: c.lastMessage?.content ?? "",

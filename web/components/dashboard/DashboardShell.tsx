@@ -65,15 +65,6 @@ export function DashboardShell({
   // While the session is still resolving, show a neutral loading label —
   // never the mock `userName` prop (a stranger's name flashing on load).
   const shownName = authLoading ? "Loading…" : user ? displayName : userName;
-  const shownInitials =
-    !authLoading && user
-      ? shownName
-          .split(" ")
-          .map((w) => w[0])
-          .join("")
-          .slice(0, 2)
-          .toUpperCase()
-      : userInitials;
   const handleLogout = () => {
     if (user) logout();
     else setMenuOpen(false);
@@ -114,10 +105,8 @@ export function DashboardShell({
                 onClick={() => setUserMenuOpen((v) => !v)}
                 className="flex cursor-pointer items-center gap-2.5 rounded-xl px-1 py-1 hover:bg-ink-50 dark:hover:bg-white/5"
               >
-                {/* No stock-photo fallback: the header used to show a
-                    stranger's photo (avatar-reviewer.jpg) as the logged-in
-                    user's face. The initials Avatar renders instead — the
-                    same component the marketplace cards use. */}
+                {/* No stock-photo fallback: the initials Avatar renders
+                    instead — the same component the marketplace cards use. */}
                 <Avatar name={shownName} size="sm" />
                 <span className="text-[15px] font-semibold text-ink-900 dark:text-ink-50">
                   {shownName}

@@ -11,12 +11,11 @@ import {
 } from "@/components/auth/auth-forms";
 
 // Professional signup. The design's DESKTOP frame duplicated the brand
-// ("Business account") wizard verbatim — a design anomaly that read as
-// a bug to every tester (professionals were asked for a company and
-// hiring goals). The design's own MOBILE frame carries the correct
-// professional copy, so this page now uses that copy on all viewports,
-// with the same single-step account form and submit behaviour as the
-// other role signups.
+// ("Business account") wizard verbatim — a design anomaly (professionals
+// were asked for a company and hiring goals). The design's own MOBILE
+// frame carries the correct professional copy, so this page uses that
+// copy on all viewports, with the same single-step account form and
+// submit behaviour as the other role signups.
 // NOTE: the frame also drew a 4-step wizard (Account/Profile/Expertise/
 // Confirm) but signup is a single step — the account is created here
 // and profile completion happens later in Settings — so no stepper is

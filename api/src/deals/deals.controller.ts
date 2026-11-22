@@ -38,7 +38,7 @@ export class DealsController {
     return this.dealsService.findMyDeals(req.user.id);
   }
 
-  // Admin: all deals (M4 deal/payment overview)
+  // Admin: all deals (deal/payment overview)
   @Get('admin/all')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)

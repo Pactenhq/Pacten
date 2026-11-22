@@ -541,10 +541,8 @@ export function ProfileCompleteness({ pct }: { pct: number }) {
 }
 
 export function AvailabilityCalendar() {
-  // Real calendar for the CURRENT month (the widget previously rendered
-  // a hard-coded July 2025 grid with invented per-day statuses and dead
-  // prev/next buttons). Prev/next now navigate; today is highlighted;
-  // no fake availability statuses are shown.
+  // Real calendar for the CURRENT month. Prev/next navigate; today is
+  // highlighted; no fake availability statuses are shown.
   const [view, setView] = useState(() => {
     const n = new Date();
     return { year: n.getFullYear(), month: n.getMonth() };
@@ -1004,8 +1002,7 @@ export function RecentReferrals({
 }: {
   rows: { name: string; joined: string; earnings: string; status: string }[];
 }) {
-  // Empty state only when there are no rows (it was appended under the
-  // populated list unconditionally).
+  // Empty state only when there are no rows.
   if (rows.length === 0) {
     return (
       <Card>

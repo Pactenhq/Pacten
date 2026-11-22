@@ -6,7 +6,7 @@ import { Footer } from "@/components/ui/Footer";
 import { Tag } from "@/components/ui/Tag";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { Reveal, Stagger } from "@/components/ui/Reveal";
+import { Stagger } from "@/components/ui/Reveal";
 import { PricingCards } from "@/components/pricing/PricingCards";
 import { pricingComparison, pricingFaqs, rateCalculatorTiers } from "@/lib/mock-billing";
 import { parseBudgetNumber } from "@/lib/budget";

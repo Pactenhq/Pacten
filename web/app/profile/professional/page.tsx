@@ -9,9 +9,8 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { api, dashboardPathForRole } from "@/lib/api";
 
 // Legacy route: shows the signed-in professional's own public profile.
-// It previously rendered a fabricated showcase profile (fake rates,
-// fake availability, fake reviews). It now redirects to the real
-// public profile page (/professionals/[id]) backed by the profiles API.
+// It redirects to the real public profile page (/professionals/[id])
+// backed by the profiles API.
 export default function ProfessionalProfilePage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();

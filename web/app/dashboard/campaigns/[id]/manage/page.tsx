@@ -16,18 +16,12 @@ import { manageNavFor } from "@/lib/mock-campaigns";
 import { dashboardUser } from "@/lib/mock";
 import { useAuth } from "@/components/auth/AuthProvider";
 
-// Brand campaign management workspace. The page previously rendered a
-// fully fabricated workspace for one mock campaign ("Summer Glow"):
-// fake header, info cards, tabs, assigned creator, deliverables,
-// activity feed and messages — while the [id] segment was ignored and
-// only the Approve/Reject buttons called the real API.
-//
-// Now: the header, status, budget, deadline and deliverables come from
-// the real campaign API, and the Applications section lists the real
-// applications. There is no backend for campaign tasks, files or an
-// activity feed, so those sections are gone rather than fabricated;
-// the Messages panel starts empty (campaign messages have no backend —
-// real messaging lives under /dashboard/messages).
+// Brand campaign management workspace. The header, status, budget,
+// deadline and deliverables come from the real campaign API, and the
+// Applications section lists the real applications. There is no backend
+// for campaign tasks, files or an activity feed, so those sections are
+// not shown; the Messages panel starts empty (campaign messages have
+// no backend — real messaging lives under /dashboard/messages).
 export default function ManageCampaignPage() {
   const { id } = useParams() as { id: string };
   const { user, loading: authLoading } = useAuth();
@@ -148,8 +142,8 @@ export default function ManageCampaignPage() {
                     <h1 className="text-[28px] font-extrabold tracking-tight text-ink-900 dark:text-ink-50">
                       {campaign.title}
                     </h1>
-                    {/* GAP-4: same shared label as My Campaigns /
-                        brand dashboard / public detail (was raw "open"). */}
+                    {/* Same shared label as My Campaigns / brand dashboard
+                        / public detail. */}
                     {campaign.status ? <Tag tone="warning">{campaignStatusLabel(campaign.status)}</Tag> : null}
                   </div>
                   <p className="mt-2 text-[14px] text-ink-500 dark:text-ink-300">

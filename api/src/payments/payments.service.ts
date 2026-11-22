@@ -73,7 +73,7 @@ export class PaymentsService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    // Seed the client's final rates. Existing rows still carrying the old
+    // Seed the final rates. Existing rows still carrying the old
     // DEMO note are migrated to the final values; rows an admin has since
     // edited (different note) are left untouched.
     for (const seed of FINAL_COMMISSION_SEED) {
@@ -493,7 +493,7 @@ export class PaymentsService implements OnModuleInit {
         if (payment) {
           payment.status = PaymentStatus.REFUNDED;
           await this.paymentsRepo.save(payment);
-          // Client rule: no referral rewards on refunds/chargebacks —
+          // Platform rule: no referral rewards on refunds/chargebacks —
           // reverse any earning sourced from this deal/payment.
           await this.referrals.reverseEarningsBySource(payment.id);
           await this.referrals.reverseEarningsBySource(payment.dealId);
@@ -510,7 +510,7 @@ export class PaymentsService implements OnModuleInit {
         // Renewal-payment refund: the charge carries the invoice id
         // (charge.invoice), which is the sourceId the renewal branch
         // credits the referral earning under — reverse that earning too
-        // (client rule: no rewards on refunds/chargebacks).
+        // (no rewards on refunds/chargebacks).
         if (event.data.invoice) {
           await this.referrals.reverseEarningsBySource(event.data.invoice);
         }
@@ -588,7 +588,7 @@ export class PaymentsService implements OnModuleInit {
               session.amount_total ?? plan.priceCentsMonthly,
               session.id,
             );
-            // Billing History (defect #1): the subscription is active but
+            // Billing History: the subscription is active but
             // no Payment row existed, so /payments/my was empty. Record
             // it here too — deduped by session id, so whichever path
             // (webhook or return-path sync) lands first wins.
@@ -615,10 +615,10 @@ export class PaymentsService implements OnModuleInit {
         break;
       }
       case 'invoice.payment_succeeded': {
-        // Renewal fix (staging, Nov 11 2026): renewals never created a
-        // Payment row — invoice.payment_succeeded was stored for audit
-        // only — so Billing History showed the initial checkout and then
-        // nothing, even though the subscriber kept paying monthly.
+        // Renewals create a Payment row here: invoice.payment_succeeded
+        // was stored for audit only, so Billing History showed
+        // the initial checkout and then nothing, even though the
+        // subscriber kept paying monthly.
         const invoice = event.data;
         const stripeSubId =
           typeof invoice?.subscription === 'string'

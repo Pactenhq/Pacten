@@ -14,12 +14,9 @@ import { api } from "@/lib/api";
 // campaign rows: icon, "New Product Launch" / "@sophie.c", Budget /
 // Status / Deadline / Submitted columns and a kebab menu.
 //
-// GAP-4: the status shown here used to be a second, invented mapping
-// (open -> "Pending", closed -> "Declined") while the brand dashboard
-// showed "Active" and the public detail showed the raw "open". The row
-// status now comes from the shared campaignStatusLabel() helper, and
-// the pills filter on those same canonical labels, so all three
-// surfaces agree.
+// The row status comes from the shared campaignStatusLabel() helper,
+// and the pills filter on those same canonical labels, so the list,
+// the brand dashboard and the public detail all agree.
 const pillToStatus: Record<string, string[]> = {
   All: [],
   Open: ["Open"],
@@ -57,19 +54,15 @@ function StatusIcon({ status }: { status: string }) {
 
 export function CampaignTabs() {
   const [pill, setPill] = useState("All");
-  // Start EMPTY: rows come only from the real API. The list previously
-  // initialised with fabricated showcase campaigns, so a brand with no
-  // campaigns saw fake rows ("New Product Launch / @sophie.c").
+  // Start EMPTY: rows come only from the real API.
   const [rows, setRows] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [openMenu, setOpenMenu] = useState<number | null>(null);
   const [closingId, setClosingId] = useState<string | null>(null);
 
-  // The kebab menu used to close only by clicking the kebab again or
-  // by choosing an action — clicking anywhere else on the page (or
-  // pressing Escape) left it open. Close it on outside mousedown and
-  // on Escape, like the header menus and the notification bell.
+  // Close the kebab menu on outside mousedown and on Escape, like the
+  // header menus and the notification bell.
   useEffect(() => {
     if (openMenu == null) return;
     const onDocClick = (e: MouseEvent) => {

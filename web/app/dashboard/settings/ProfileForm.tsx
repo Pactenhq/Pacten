@@ -15,8 +15,7 @@ export function SettingsProfileForm() {
   const { user, profile, loading, refresh } = useAuth();
   const router = useRouter();
   // Start EMPTY and fill from the real session profile (the useEffect
-  // below). The form previously initialised with the design-mock user
-  // ("Olivia Martinez"), which flashed as a stranger's data on load.
+  // below).
   const [values, setValues] = useState({
     fullName: "",
     location: "",

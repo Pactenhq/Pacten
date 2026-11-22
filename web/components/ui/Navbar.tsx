@@ -70,7 +70,7 @@ function NavDropdown({
   // Close delay, cancelled on re-enter. A plain mouseleave closed the
   // menu the instant the cursor left the trigger — including while it
   // crossed the 8px strip between trigger and panel — so a normal slow
-  // move down could never reach the menu items (client report, Nov 14).
+  // move down could never reach the menu items.
   // The delay alone is not the fix: the panel below also carries a
   // padding bridge, so the strip belongs to this wrapper and no
   // mouseleave fires while crossing it at all. The delay is belt and
@@ -112,10 +112,10 @@ function NavDropdown({
         aria-expanded={open}
         // Clicking the trigger NAVIGATES to the group's page — the
         // label is a link (mobile already treats it as one; desktop
-        // must match the client's expectation that clicking switches
+        // must match the expectation that clicking switches
         // to the section). Hover already opened the menu before the
         // click, so there is NO toggle here and no way for a click to
-        // close a just-opened menu — the Nov 11 lesson. Focus also
+        // close a just-opened menu. Focus also
         // opens the menu, so keyboard users can Tab from the trigger
         // straight into the menu items — except for the focus the
         // parent performs after closing with Escape (see
@@ -143,11 +143,9 @@ function NavDropdown({
       {open && (
         // Padding bridge: the outer wrapper carries pt-2, so the 8px
         // strip between the trigger and the visual menu belongs to
-        // this hover wrapper — crossing it no longer fires
-        // mouseleave. The visual styles stay on the inner menu, so
-        // the menu appears in exactly the same place as before
-        // (previously `mt-2` on the menu itself, which put the strip
-        // outside the wrapper).
+        // this hover wrapper — crossing it does not fire mouseleave.
+        // The visual styles stay on the inner menu, so the menu appears
+        // in exactly the same place as before.
         <div className="absolute top-full left-0 z-50 w-60 pt-2">
           <div className="rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 p-2 shadow-card">
             <ul>

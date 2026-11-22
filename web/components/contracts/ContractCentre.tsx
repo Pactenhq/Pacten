@@ -15,11 +15,8 @@ import {
 
 // The two contract options below are the REAL generation choices in the
 // system (see contracts.service: template 'standard' vs 'simple').
-// The tab previously listed a fabricated "Influencer Template" with
-// dead Edit/Delete buttons.
-
 // Contract Centre list pages, rebuilt from the design frames (visual design
-// unchanged). M4: rows, stats, search and tabs are now driven by the real
+// unchanged). Rows, stats, search and tabs are driven by the real
 // contracts API instead of mock data. Backend statuses map to the design's
 // labels: sent -> "Awaiting Signature", accepted -> "Signed",
 // declined -> "Cancelled", draft -> "Draft".

@@ -170,7 +170,7 @@ export class CampaignsService {
     await this.campaigns.remove(campaign);
   }
 
-  // ---------- Admin (M4: job/campaign management) ----------
+  // ---------- Admin (job/campaign management) ----------
 
   private safeCampaign(campaign: Campaign, applicationCount: number) {
     const b: any = (campaign as any).brand;

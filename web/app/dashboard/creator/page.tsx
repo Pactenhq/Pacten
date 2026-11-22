@@ -24,11 +24,11 @@ import { api } from "@/lib/api";
 
 // + "Creator dashboard empty"
 // (418:69025); mobile refs 366:26121 / 418:69686.
-// Stat cards, Recent Requests aur campaign rows AB REAL API DATA se
-// aate hain (pehle sab mock tha): earnings = completed deals ke budgets,
-// active campaigns = active deals, requests = received opportunities.
-// No "Profile Views" data source in MVP — Pending Requests count is
-// shown instead. Profile completeness is computed from real fields.
+// Stat cards, Recent Requests and campaign rows come from the real API:
+// earnings = completed deals' budgets, active campaigns = active deals,
+// requests = received opportunities. No "Profile Views" data source in
+// MVP — the Pending Requests count is shown instead. Profile
+// completeness is computed from real fields.
 
 function moneyOf(v: any): number {
   if (v == null) return 0;

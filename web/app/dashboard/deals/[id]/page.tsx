@@ -192,12 +192,10 @@ export default function DealDetailPage() {
     await refreshM4();
   };
 
-  // GAP-3: the deal's status (and its contract) can also change
-  // elsewhere — the other party signing the contract on the contract
-  // page, or an action taken in another tab. This page previously
-  // refetched only after its OWN actions, so those changes stayed
-  // invisible until a manual reload. Refetch whenever the page regains
-  // focus or becomes visible again, on top of refresh-after-action.
+  // The deal's status (and its contract) can also change elsewhere —
+  // the other party signing the contract on the contract page, or an
+  // action taken in another tab. Refetch whenever the page regains focus
+  // or becomes visible again, on top of refresh-after-action.
   useEffect(() => {
     const onFocus = () => {
       void refreshDeal();
@@ -429,7 +427,7 @@ export default function DealDetailPage() {
           </div>
         </div>
 
-        {/* M4: Contract */}
+        {/* Contract */}
         <div className="rounded-2xl border border-gray-200 dark:border-ink-700 bg-white dark:bg-ink-900 p-6">
           <h3 className="mb-4 text-lg font-semibold">Contract</h3>
           {contract ? (
@@ -467,7 +465,7 @@ export default function DealDetailPage() {
           )}
         </div>
 
-        {/* M4: Payment — wording follows the signed contract's §4 terms
+        {/* Payment — wording follows the signed contract's §4 terms
             (no upfront promise when the agreement requires none). The
             payment flow itself (Stripe upfront payment) is unchanged. */}
         <div className="rounded-2xl border border-gray-200 dark:border-ink-700 bg-white dark:bg-ink-900 p-6">
@@ -535,7 +533,7 @@ export default function DealDetailPage() {
           )}
         </div>
 
-        {/* M4: Completion → approval → payout */}
+        {/* Completion → approval → payout */}
         {(deal.status === "active" ||
           deal.status === "submitted" ||
           deal.status === "approved" ||
@@ -578,7 +576,7 @@ export default function DealDetailPage() {
             </div>
           </div>
         )}
-        {/* M5: Disputes */}
+        {/* Disputes */}
         <div className="rounded-2xl border border-gray-200 dark:border-ink-700 bg-white dark:bg-ink-900 p-6">
           <h3 className="mb-4 text-lg font-semibold">Disputes</h3>
           {dealDisputes.length > 0 ? (

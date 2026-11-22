@@ -57,8 +57,7 @@ export function useLoginForm() {
   const [resendState, setResendState] = useState<
     "idle" | "sending" | "sent" | "error"
   >("idle");
-  // B-1: "Remember me" — checked by default (the pre-fix behaviour
-  // always persisted the token), unchecked = session-only token.
+  // "Remember me" — checked by default, unchecked = session-only token.
   const [remember, setRemember] = useState(true);
 
   const field = (name: string) => ({

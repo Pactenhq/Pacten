@@ -283,8 +283,8 @@ export interface DashboardCampaign {
   title: string;
   handle: string;
   budget: string;
-  // GAP-4: was "Active" | "Completed" — the row status now carries the
-  // shared canonical campaign label ("Open" / "Completed" / "Closed").
+  // The row status carries the shared canonical campaign label
+  // ("Open" / "Completed" / "Closed").
   status: string;
   deadline: string;
   submitted: string;
@@ -320,7 +320,7 @@ export interface HomePlan {
   tag?: string;
 }
 
-// Per-role home pricing cards — names/prices follow the client's FINAL
+// Per-role home pricing cards — names/prices follow the final pricing.
 export type HomePlanRole = "brand" | "creator" | "professional";
 
 export const homeSearchChips = [

@@ -17,7 +17,7 @@ import { mapConversation, mapMessages } from "@/lib/conversation-map";
 // "mob inbox" (411:59486).
 // Loads the real conversation + messages from the API. Unknown ids and
 // API failures show an empty/not-found state — never mock people.
-// Real conversation me messages na hon to thread KHAALI dikhta hai.
+// A real conversation with no messages shows an empty thread.
 export default function ConversationPage() {
   const { id } = useParams() as { id: string };
   const { user } = useAuth();
@@ -38,10 +38,9 @@ export default function ConversationPage() {
   // Refresh the conversation list (unread badges) after the open thread
   // is marked read. Deliberately NOT gated by the load effect's
   // `cancelled` flag: on a direct-URL open the effect runs twice
-  // (session unresolved, then resolved) and the first run's cleanup
-  // used to discard the refresh, leaving a stale badge. The refresh is
-  // idempotent — the list is re-read from the API after mark-read — so
-  // a superseded run applying it is harmless.
+  // (session unresolved, then resolved). The refresh is idempotent —
+  // the list is re-read from the API after mark-read — so a superseded
+  // run applying it is harmless.
   const refreshConversations = useCallback(() => {
     api
       .conversations()

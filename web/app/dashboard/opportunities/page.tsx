@@ -11,7 +11,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { api } from "@/lib/api";
 import { parseBudgetNumber } from "@/lib/budget";
 
-// Direct opportunities (M2): brand → creator/professional.
+// Direct opportunities: brand → creator/professional.
 // Role-aware single page: brands see what they sent,
 // creators/professionals see what they received (accept/decline).
 const STATUS_STYLE: Record<string, string> = {

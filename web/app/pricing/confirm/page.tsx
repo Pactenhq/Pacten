@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/Button";
 import { api, getToken } from "@/lib/api";
 
 // desktop + "mob pricing Confirm Your Upgrade" (426:70148) mobile.
-// Design unchanged. M4: plan data now comes from the real subscriptions API
+// Design unchanged. Plan data comes from the real subscriptions API
 // (?plan=<id>); Confirm runs the real checkout.
 
 type Plan = {
@@ -72,8 +72,8 @@ function ConfirmUpgradeContent() {
     setBusy(true);
     try {
       const res = await api.subscriptionCheckout(plan.id);
-      // Live mode: Stripe ki apni hosted checkout screen par bhejo.
-      // Demo mode: subscription foran active ho jati hai.
+      // Live mode: send the user to Stripe's hosted checkout screen.
+      // Demo mode: the subscription activates immediately.
       if (res?.checkoutUrl && !res?.demoMode) {
         window.location.href = res.checkoutUrl;
         return;

@@ -11,10 +11,8 @@ import { api, dashboardPathForRole } from "@/lib/api";
 
 // Brand profile page. There is no public brand profile route, so this
 // page shows the signed-in brand's own profile from the real profiles
-// API. It previously rendered a fabricated showcase brand (fake
-// campaigns, fake jobs, fake hiring activity, fake reviews). Every
-// field below comes from GET /profiles/me; empty fields say so
-// instead of inventing content.
+// API. Every field below comes from GET /profiles/me; empty fields say
+// so instead of inventing content.
 export default function BrandProfilePage() {
   const { user, displayName, loading: authLoading } = useAuth();
   const [profile, setProfile] = useState<any>(null);

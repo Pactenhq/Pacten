@@ -12,7 +12,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { api } from "@/lib/api";
 
 // desktop + "mob Subscription" (423:66356) mobile — design unchanged.
-// M4: plan, billing details and cancel are now driven by the real
+// Plan, billing details and cancel are driven by the real
 // subscriptions API instead of mock data.
 
 type Plan = {
@@ -334,8 +334,7 @@ export default function SubscriptionPage() {
             ) : payments.length === 0 ? (
               // Empty state still renders the Plan/Date/Amount/Status
               // column headers, so the Figma columns are verifiable even
-              // before any payment exists (previously the headers only
-              // appeared once a payment row existed).
+              // before any payment exists.
               <div className="mt-4 overflow-x-auto">
                 <table className="w-full min-w-[560px] text-left text-[15px]">
                   <thead>

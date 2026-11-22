@@ -48,10 +48,9 @@ function MessagesContent() {
   // Refresh the conversation list (unread badges) after the open thread
   // is marked read. Deliberately NOT gated by the load effect's
   // `cancelled` flag: on a direct-URL open the effect runs twice
-  // (session unresolved, then resolved) and the first run's cleanup
-  // used to discard the refresh, leaving a stale badge. The refresh is
-  // idempotent — the list is re-read from the API after mark-read — so
-  // a superseded run applying it is harmless.
+  // (session unresolved, then resolved). The refresh is idempotent —
+  // the list is re-read from the API after mark-read — so a superseded
+  // run applying it is harmless.
   const refreshConversations = useCallback(() => {
     api
       .conversations()
@@ -72,9 +71,7 @@ function MessagesContent() {
         if (cancelled) return;
         if (Array.isArray(data)) {
           // The API answered: show EXACTLY what it returned — including
-          // an empty list. The page previously kept the mock Jane Smith
-          // conversations whenever the real list was empty, so real
-          // accounts saw five fake duplicate conversations.
+          // an empty list.
           setConversations(data.map((c: any) => mapConversation(c, myId)));
           // ?conversation=<id> names the thread to open. Only a real
           // id that is actually in the list opens a thread — an

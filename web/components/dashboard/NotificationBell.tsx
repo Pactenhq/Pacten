@@ -10,10 +10,7 @@ import { formatRelativeTime } from "@/lib/relative-time";
 // "Notification dropbox" frame (429:118790), 390px wide panel with
 // notification rows (47px icon chip, two-line copy, relative time).
 // Empty state follows "Notification dropbox empty" (429:118890).
-// Data is REAL: GET /notifications/me + /notifications/me/unread-count.
-// The bell previously rendered fabricated preview notifications
-// ("Campaign accepted", …) for every logged-in user; the QA pack emptied
-// it, and this build wires it to the notifications backend.
+// Data is real: GET /notifications/me + /notifications/me/unread-count.
 
 type NotificationIcon = "check" | "chat" | "user" | "star" | "wrench";
 

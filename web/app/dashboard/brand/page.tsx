@@ -26,9 +26,9 @@ import { campaignStatusLabel } from "@/lib/campaignStatus";
 // (344:11945) mobile. Welcome header with "+ Create Campaign", three stat
 // cards, Recent Requests table, Active/Completed campaign rows, AI Business
 // Assistant and AI Performance Insights.
-// Stat cards, requests aur campaign lists AB REAL API DATA se aate hain
-// (pehle sab mock tha). "Profile Views" ki jagah "Pending Requests" hai —
-// profile views ka koi data source MVP me hai hi nahi (analytics Phase 2).
+// Stat cards, requests and campaign lists come from the real API.
+// "Profile Views" is replaced by "Pending Requests" — there is no
+// data source for profile views in the MVP (analytics is Phase 2).
 
 function fmtDate(d: any): string {
   if (!d) return "—";
@@ -42,10 +42,8 @@ function personName(u: any): string {
   return n || u.email || "User";
 }
 
-// GAP-4: the row status used to be hardcoded "Active" for every open
-// campaign while My Campaigns showed "Pending" and the public detail
-// showed raw "open". It now comes from the shared
-// campaignStatusLabel() helper, so all three surfaces agree.
+// The row status comes from the shared campaignStatusLabel() helper,
+// so My Campaigns, the brand dashboard and the public detail agree.
 function toCampaignCard(c: any): DashboardCampaign {
   const rawBudget = c.budget != null ? String(c.budget).trim() : "";
   return {

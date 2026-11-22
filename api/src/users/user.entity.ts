@@ -80,7 +80,7 @@ export class User {
   // Stripe Connect Express account id (acct_...) for payouts. Set only by
   // the Connect onboarding flow; null until the user connects. Never
   // exposed on public profile endpoints (the user relation is stripped
-  // there — see the M5 QA F8 fix).
+  // there).
   @Column({ nullable: true })
   stripeAccountId: string;
 

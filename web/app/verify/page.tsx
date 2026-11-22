@@ -12,8 +12,6 @@ import { api } from "@/lib/api";
 // Email verification (token link from the signup email).
 // The verification email links here as /verify?token=... — this component
 // submits that token to the API (GET /auth/verify) and reports the result.
-// Previously this page ignored the token entirely and the Continue button
-// did nothing, so users who clicked the email link were stuck here.
 function EmailVerificationResult({ token }: { token: string }) {
   const [state, setState] = useState<"verifying" | "success" | "error">(
     "verifying"

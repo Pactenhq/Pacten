@@ -29,9 +29,8 @@ export default function AdminLayout({
     if (!user) {
       router.replace("/login");
     } else if (user.role !== "admin") {
-      // A signed-in non-admin used to be dumped on the login form with
-      // no explanation (while the header still showed their session).
-      // Send them to their own dashboard instead.
+      // A signed-in non-admin is sent to their own dashboard instead
+      // of the login form.
       router.replace(
         user.role === "creator"
           ? "/dashboard/creator"

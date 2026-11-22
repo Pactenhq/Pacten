@@ -10,20 +10,18 @@ import { api, getToken } from "@/lib/api";
 import { initialsForName } from "@/lib/conversation-map";
 import { useAuth } from "@/components/auth/AuthProvider";
 
-// Open-conversation panel, rebuilt from the design "inbox" (411:59061)
-// Frame 412: header (photo avatar, name/handle, filled "View Profile"
-// button, kebab), date divider (the FIRST message's real date — the old
-// code hardcoded the Figma placeholder "Sep 2" for every thread),
-// incoming (#ebf3ff) / outgoing (#d3d8f0) bubbles with timestamps, and
-// the composer box ("Type your message..." + paperclip + "Send Message").
-// Real conversations (UUID id) load/persist messages via the API.
-// Naye messages WebSocket (socket.io) se foran aate hain; agar socket
-// connect na ho sake to 5s polling fallback ke taur par chalti hai.
-// Mock conversations stay client-side.
+// Open-conversation panel: header (photo avatar, name/handle, filled
+// "View Profile" button, kebab), date divider showing the FIRST
+// message's real date, incoming / outgoing bubbles with timestamps,
+// and the composer box ("Type your message..." + paperclip + "Send
+// Message"). Real conversations (UUID id) load/persist messages via
+// the API. New messages arrive over WebSocket (socket.io), with a 5s
+// polling fallback if the socket cannot connect. Mock conversations
+// stay client-side.
 
-// ISO timestamp ko design-style time ("10:24 AM") me badlo;
-// jo strings pehle se display format me hain ("now", "10:24 AM")
-// wo waisay hi rehne do.
+// Format an ISO timestamp as a design-style time ("10:24 AM");
+// strings already in display format ("now", "10:24 AM") pass
+// through unchanged.
 export function fmtTime(t: string): string {
   if (!t) return "";
   if (/^\d{4}-\d{2}-\d{2}T/.test(t)) {
@@ -34,9 +32,9 @@ export function fmtTime(t: string): string {
   return t;
 }
 
-// ISO timestamp ko design-style date ("Nov 11") me badlo. Jo strings
-// pehle se display format me hain ("now") unka matlab aaj ki date hai —
-// optimistic message ya legacy display string.
+// Format an ISO timestamp as a design-style date ("Nov 11"). Strings
+// already in display format ("now") mean today's date — an optimistic
+// message or a legacy display string.
 export function fmtDate(t: string): string {
   let d: Date | null = null;
   if (/^\d{4}-\d{2}-\d{2}T/.test(t)) {
@@ -118,7 +116,7 @@ export function ConversationPanel({
       socket.on("newMessage", (m: any) => {
         if (!m || m.conversationId !== convId) return;
         setMessages((prev) => {
-          // Apna bheja hua message (optimistic) dobara add na ho
+          // Don't add our own sent (optimistic) message twice
           if (prev.some((x) => String(x.id) === String(m.id))) return prev;
           const mine =
             m.senderId &&
@@ -172,18 +170,17 @@ export function ConversationPanel({
     return () => clearInterval(timer);
   }, [isReal, convId, socketOk, markRead]);
 
-  // "View Profile" (defect #2 fix): the button previously had no
-  // onClick at all, so it navigated nowhere. The other party's PUBLIC
-  // profile lives at /creators/[profileId] or /professionals/[profileId]
-  // — keyed by PROFILE id, while the conversation only carries the other
-  // party's USER id — so the profile id is resolved through the by-user
-  // lookup before navigating. There is NO public brand profile route
-  // (no /brands/[id] page exists), and mock conversations carry no
-  // other-party identity at all, so for a brand counterpart — or when
-  // the identity/role is unknown — the button is hidden instead of
-  // linking to a route that does not exist. A missing public profile
-  // (lookup 404, e.g. role without a completed profile) also hides the
-  // button rather than landing on a "not found" page.
+  // "View Profile": the other party's PUBLIC profile lives at
+  // /creators/[profileId] or /professionals/[profileId] — keyed by PROFILE
+  // id, while the conversation only carries the other party's USER id — so
+  // the profile id is resolved through the by-user lookup before
+  // navigating. There is NO public brand profile route (no /brands/[id]
+  // page exists), and mock conversations carry no other-party identity at
+  // all, so for a brand counterpart — or when the identity/role is unknown
+  // — the button is hidden instead of linking to a route that does not
+  // exist. A missing public profile (lookup 404, e.g. role without a
+  // completed profile) also hides the button rather than landing on a
+  // "not found" page.
   const otherUserId = (conversation as any)?.otherUserId as string | null | undefined;
   const otherRole = (conversation as any)?.otherRole as string | null | undefined;
   const viewProfileKind =
@@ -230,10 +227,9 @@ export function ConversationPanel({
         .sendMessage(convId, body)
         .then((m: any) => {
           setMessages((prev) => {
-            // WebSocket broadcast REST response se pehle aa sakta hai —
-            // agar socket ne message pehle hi add kar diya hai to
-            // dobara add na karo (duplicate bubble bug); the temp row
-            // is then dropped.
+            // The WebSocket broadcast can arrive before the REST
+            // response — if the socket already added the message, don't
+            // add it again; the temp row is then dropped.
             if (m?.id && prev.some((x) => String(x.id) === String(m.id)))
               return prev.filter((x) => String(x.id) !== tempId);
             return prev.map((x) =>

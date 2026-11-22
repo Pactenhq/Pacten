@@ -1,4 +1,4 @@
-// API client for the Pacten backend (Phase 1: auth + profiles).
+// API client for the Pacten backend.
 // Base URL is baked at build time from NEXT_PUBLIC_API_URL.
 
 const API_BASE =
@@ -249,7 +249,7 @@ export const api = {
       auth: true,
     }),
 
-  // Direct opportunities (M2): brand → creator/professional
+  // Direct opportunities: brand → creator/professional
   sendOpportunity: (d: {
     recipientId: string;
     title: string;
@@ -339,7 +339,7 @@ export const api = {
   approveDealWork: (id: string) =>
     apiFetch<any>(`/deals/${id}/approve`, { method: "POST", auth: true }),
 
-  // Contracts (M4)
+  // Contracts
   contracts: () => apiFetch<any[]>("/contracts", { auth: true }),
 
   contractDetail: (id: string) =>
@@ -374,7 +374,7 @@ export const api = {
       auth: true,
     }),
 
-  // Payments (M4, Stripe test mode)
+  // Payments (Stripe test mode)
   createUpfrontPayment: (
     dealId: string,
     d?: { amountCents?: number; currency?: string },
@@ -419,7 +419,7 @@ export const api = {
   paymentForDeal: (dealId: string) =>
     apiFetch<any>(`/payments/by-deal/${dealId}`, { auth: true }),
 
-  // Subscriptions (M4)
+  // Subscriptions
   subscriptionPlans: (role?: string) =>
     apiFetch<any[]>(
       role ? `/subscriptions/plans?role=${role}` : "/subscriptions/plans",
@@ -522,7 +522,7 @@ export const api = {
       auth: true,
     }),
 
-  // Admin campaigns (M4)
+  // Admin campaigns
   adminCampaigns: (params?: { status?: string; search?: string }) => {
     const q = new URLSearchParams(params as any).toString();
     return apiFetch<any>(`/campaigns/admin/all${q ? `?${q}` : ""}`, {
@@ -543,7 +543,7 @@ export const api = {
       auth: true,
     }),
 
-  // Admin deals (M4)
+  // Admin deals
   adminDeals: (params?: { status?: string; search?: string }) => {
     const q = new URLSearchParams(params as any).toString();
     return apiFetch<any>(`/deals/admin/all${q ? `?${q}` : ""}`, {
@@ -551,7 +551,7 @@ export const api = {
     });
   },
 
-  // Admin settings (M4)
+  // Admin settings
   adminSettings: () => apiFetch<any>("/admin/settings", { auth: true }),
 
   adminSaveSettings: (values: Record<string, number>) =>

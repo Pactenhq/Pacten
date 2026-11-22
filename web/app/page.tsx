@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/Button";
 import { Tag } from "@/components/ui/Tag";
 import { Card } from "@/components/ui/Card";
 import { Reveal, Stagger } from "@/components/ui/Reveal";
-import { TiltCard } from "@/components/ui/TiltCard";
 import { GlowOrb } from "@/components/ui/Animated";
 import { cn } from "@/lib/cn";
 import { homeSearchChips } from "@/lib/mock";
@@ -122,9 +121,7 @@ function Hero() {
   const router = useRouter();
   const [tab, setTab] = useState(0);
   const [query, setQuery] = useState("");
-  // Clicking a hero card NAVIGATES to its target (client report, Nov 14:
-  // clicking only changed the selected tab and never went anywhere — and
-  // Creators, the default tab, showed nothing at all when clicked).
+  // Clicking a hero card NAVIGATES to its target.
   // A typed query is carried along as ?q= so it is not lost.
   const goTo = (idx: number, value?: string) => {
     const base = searchTabs[idx].target;
