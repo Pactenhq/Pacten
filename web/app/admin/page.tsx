@@ -8,6 +8,7 @@ import {
   WelcomeHeader,
 } from "@/components/dashboard/widgets";
 import { api } from "@/lib/api";
+import { roleLabel } from "@/lib/roleLabels";
 
 export default function AdminOverviewPage() {
   const [stats, setStats] = useState<any>(null);
@@ -87,7 +88,7 @@ export default function AdminOverviewPage() {
                 className="flex items-center justify-between py-2 text-[14px]"
               >
                 <span className="font-semibold capitalize text-ink-900 dark:text-ink-50">
-                  {r.role}
+                  {roleLabel(r.role)}
                 </span>
                 <span className="text-ink-500 dark:text-ink-300">{r.count}</span>
               </li>

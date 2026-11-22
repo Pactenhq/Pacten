@@ -7,6 +7,7 @@ import {
 } from "@/components/dashboard/widgets";
 import { Button } from "@/components/ui/Button";
 import { api } from "@/lib/api";
+import { roleLabel } from "@/lib/roleLabels";
 
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<any[]>([]);
@@ -83,7 +84,7 @@ export default function AdminSettingsPage() {
     try {
       await api.adminSaveCommissionRule(rule.id, Math.round(pct * 100));
       setMessage(
-        `Commission for ${rule.role} / ${rule.tier} saved. It applies to new payments immediately.`,
+        `Commission for ${roleLabel(rule.role)} / ${rule.tier} saved. It applies to new payments immediately.`,
       );
       load();
     } catch {
@@ -162,7 +163,7 @@ export default function AdminSettingsPage() {
                   return (
                     <tr key={r.id}>
                       <td className="py-3 pr-4 capitalize text-ink-700 dark:text-ink-200">
-                        {r.role}
+                        {roleLabel(r.role)}
                       </td>
                       <td className="py-3 pr-4 capitalize text-ink-700 dark:text-ink-200">
                         {r.tier}

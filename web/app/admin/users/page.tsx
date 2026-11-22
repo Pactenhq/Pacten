@@ -5,6 +5,7 @@ import { WelcomeHeader } from "@/components/dashboard/widgets";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { api } from "@/lib/api";
+import { roleLabel } from "@/lib/roleLabels";
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<any[]>([]);
@@ -101,7 +102,7 @@ export default function AdminUsersPage() {
                       {[u.firstName, u.lastName].filter(Boolean).join(" ") || "–"}
                     </td>
                     <td className="py-3 pr-4 capitalize text-ink-700 dark:text-ink-200">
-                      {u.role}
+                      {roleLabel(u.role)}
                     </td>
                     <td className="py-3 pr-4">
                       <span
