@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/cn";
@@ -705,6 +705,7 @@ export function ReferralHero({
   };
 }) {
   const [copied, setCopied] = useState(false);
+  const linkCardRef = useRef<HTMLDivElement>(null);
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(info.link);
@@ -714,6 +715,66 @@ export function ReferralHero({
       setCopied(false);
     }
   };
+  // System share sheet where the browser offers one, otherwise copy.
+  const shareLink = async () => {
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        await navigator.share({
+          title: "Pacten",
+          text: "Join me on Pacten",
+          url: info.link,
+        });
+        return;
+      } catch {
+        // Share dismissed — fall through to copy.
+      }
+    }
+    await copyLink();
+  };
+  // Bring the referral link into view and copy it, so it can be pasted
+  // into any invite.
+  const inviteFriends = () => {
+    linkCardRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    void copyLink();
+  };
+  // The Rewards section lives further down this page.
+  const viewRewards = () => {
+    document
+      .getElementById("rewards")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+  // Per-platform share links carrying the referral link. Instagram has no
+  // web share URL, so it has no chip here.
+  const encodedLink = encodeURIComponent(info.link);
+  const shareText = encodeURIComponent("Join me on Pacten");
+  const shareTargets = [
+    {
+      key: "in",
+      label: "Share on LinkedIn",
+      href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedLink}`,
+      text: "in",
+    },
+    {
+      key: "x",
+      label: "Share on X",
+      href: `https://twitter.com/intent/tweet?text=${shareText}&url=${encodedLink}`,
+      text: "𝕏",
+    },
+    {
+      key: "wa",
+      label: "Share on WhatsApp",
+      href: `https://wa.me/?text=${shareText}%20${encodedLink}`,
+      text: "wa",
+    },
+    {
+      key: "tg",
+      label: "Share on Telegram",
+      href: `https://t.me/share/url?url=${encodedLink}&text=${shareText}`,
+      text: "tg",
+    },
+  ];
+  const heroButtonClass =
+    "border-brand-300 text-brand dark:text-brand-200 hover:border-brand hover:text-brand dark:hover:text-brand-200";
   return (
     <div>
       <h1 className="text-[28px] font-extrabold tracking-tight text-ink-900 dark:text-ink-50">
@@ -721,55 +782,67 @@ export function ReferralHero({
       </h1>
       <p className="mt-1 text-[15px] text-ink-500 dark:text-ink-300">{info.subtitle}</p>
       <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {["Copy Link", "Share", "Invite Friends", "View Rewards"].map(
-          (label) => (
-            <Button
-              key={label}
-              variant="outline"
-              size="lg"
-              className="border-brand-300 text-brand dark:text-brand-200 hover:border-brand hover:text-brand dark:hover:text-brand-200"
-              onClick={label === "Copy Link" ? copyLink : undefined}
-            >
-              {label === "Copy Link" && copied ? "Copied" : label}
-            </Button>
-          )
-        )}
+        <Button variant="outline" size="lg" className={heroButtonClass} onClick={copyLink}>
+          {copied ? "Copied" : "Copy Link"}
+        </Button>
+        <Button variant="outline" size="lg" className={heroButtonClass} onClick={shareLink}>
+          Share
+        </Button>
+        <Button variant="outline" size="lg" className={heroButtonClass} onClick={inviteFriends}>
+          Invite Friends
+        </Button>
+        <Button variant="outline" size="lg" className={heroButtonClass} onClick={viewRewards}>
+          View Rewards
+        </Button>
       </div>
       <div className="mt-6 grid gap-5 lg:grid-cols-2">
-        <Card className="p-6">
-          <p className="text-[19px] font-bold text-ink-900 dark:text-ink-50">{info.linkLabel}</p>
-          <div className="mt-4 flex items-center gap-3">
-            <span className="flex h-12 min-w-0 flex-1 items-center justify-between gap-2 rounded-xl bg-brand-50/60 dark:bg-white/10 px-4 text-[14px] font-medium text-brand dark:text-brand-200">
-              <span className="truncate">{info.link}</span>
-              <button
-                type="button"
-                onClick={copyLink}
-                aria-label="Copy referral link"
-                className="cursor-pointer shrink-0 text-brand dark:text-brand-200 hover:text-brand-dark"
-              >
-                <WidgetIcon name="copy" className="h-[18px] w-[18px]" />
-              </button>
-            </span>
-            <Button size="md" onClick={copyLink}>
-              {copied ? "Copied" : "Copy Link"}
-            </Button>
-          </div>
-          <p className="mt-3 text-[13px] text-ink-500 dark:text-ink-300">{info.linkHint}</p>
-          <p className="mt-4 flex items-center gap-3 text-[13px] font-semibold text-ink-700 dark:text-ink-200">
-            Share
-            <span className="flex items-center gap-2" aria-label="Share options">
-              {["in", "link", "ig", "x"].map((s) => (
-                <span
-                  key={s}
-                  aria-hidden
-                  className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-50 dark:bg-white/10 text-[12px] font-extrabold text-brand dark:text-brand-200"
+        <div ref={linkCardRef}>
+          <Card className="p-6">
+            <p className="text-[19px] font-bold text-ink-900 dark:text-ink-50">{info.linkLabel}</p>
+            <div className="mt-4 flex items-center gap-3">
+              <span className="flex h-12 min-w-0 flex-1 items-center justify-between gap-2 rounded-xl bg-brand-50/60 dark:bg-white/10 px-4 text-[14px] font-medium text-brand dark:text-brand-200">
+                <span className="truncate">{info.link}</span>
+                <button
+                  type="button"
+                  onClick={copyLink}
+                  aria-label="Copy referral link"
+                  className="cursor-pointer shrink-0 text-brand dark:text-brand-200 hover:text-brand-dark"
                 >
-                  {s === "in" ? "in" : s === "ig" ? "ig" : s === "x" ? "𝕏" : "🔗"}
-                </span>
-              ))}
-            </span>
-          </p>
-        </Card>
+                  <WidgetIcon name="copy" className="h-[18px] w-[18px]" />
+                </button>
+              </span>
+              <Button size="md" onClick={copyLink}>
+                {copied ? "Copied" : "Copy Link"}
+              </Button>
+            </div>
+            <p className="mt-3 text-[13px] text-ink-500 dark:text-ink-300">{info.linkHint}</p>
+            <p className="mt-4 flex items-center gap-3 text-[13px] font-semibold text-ink-700 dark:text-ink-200">
+              Share
+              <span className="flex items-center gap-2" aria-label="Share options">
+                {shareTargets.map((s) => (
+                  <a
+                    key={s.key}
+                    href={s.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={s.label}
+                    className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg bg-brand-50 dark:bg-white/10 text-[12px] font-extrabold text-brand dark:text-brand-200"
+                  >
+                    {s.text}
+                  </a>
+                ))}
+                <button
+                  type="button"
+                  onClick={copyLink}
+                  aria-label="Copy referral link"
+                  className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg bg-brand-50 dark:bg-white/10 text-[12px] font-extrabold text-brand dark:text-brand-200"
+                >
+                  🔗
+                </button>
+              </span>
+            </p>
+          </Card>
+        </div>
         <Card className="p-6">
           <div className="flex items-start justify-between">
             <p className="text-[19px] font-bold text-ink-900 dark:text-ink-50">

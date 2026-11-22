@@ -41,17 +41,17 @@ export interface RateTier {
 export const rateCalculatorTiers: RateTier[] = [
   {
     label: "Minimum Price",
-    price: "$0",
+    price: "—",
     blurb: "Floor rate \u2014 suitable for micro-creators or bundled deals",
   },
   {
     label: "Recommended Price",
-    price: "$0",
+    price: "—",
     blurb: "Market rate for your audience and content type",
   },
   {
     label: "Premium Price",
-    price: "$0",
+    price: "—",
     blurb: "For high-demand niches",
   },
 ];

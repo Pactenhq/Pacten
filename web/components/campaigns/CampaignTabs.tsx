@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/cn";
 import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
 import { myCampaignPills } from "@/lib/mock-campaigns";
 import { campaignStatusLabel } from "@/lib/campaignStatus";
 import { api } from "@/lib/api";
@@ -60,6 +61,8 @@ export function CampaignTabs() {
   // initialised with fabricated showcase campaigns, so a brand with no
   // campaigns saw fake rows ("New Product Launch / @sophie.c").
   const [rows, setRows] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [openMenu, setOpenMenu] = useState<number | null>(null);
   const [closingId, setClosingId] = useState<string | null>(null);
 
@@ -85,7 +88,13 @@ export function CampaignTabs() {
     };
   }, [openMenu]);
 
-  useEffect(() => {
+  // The list starts empty and stays in a loading state until the API
+  // answers — without it, a slow load showed "No campaigns yet" for a
+  // brand that does have campaigns. A failed fetch shows an error with
+  // a retry instead of the same empty state.
+  const loadCampaigns = () => {
+    setLoading(true);
+    setLoadError(false);
     api
       .myCampaigns()
       .then((data) => {
@@ -102,12 +111,20 @@ export function CampaignTabs() {
               rawStatus: c.status,
             }))
           );
+        } else {
+          setRows([]);
         }
       })
       .catch(() => {
-        // API unavailable or not logged in — keep the list empty.
-        // Never show fabricated campaigns.
-      });
+        // API unavailable or not logged in — show the error state, not
+        // the empty state. Never show fabricated campaigns.
+        setLoadError(true);
+      })
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadCampaigns();
   }, []);
 
   const closeCampaign = async (id: string) => {
@@ -161,10 +178,32 @@ export function CampaignTabs() {
       </div>
 
       <div className="mt-2 flex flex-col gap-4">
-        {filtered.length === 0 && (
+        {loading && (
           <Card className="p-8 text-center">
             <p className="text-[15px] text-ink-500 dark:text-ink-300">
-              No campaigns yet. When you create a campaign, it will appear here.
+              Loading campaigns…
+            </p>
+          </Card>
+        )}
+        {!loading && loadError && (
+          <Card className="p-8 text-center">
+            <p className="text-[15px] text-ink-500 dark:text-ink-300">
+              Couldn’t load your campaigns. Check your connection and try
+              again.
+            </p>
+            <div className="mt-4">
+              <Button size="md" onClick={loadCampaigns}>
+                Try again
+              </Button>
+            </div>
+          </Card>
+        )}
+        {!loading && !loadError && filtered.length === 0 && (
+          <Card className="p-8 text-center">
+            <p className="text-[15px] text-ink-500 dark:text-ink-300">
+              {rows.length === 0
+                ? "No campaigns yet. When you create a campaign, it will appear here."
+                : "No campaigns in this view."}
             </p>
           </Card>
         )}

@@ -1,43 +1,12 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { TextField } from "@/components/ui/TextField";
 import { Button } from "@/components/ui/Button";
-import { Stepper } from "@/components/auth/Stepper";
 import { api } from "@/lib/api";
-
-//
-// Copy, stepper, card and side-panel layout matched verbatim from the frame.
-const STEPS = [
-  "Profile Details",
-  "Social Accounts",
-  "Identity Document",
-  "Submit for Review",
-];
-
-function ChevronDown() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      fill="none"
-      aria-hidden
-      className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-ink-500 dark:text-ink-300"
-    >
-      <path
-        d="M4 6l4 4 4-4"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
 
 //
 // Email verification (token link from the signup email).
@@ -139,12 +108,28 @@ function EmailVerificationResult({ token }: { token: string }) {
 }
 
 //
-// Identity verification (verified-badge application) — Figma design, kept
-// exactly as designed. It has no backend: the manual-verification flow is
-// a separate gated item, so this form is only shown when the page is opened
-// WITHOUT an email-verification token (no link in the app points here;
-// only the verification email does, and it always carries a token).
-function IdentityVerificationForm() {
+// No token: the page was opened without an email-verification link.
+// There is no badge application here — manual verification is a separate
+// gated item with no backend yet — so the page tells the user to use the
+// link in their signup email, and offers a working resend.
+function NoTokenVerificationGuide() {
+  const [email, setEmail] = useState("");
+  const [resendState, setResendState] = useState<
+    "idle" | "sending" | "sent" | "error"
+  >("idle");
+
+  const resend = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setResendState("sending");
+    try {
+      await api.resendVerificationEmail(email.trim());
+      setResendState("sent");
+    } catch {
+      setResendState("error");
+    }
+  };
+
   return (
     <main className="bg-mist/50 dark:bg-ink-950/50">
       <div className="mx-auto max-w-[1380px] px-6 py-14 lg:px-12 lg:py-20">
@@ -152,40 +137,24 @@ function IdentityVerificationForm() {
           Verification
         </h1>
         <p className="mt-3 text-lg text-ink-500 dark:text-ink-300">
-          Submit your details for review and earn a verified badge.
+          This page confirms your email address using the link in your signup
+          email.
         </p>
-
-        <div className="mt-10 flex justify-start">
-          <Stepper steps={STEPS} activeIndex={0} />
-        </div>
 
         <div className="mt-10 grid gap-6 lg:grid-cols-[685px_1fr]">
           <Card className="p-6 shadow-pop sm:p-10">
             <h2 className="text-2xl font-bold tracking-tight text-ink-900 dark:text-ink-50 lg:text-3xl">
-              Confirm Profile Details
+              Check your email
             </h2>
+            <p className="mt-3 text-[15px] leading-relaxed text-ink-500 dark:text-ink-300">
+              We sent a verification link to the email address you signed up
+              with. Open that email and click the link, then log in. The link
+              expires after 24 hours.
+            </p>
             <form
               className="mt-8 flex flex-col gap-5"
-              onSubmit={(e) => e.preventDefault()}
+              onSubmit={resend}
             >
-              <div className="grid gap-5 sm:grid-cols-2">
-                <TextField
-                  label="First Name"
-                  name="firstName"
-                  type="text"
-                  placeholder="First Name"
-                  autoComplete="given-name"
-                  required
-                />
-                <TextField
-                  label="Last Name"
-                  name="lastName"
-                  type="text"
-                  placeholder="Last Name"
-                  autoComplete="family-name"
-                  required
-                />
-              </div>
               <TextField
                 label="Email"
                 name="email"
@@ -193,43 +162,34 @@ function IdentityVerificationForm() {
                 placeholder="Email"
                 autoComplete="email"
                 required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
-              <div className="flex w-full flex-col gap-1.5">
-                <label
-                  htmlFor="creator-category"
-                  className="text-sm font-medium text-ink-900 dark:text-ink-50"
-                >
-                  Creator Category
-                </label>
-                <div className="relative">
-                  <select
-                    id="creator-category"
-                    name="creatorCategory"
-                    className="h-12 w-full appearance-none rounded-xl border border-ink-300 dark:border-ink-700 bg-white dark:bg-ink-900 px-4 pr-11 text-[15px] text-ink-400 dark:text-ink-300 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand-100"
-                    defaultValue=""
-                    required
-                  >
-                    <option value="" disabled>
-                      Choose
-                    </option>
-                    <option value="lifestyle">Lifestyle</option>
-                    <option value="fashion">Fashion</option>
-                    <option value="fitness">Fitness</option>
-                    <option value="beauty">Beauty</option>
-                    <option value="tech">Tech</option>
-                    <option value="food">Food</option>
-                  </select>
-                  <ChevronDown />
-                </div>
-              </div>
               <div>
-                <Button type="submit" size="lg">
-                  Continue
+                <Button
+                  type="submit"
+                  size="lg"
+                  disabled={resendState === "sending"}
+                >
+                  {resendState === "sending"
+                    ? "Sending…"
+                    : "Resend verification email"}
                 </Button>
               </div>
             </form>
+            {resendState === "sent" && (
+              <p className="mt-4 text-sm text-ink-500 dark:text-ink-300">
+                If an account exists for this email, a verification email has
+                been sent. Check your inbox — and your spam folder.
+              </p>
+            )}
+            {resendState === "error" && (
+              <p className="mt-4 text-sm text-danger dark:text-danger-bright">
+                Something went wrong. Please try again.
+              </p>
+            )}
             <p className="mt-4 text-sm text-ink-500 dark:text-ink-300">
-              Already have an account?{" "}
+              Already verified?{" "}
               <Link
                 href="/login"
                 className="font-semibold text-brand dark:text-brand-200 hover:underline"
@@ -242,18 +202,15 @@ function IdentityVerificationForm() {
           <Card className="h-fit p-6 sm:p-8">
             <h2 className="text-2xl font-bold text-ink-900 dark:text-ink-50">Need Help?</h2>
             <p className="mt-3 text-[15px] leading-relaxed text-ink-500 dark:text-ink-300">
-              If you have questions about the verification process, visit our
-              Help Centre or contact support.
+              If the email never arrives, check your spam folder first, then
+              contact support.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
-              <Link href="/">
-                <Button size="lg">Visit Help Centre</Button>
-              </Link>
-              <Link href="/">
+              <a href="mailto:hello@pacten.info">
                 <Button variant="outline" size="lg">
                   Contact Support
                 </Button>
-              </Link>
+              </a>
             </div>
           </Card>
         </div>
@@ -268,7 +225,7 @@ function VerifyPageInner() {
   if (token) {
     return <EmailVerificationResult token={token} />;
   }
-  return <IdentityVerificationForm />;
+  return <NoTokenVerificationGuide />;
 }
 
 export default function VerifyPage() {

@@ -133,7 +133,10 @@ export class ProfilesService {
       qb.andWhere(
         '(c.displayName ILIKE :q OR c.bio ILIKE :q ' +
           'OR EXISTS (SELECT 1 FROM unnest(c.niches) AS n WHERE n ILIKE :q) ' +
-          'OR EXISTS (SELECT 1 FROM unnest(c.platforms) AS p WHERE p ILIKE :q))',
+          'OR EXISTS (SELECT 1 FROM unnest(c.platforms) AS p WHERE p ILIKE :q) ' +
+          'OR EXISTS (SELECT 1 FROM unnest(c.skills) AS s WHERE s ILIKE :q) ' +
+          'OR EXISTS (SELECT 1 FROM unnest(c.languages) AS l WHERE l ILIKE :q) ' +
+          'OR EXISTS (SELECT 1 FROM unnest(c.industries) AS ind WHERE ind ILIKE :q))',
         { q: `%${filters.query}%` },
       );
     }
@@ -185,7 +188,13 @@ export class ProfilesService {
       qb.andWhere('LOWER(p.city) = LOWER(:city)', { city: filters.city });
     }
     if (filters.query) {
-      qb.andWhere('(p.displayName ILIKE :q OR p.bio ILIKE :q OR p.title ILIKE :q)', { q: `%${filters.query}%` });
+      qb.andWhere(
+        '(p.displayName ILIKE :q OR p.bio ILIKE :q OR p.title ILIKE :q ' +
+          'OR EXISTS (SELECT 1 FROM unnest(p.skills) AS s WHERE s ILIKE :q) ' +
+          'OR EXISTS (SELECT 1 FROM unnest(p.languages) AS l WHERE l ILIKE :q) ' +
+          'OR EXISTS (SELECT 1 FROM unnest(p.industries) AS ind WHERE ind ILIKE :q))',
+        { q: `%${filters.query}%` },
+      );
     }
     if (isTruthy(filters.excludeTest)) {
       qb.andWhere(

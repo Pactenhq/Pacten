@@ -71,7 +71,7 @@ export default function BrandProfilePage() {
           )}
           {state === "wrong-role" && (
             <div className="flex flex-col items-start gap-3">
-              <p className="text-lg font-medium text-ink-900 dark:text-ink-50">This page is for brands.</p>
+              <p className="text-lg font-medium text-ink-900 dark:text-ink-50">This page is for businesses.</p>
               <Link href={dashboardPathForRole(user?.role ?? "")} className="text-[15px] font-semibold text-brand dark:text-brand-200 hover:underline">
                 Go to your dashboard
               </Link>
@@ -79,9 +79,9 @@ export default function BrandProfilePage() {
           )}
           {state === "missing" && (
             <div className="flex flex-col items-start gap-3">
-              <p className="text-lg font-medium text-ink-900 dark:text-ink-50">No brand profile found.</p>
+              <p className="text-lg font-medium text-ink-900 dark:text-ink-50">No business profile found.</p>
               <p className="text-[15px] text-ink-500 dark:text-ink-300">
-                Your brand profile could not be loaded. Complete it from your dashboard settings.
+                Your business profile could not be loaded. Complete it from your dashboard settings.
               </p>
               <Link href="/dashboard/settings" className="text-[15px] font-semibold text-brand dark:text-brand-200 hover:underline">
                 Go to settings
@@ -93,7 +93,7 @@ export default function BrandProfilePage() {
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
                   <h1 className="text-[26px] font-extrabold tracking-tight text-ink-900 dark:text-ink-50">
-                    {profile.companyName || displayName || "Your brand"}
+                    {profile.companyName || displayName || "Your business"}
                   </h1>
                   <p className="mt-1 text-[15px] text-ink-500 dark:text-ink-300">Business profile</p>
                 </div>

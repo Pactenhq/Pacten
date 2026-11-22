@@ -115,6 +115,16 @@ export class CampaignsService {
       );
     }
 
+    if (filters?.niche) {
+      // niches is a simple-array column (comma-separated text, not a
+      // Postgres array), so ANY() cannot apply — match whole tokens
+      // instead, case-insensitively, with LIKE wildcards escaped.
+      const token = filters.niche.replace(/[%_\\]/g, "\\$&");
+      qb.andWhere(`(',' || c.niches || ',') ILIKE :nicheToken ESCAPE '\\'`, {
+        nicheToken: `%,${token},%`,
+      });
+    }
+
     const list = await qb.getMany();
     await this.attachPublicBrand(list);
     return list;

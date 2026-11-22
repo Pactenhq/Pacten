@@ -337,7 +337,7 @@ function RateCalculator() {
           <Card key={tier.label} className="card-lift p-6 text-center">
             <ResultIcon kind={icons[i] ?? "money"} />
             <p className="mt-4 text-4xl font-extrabold text-ink-900 dark:text-ink-50">
-              {tiers ? tiers[i] ?? tier.price : tier.price}
+              {tiers ? tiers[i] ?? "—" : "—"}
             </p>
             <p className="mt-2 text-[15px] font-bold text-ink-900 dark:text-ink-50">
               {tier.label}
@@ -350,7 +350,7 @@ function RateCalculator() {
         <Card className="card-lift p-6 text-center">
           <ResultIcon kind="chart" />
           <p className="mt-4 text-4xl font-extrabold text-ink-900 dark:text-ink-50">
-            {confidence !== null ? `${confidence}%` : "0%"}
+            {confidence !== null ? `${confidence}%` : "—"}
           </p>
           <p className="mt-2 text-[15px] font-bold text-ink-900 dark:text-ink-50">
             Confidence Score

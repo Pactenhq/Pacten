@@ -39,7 +39,6 @@ function EarningsSummary() {
       <p className="text-[30px] font-extrabold tracking-tight text-ink-900 dark:text-ink-50">
         £0
       </p>
-      <p className="mt-0.5 text-[13px] text-ink-400 dark:text-ink-300">vs last month</p>
       {/* Design-only bar chart: all bars are £0 placeholders (Figma). */}
       <div
         className="mt-6 flex h-36 items-end gap-2"
@@ -200,16 +199,16 @@ export default function AnalyticsDashboardPage() {
   // Figma placeholder stat cards (0 / 0% / £0 — never real metrics).
   const statCards = isBrand
     ? [
-        { value: "£0", label: "Total Revenue", delta: "0%", icon: "moneybag", sub: "vs last month" },
-        { value: "0", label: "Active Campaigns", delta: "0%", icon: "megaphone", sub: "vs last month" },
-        { value: "0", label: "Total Impressions", delta: "0%", icon: "eye", sub: "vs last month" },
-        { value: "0%", label: "Avg. Engagement Rate", delta: "0%", icon: "percent", sub: "vs last month" },
+        { value: "£0", label: "Total Revenue", delta: "", icon: "moneybag" },
+        { value: "0", label: "Active Campaigns", delta: "", icon: "megaphone" },
+        { value: "0", label: "Total Impressions", delta: "", icon: "eye" },
+        { value: "0%", label: "Avg. Engagement Rate", delta: "", icon: "percent" },
       ]
     : [
-        { value: "£0", label: "Total Earnings", delta: "0%", icon: "moneybag", sub: "vs last month" },
-        { value: "0", label: "Total Conversions", delta: "0%", icon: "target", sub: "vs last month" },
-        { value: "0", label: "Total Impressions", delta: "0%", icon: "eye", sub: "vs last month" },
-        { value: "0", label: "Total Engagements", delta: "0%", icon: "people", sub: "vs last month" },
+        { value: "£0", label: "Total Earnings", delta: "", icon: "moneybag" },
+        { value: "0", label: "Total Conversions", delta: "", icon: "target" },
+        { value: "0", label: "Total Impressions", delta: "", icon: "eye" },
+        { value: "0", label: "Total Engagements", delta: "", icon: "people" },
       ];
 
   // Figma placeholder summary metrics (desktop "Performance Summary" card).

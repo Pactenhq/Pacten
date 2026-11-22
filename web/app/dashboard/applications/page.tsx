@@ -16,10 +16,10 @@ import { api } from "@/lib/api";
 // Stat cards, filters and the identical "Social Media Creator" rows,
 // all copy verbatim.
 const statCards = [
-  { value: "0", label: "Total Applications", delta: "vs. last month +0% ↗" },
-  { value: "0", label: "Under Review", delta: "vs. last month +0% ↗" },
-  { value: "0", label: "Interviews", delta: "vs. last month +0% ↗" },
-  { value: "0", label: "Offers", delta: "vs. last month +0% ↗" },
+  { value: "0", label: "Total Applications", delta: "" },
+  { value: "0", label: "Under Review", delta: "" },
+  { value: "0", label: "Interviews", delta: "" },
+  { value: "0", label: "Offers", delta: "" },
 ];
 
 export default function CreatorApplicationsPage() {
@@ -69,10 +69,10 @@ export default function CreatorApplicationsPage() {
             (a: any) => a.status === "accepted"
           ).length;
           setStats([
-            { value: String(total), label: "Total Applications", delta: "vs. last month +0% ↗" },
-            { value: String(underReview), label: "Under Review", delta: "vs. last month +0% ↗" },
-            { value: "0", label: "Interviews", delta: "vs. last month +0% ↗" },
-            { value: String(offers), label: "Offers", delta: "vs. last month +0% ↗" },
+            { value: String(total), label: "Total Applications", delta: "" },
+            { value: String(underReview), label: "Under Review", delta: "" },
+            { value: "0", label: "Interviews", delta: "" },
+            { value: String(offers), label: "Offers", delta: "" },
           ]);
         }
       })

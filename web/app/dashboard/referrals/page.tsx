@@ -251,7 +251,7 @@ export default function ReferralsDashboardPage() {
           </div>
         </section>
 
-        <section>
+        <section id="rewards">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-[22px] font-extrabold text-ink-900 dark:text-ink-50">Rewards</h2>
           </div>
@@ -387,7 +387,7 @@ export default function ReferralsDashboardPage() {
         </section>
 
         <div className="grid gap-8 lg:grid-cols-2">
-          <section>
+          <section id="commission-history">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-[22px] font-extrabold text-ink-900 dark:text-ink-50">
                 Commission History
