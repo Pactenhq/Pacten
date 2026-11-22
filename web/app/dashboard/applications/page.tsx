@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { RowsSkeleton } from "@/components/ui/Skeleton";
 import Link from "next/link";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { StatCard, WelcomeHeader } from "@/components/dashboard/widgets";
@@ -106,7 +107,7 @@ export default function CreatorApplicationsPage() {
         {/* Matching empty state to the brand-side received-applications
             page ("No applications yet…"). */}
         {loading ? (
-          <p className="text-ink-500 dark:text-ink-300">Loading applications...</p>
+          <RowsSkeleton rows={4} withAvatar />
         ) : rows.length === 0 ? (
           <Card className="p-10 text-center">
             <div data-testid="my-applications-empty">

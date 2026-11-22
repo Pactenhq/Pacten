@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { RowsSkeleton } from "@/components/ui/Skeleton";
 import Link from "next/link";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { StatCard, WelcomeHeader } from "@/components/dashboard/widgets";
@@ -116,7 +117,9 @@ export default function BrandApplicationsPage() {
             </div>
           </div>
           {loading ? (
-            <p className="p-6 text-ink-500 dark:text-ink-300">Loading applications...</p>
+            <div className="p-6">
+              <RowsSkeleton rows={4} withAvatar />
+            </div>
           ) : filtered.length === 0 ? (
             <p className="p-6 text-ink-500 dark:text-ink-300">
               No applications yet. Share your campaigns to receive applications.

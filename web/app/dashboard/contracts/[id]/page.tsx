@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { DetailSkeleton } from "@/components/ui/Skeleton";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
@@ -115,7 +116,7 @@ export default function ContractDetailPage() {
     </DashboardShell>
   );
 
-  if (loading) return shell(<p className="text-gray-500 dark:text-ink-300">Loading contract...</p>);
+  if (loading) return shell(<DetailSkeleton />);
   if (!contract)
     return shell(
       <div>

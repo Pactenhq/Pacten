@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { Skeleton } from "@/components/ui/Skeleton";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/cn";
@@ -689,7 +690,9 @@ export function QuickActions({
 
 export function ReferralHero({
   info,
+  loading = false,
 }: {
+  loading?: boolean;
   info: {
     title: string;
     subtitle: string;
@@ -799,7 +802,11 @@ export function ReferralHero({
             <p className="text-[19px] font-bold text-ink-900 dark:text-ink-50">{info.linkLabel}</p>
             <div className="mt-4 flex items-center gap-3">
               <span className="flex h-12 min-w-0 flex-1 items-center justify-between gap-2 rounded-xl bg-brand-50/60 dark:bg-white/10 px-4 text-[14px] font-medium text-brand dark:text-brand-200">
-                <span className="truncate">{info.link}</span>
+                {loading ? (
+                  <Skeleton className="h-4 flex-1" />
+                ) : (
+                  <span className="truncate">{info.link}</span>
+                )}
                 <button
                   type="button"
                   onClick={copyLink}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { RowsSkeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/cn";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -172,10 +173,8 @@ export function CampaignTabs() {
 
       <div className="mt-2 flex flex-col gap-4">
         {loading && (
-          <Card className="p-8 text-center">
-            <p className="text-[15px] text-ink-500 dark:text-ink-300">
-              Loading campaigns…
-            </p>
+          <Card className="p-6">
+            <RowsSkeleton rows={3} withAvatar />
           </Card>
         )}
         {!loading && loadError && (

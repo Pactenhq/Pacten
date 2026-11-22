@@ -3,6 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { useEffect, useState } from "react";
+import { RowsSkeleton } from "@/components/ui/Skeleton";
 import Link from "next/link";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { WelcomeHeader } from "@/components/dashboard/widgets";
@@ -91,7 +92,7 @@ export default function DealsPage() {
         </div>
 
         {loading ? (
-          <p className="text-gray-500 dark:text-ink-300">Loading deals...</p>
+          <RowsSkeleton rows={4} withAvatar />
         ) : deals.length === 0 ? (
           <div className="rounded-2xl border border-gray-200 dark:border-ink-700 bg-white dark:bg-ink-900 p-12 text-center">
             <p className="text-lg font-medium text-gray-700 dark:text-ink-200">No deals yet</p>

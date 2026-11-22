@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { RowsSkeleton } from "@/components/ui/Skeleton";
 import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/ui/Navbar";
 import { Footer } from "@/components/ui/Footer";
@@ -89,9 +90,7 @@ export default function NotificationsPage() {
         <div className="mt-10 flex flex-col gap-10">
           <section aria-label="Notifications">
             {loading ? (
-              <p className="py-10 text-center text-[15px] text-ink-500 dark:text-ink-300">
-                Loading…
-              </p>
+              <RowsSkeleton rows={4} withAvatar />
             ) : signedOut ? (
               <p className="py-10 text-center text-[15px] text-ink-500 dark:text-ink-300">
                 <a href="/login" className="font-medium text-brand dark:text-brand-200 hover:underline">

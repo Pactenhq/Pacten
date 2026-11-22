@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Skeleton, SkeletonLines } from "@/components/ui/Skeleton";
 import Link from "next/link";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Card } from "@/components/ui/Card";
@@ -175,7 +176,8 @@ export default function CancelSubscriptionPage() {
           <div className="flex flex-col gap-6">
             {loading ? (
               <div className="rounded-2xl bg-brand-50/60 dark:bg-white/10 p-6">
-                <p className="text-[15px] text-ink-500 dark:text-ink-300">Loading your plan...</p>
+                <Skeleton className="h-5 w-1/2" />
+                <SkeletonLines lines={3} className="mt-4" />
               </div>
             ) : plan ? (
               <>

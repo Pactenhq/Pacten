@@ -3,6 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { useEffect, useMemo, useState } from "react";
+import { FormSkeleton } from "@/components/ui/Skeleton";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
@@ -171,7 +172,7 @@ export default function NewStandardContractPage() {
   );
 
   if (loading) {
-    return shell(<p className="text-gray-500 dark:text-ink-300">Loading agreement form...</p>);
+    return shell(<FormSkeleton />);
   }
 
   return shell(

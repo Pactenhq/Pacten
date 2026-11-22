@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { RowsSkeleton } from "@/components/ui/Skeleton";
 import Link from "next/link";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { WelcomeHeader } from "@/components/dashboard/widgets";
@@ -79,7 +80,7 @@ export default function OpportunitiesPage() {
         }
       />
       {loading ? (
-        <p className="mt-8 text-ink-500 dark:text-ink-300">Loading…</p>
+        <div className="mt-8"><RowsSkeleton rows={4} withAvatar /></div>
       ) : items.length === 0 ? (
         <Card className="mt-8 p-10 text-center">
           <p className="text-lg font-bold text-ink-900 dark:text-ink-50">Nothing here yet</p>

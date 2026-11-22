@@ -3,6 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { useEffect, useState } from "react";
+import { DetailSkeleton } from "@/components/ui/Skeleton";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
@@ -97,7 +98,7 @@ export default function ManageCampaignPage() {
       <div className="flex flex-col gap-6">
         <p className="text-[13px] font-medium text-ink-400 dark:text-ink-300">Management</p>
 
-        {state === "loading" && <p className="text-ink-500 dark:text-ink-300">Loading campaign...</p>}
+        {state === "loading" && <DetailSkeleton />}
 
         {state === "signin" && (
           <div className="flex flex-col items-start gap-3">

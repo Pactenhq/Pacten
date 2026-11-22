@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { CardSkeleton, TableSkeleton } from "@/components/ui/Skeleton";
 import Link from "next/link";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Card } from "@/components/ui/Card";
@@ -192,7 +193,10 @@ export default function SubscriptionPage() {
         </div>
 
         {loading ? (
-          <p className="text-[15px] text-ink-500 dark:text-ink-300">Loading subscription...</p>
+          <div className="grid gap-6 lg:grid-cols-2">
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
         ) : (
           <div className="grid gap-6 lg:grid-cols-2">
             <Card className="p-6">
@@ -328,9 +332,9 @@ export default function SubscriptionPage() {
               </button>
             </div>
             {paymentsLoading ? (
-              <p className="mt-4 text-[15px] text-ink-500 dark:text-ink-300">
-                Loading billing history...
-              </p>
+              <div className="mt-4">
+                <TableSkeleton rows={3} />
+              </div>
             ) : payments.length === 0 ? (
               // Empty state still renders the Plan/Date/Amount/Status
               // column headers, so the Figma columns are verifiable even

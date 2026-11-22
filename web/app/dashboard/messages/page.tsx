@@ -3,6 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { ConversationSkeleton } from "@/components/ui/Skeleton";
 import { useSearchParams } from "next/navigation";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { WelcomeHeader } from "@/components/dashboard/widgets";
@@ -170,14 +171,16 @@ function MessagesContent() {
                 // the plain list visit keeps the preview read-only.
                 markRead={!!paramTarget}
               />
+            ) : loading ? (
+              <div className="rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 p-6">
+                <ConversationSkeleton rows={4} />
+              </div>
             ) : (
               <div className="flex h-full min-h-[300px] items-center justify-center rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 p-8 text-center">
                 <p className="text-[15px] text-ink-500 dark:text-ink-300">
-                  {loading
-                    ? "Loading conversations…"
-                    : loadError
-                      ? "Conversations couldn't be loaded. Please check your connection and refresh the page."
-                      : "No conversations yet. When you message a creator or business, the conversation will appear here."}
+                  {loadError
+                    ? "Conversations couldn't be loaded. Please check your connection and refresh the page."
+                    : "No conversations yet. When you message a creator or business, the conversation will appear here."}
                 </p>
               </div>
             )}
@@ -192,10 +195,8 @@ export default function MessagesPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-[300px] items-center justify-center p-8 text-center">
-          <p className="text-[15px] text-ink-500 dark:text-ink-300">
-            Loading conversations…
-          </p>
+        <div className="p-8">
+          <ConversationSkeleton rows={4} />
         </div>
       }
     >

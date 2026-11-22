@@ -3,6 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { Suspense, useEffect, useState } from "react";
+import { DetailSkeleton } from "@/components/ui/Skeleton";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Navbar } from "@/components/ui/Navbar";
@@ -130,7 +131,9 @@ function CampaignDetailContent() {
           </Link>
 
           {loading ? (
-            <p className="mt-8 text-ink-500 dark:text-ink-300">Loading campaign...</p>
+            <div className="mt-8">
+              <DetailSkeleton />
+            </div>
           ) : !campaign ? (
             <div className="mt-8 rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 p-12 text-center shadow-card">
               <p className="text-lg font-medium text-ink-900 dark:text-ink-50">Campaign not found</p>
@@ -381,7 +384,7 @@ export default function CampaignDetailPage() {
           <Navbar />
           <main className="pb-20">
             <div className="mx-auto mt-10 max-w-[1380px] px-6 lg:px-12">
-              <p className="text-ink-500 dark:text-ink-300">Loading campaign...</p>
+              <DetailSkeleton />
             </div>
           </main>
           <Footer />

@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { RowsSkeleton } from "@/components/ui/Skeleton";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -293,7 +294,7 @@ export function ContractCentre({ variant }: { variant: "brand" | "creator" }) {
       )}
 
       {loading ? (
-        <p className="text-[15px] text-ink-500 dark:text-ink-300">Loading contracts...</p>
+        <RowsSkeleton rows={3} withAvatar />
       ) : (
         <>
           <StatCards stats={stats} />

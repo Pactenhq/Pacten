@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { DetailSkeleton } from "@/components/ui/Skeleton";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
@@ -48,7 +49,7 @@ export default function DisputeDetailPage() {
       </div>
       <Card className="mt-6 p-6">
         {loading ? (
-          <p className="text-[14px] text-ink-500 dark:text-ink-300">Loading…</p>
+          <DetailSkeleton />
         ) : !dispute ? (
           <p className="text-[14px] text-ink-500 dark:text-ink-300">Dispute not found.</p>
         ) : (

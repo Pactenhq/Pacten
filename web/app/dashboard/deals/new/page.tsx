@@ -3,6 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { Skeleton, FormSkeleton } from "@/components/ui/Skeleton";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
@@ -345,11 +346,7 @@ function NewDealForm() {
           below if needed.
         </p>
       )}
-      {prefillLoading && (
-        <p className="rounded-lg bg-amber-50 px-4 py-2 text-sm text-amber-800">
-          Loading pre-filled details…
-        </p>
-      )}
+      {prefillLoading && <Skeleton className="h-9 w-full" />}
       {creatorParam && !applicationId && !opportunityId && (
         <p className="rounded-lg bg-blue-50 px-4 py-2 text-sm text-blue-800">
           Direct deal — creator pre-selected from their profile.
@@ -520,7 +517,7 @@ export default function NewDealPage() {
           title="New Deal"
           subtitle="Propose a collaboration deal with a creator."
         />
-        <Suspense fallback={<p className="text-sm text-gray-500 dark:text-ink-300">Loading…</p>}>
+        <Suspense fallback={<FormSkeleton />}>
           <NewDealForm />
         </Suspense>
       </div>

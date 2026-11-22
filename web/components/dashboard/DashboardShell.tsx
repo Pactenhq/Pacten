@@ -109,7 +109,14 @@ export function DashboardShell({
                     instead — the same component the marketplace cards use. */}
                 <Avatar name={shownName} size="sm" />
                 <span className="text-[15px] font-semibold text-ink-900 dark:text-ink-50">
-                  {shownName}
+                  {authLoading ? (
+                    <span
+                      aria-hidden="true"
+                      className="skeleton-shimmer inline-block h-4 w-24 rounded-lg bg-ink-100 align-middle dark:bg-ink-800"
+                    />
+                  ) : (
+                    shownName
+                  )}
                 </span>
                 <svg
                   width="16"

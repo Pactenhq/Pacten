@@ -3,6 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { Suspense, useEffect, useState } from "react";
+import { CardSkeleton } from "@/components/ui/Skeleton";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Navbar } from "@/components/ui/Navbar";
@@ -100,7 +101,7 @@ function ConfirmUpgradeContent() {
         </div>
 
         {loading ? (
-          <p className="mt-12 text-center text-[15px] text-ink-500 dark:text-ink-300">Loading plan...</p>
+          <div className="mt-12"><CardSkeleton /></div>
         ) : !plan ? (
           <div className="mt-12 text-center">
             <p className="text-[15px] text-ink-500 dark:text-ink-300">No plan selected.</p>

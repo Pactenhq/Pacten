@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { RowsSkeleton, TableSkeleton } from "@/components/ui/Skeleton";
 import {
   SectionCard,
   WelcomeHeader,
@@ -108,7 +109,7 @@ export default function AdminSettingsPage() {
       )}
       <SectionCard title="Free-plan limits" className="mt-6">
         {loading ? (
-          <p className="mt-3 text-[14px] text-ink-500 dark:text-ink-300">Loading…</p>
+          <RowsSkeleton rows={3} className="mt-3" />
         ) : (
           <>
             <div className="mt-4 space-y-4">
@@ -145,7 +146,7 @@ export default function AdminSettingsPage() {
           subscription tier. Businesses are never charged.
         </p>
         {loading ? (
-          <p className="mt-3 text-[14px] text-ink-500 dark:text-ink-300">Loading…</p>
+          <TableSkeleton rows={3} className="mt-3" />
         ) : (
           <div className="mt-4 overflow-x-auto">
             <table className="w-full text-left text-[14px]">

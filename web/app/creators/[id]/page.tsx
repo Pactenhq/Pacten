@@ -3,6 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { useEffect, useState } from "react";
+import { ProfileSkeleton } from "@/components/ui/Skeleton";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Navbar } from "@/components/ui/Navbar";
@@ -65,7 +66,9 @@ export default function CreatorDetailPage() {
           ← Back to creators
         </Link>
         {loading ? (
-          <p className="mt-10 text-ink-500 dark:text-ink-300">Loading profile…</p>
+          <div className="mt-10">
+            <ProfileSkeleton />
+          </div>
         ) : notFound || !profile ? (
           <Card className="mt-10 p-10 text-center">
             <p className="text-lg font-bold text-ink-900 dark:text-ink-50">Creator not found</p>

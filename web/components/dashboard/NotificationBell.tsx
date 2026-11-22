@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { RowsSkeleton } from "@/components/ui/Skeleton";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/cn";
 import { api } from "@/lib/api";
@@ -192,7 +193,9 @@ export function NotificationBell() {
           </div>
 
           {loading && items.length === 0 ? (
-            <p className="py-8 text-center text-sm text-ink-500 dark:text-ink-300">Loading…</p>
+            <div className="px-4 py-4">
+              <RowsSkeleton rows={3} withAvatar />
+            </div>
           ) : items.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-8 text-center">
               <span className="flex h-12 w-12 items-center justify-center rounded-full bg-ink-50 dark:bg-ink-900 text-ink-400 dark:text-ink-300">

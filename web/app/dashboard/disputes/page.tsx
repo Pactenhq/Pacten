@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { RowsSkeleton } from "@/components/ui/Skeleton";
 import Link from "next/link";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Card } from "@/components/ui/Card";
@@ -43,7 +44,7 @@ export default function DisputesPage() {
       </div>
       <Card className="mt-6 p-6">
         {loading ? (
-          <p className="text-[14px] text-ink-500 dark:text-ink-300">Loading…</p>
+          <RowsSkeleton rows={3} withAvatar />
         ) : disputes.length === 0 ? (
           <p className="text-[14px] text-ink-500 dark:text-ink-300">
             No disputes. You can file one from any deal page if an issue

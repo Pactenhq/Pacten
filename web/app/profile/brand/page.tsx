@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ProfileSkeleton } from "@/components/ui/Skeleton";
 import Link from "next/link";
 import { Navbar } from "@/components/ui/Navbar";
 import { Footer } from "@/components/ui/Footer";
@@ -58,7 +59,7 @@ export default function BrandProfilePage() {
       <Navbar />
       <main className="pb-20">
         <div className="mx-auto max-w-[900px] px-4 pt-6 sm:px-6 lg:px-12">
-          {state === "loading" && <p className="text-ink-500 dark:text-ink-300">Loading your profile...</p>}
+          {state === "loading" && <ProfileSkeleton />}
           {state === "signin" && (
             <div className="flex flex-col items-start gap-3">
               <p className="text-lg font-medium text-ink-900 dark:text-ink-50">Sign in to view your profile</p>

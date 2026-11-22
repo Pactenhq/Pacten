@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { PlanCardsSkeleton } from "@/components/ui/Skeleton";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
 import { usePlans, type Plan, type PlanRole } from "./usePlans";
@@ -82,7 +83,9 @@ export function PricingCards({ role }: { role: PlanRole }) {
   const { plans, loading } = usePlans(role);
 
   if (loading) {
-    return <p className="text-center text-[15px] text-ink-500 dark:text-ink-300">Loading plans...</p>;
+    return (
+      <PlanCardsSkeleton className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3" />
+    );
   }
 
   if (plans.length === 0) {

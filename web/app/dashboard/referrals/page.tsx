@@ -114,7 +114,7 @@ export default function ReferralsDashboardPage() {
     title: "Invite friends and earn rewards",
     subtitle: "Share Pacten with your network and get rewarded when they join.",
     linkLabel: "Your Referral Link",
-    link: dash?.link || "Loading…",
+    link: dash?.link || "",
     linkHint: "Share this link — you earn 20% of a referred user's first three subscription payments, and 10% of Pacten's commission on their first completed paid deal.",
     codeLabel: "Your Referral Code",
     code: dash?.code || "…",
@@ -222,7 +222,7 @@ export default function ReferralsDashboardPage() {
       userInitials={dashboardUser.initials}
     >
       <div className="flex flex-col gap-8">
-        <ReferralHero info={info} />
+        <ReferralHero info={info} loading={loading} />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
           {stats.map((st) => (

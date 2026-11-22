@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { Skeleton, GridCardsSkeleton } from "@/components/ui/Skeleton";
 import { Navbar } from "@/components/ui/Navbar";
 import { Footer } from "@/components/ui/Footer";
 import { Drawer } from "@/components/ui/Drawer";
@@ -219,19 +220,15 @@ export default function CampaignsPage() {
           clearSignal={clearKey}
         />
         <div className="mt-10">
-          <ResultCount
-            // While the fetch is still in flight the list is empty, NOT
-            // loaded-empty: showing "Showing 0 campaigns" during a slow
-            // fetch reads as "no campaigns exist" (this is what made the
-            // first campaign look missing while loading). Say loading
-            // until the fetch resolves; the !loading empty-state below
-            // already handles the truly-empty case.
-            count={
-              loading
-                ? "Loading campaigns…"
-                : `Showing ${campaigns.length} campaign${campaigns.length === 1 ? "" : "s"}`
-            }
-          />
+          {loading ? (
+            <div className="mx-auto max-w-[1380px] px-6 lg:px-12">
+              <Skeleton className="h-[13px] w-44" />
+            </div>
+          ) : (
+            <ResultCount
+              count={`Showing ${campaigns.length} campaign${campaigns.length === 1 ? "" : "s"}`}
+            />
+          )}
         </div>
         <div className="mx-auto mt-8 max-w-[1380px] px-6 lg:px-12">
           <div className="flex gap-8">
@@ -260,11 +257,15 @@ export default function CampaignsPage() {
                   Filters
                 </Button>
               </div>
-              <div className="grid gap-5 md:grid-cols-2">
-                {pagedCampaigns.map((j) => (
-                  <CampaignCard key={j.id} job={j} />
-                ))}
-              </div>
+              {loading ? (
+                <GridCardsSkeleton count={4} className="grid gap-5 md:grid-cols-2" />
+              ) : (
+                <div className="grid gap-5 md:grid-cols-2">
+                  {pagedCampaigns.map((j) => (
+                    <CampaignCard key={j.id} job={j} />
+                  ))}
+                </div>
+              )}
               {!loading && pagedCampaigns.length === 0 && (
                 <div className="rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 p-12 text-center shadow-card">
                   <p className="text-lg font-bold text-ink-900 dark:text-ink-50">

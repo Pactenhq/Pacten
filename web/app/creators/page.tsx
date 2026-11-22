@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { GridCardsSkeleton } from "@/components/ui/Skeleton";
 import { Navbar } from "@/components/ui/Navbar";
 import { Footer } from "@/components/ui/Footer";
 import { Drawer } from "@/components/ui/Drawer";
@@ -267,9 +268,7 @@ export default function CreatorsPage() {
             <div className="min-w-0 flex-1">
               <FilterButton onClick={() => setDrawerOpen(true)} />
               {!listSettled ? (
-                <div className="flex flex-col items-center rounded-2xl border border-dashed border-ink-200 dark:border-ink-700 bg-ink-50/60 dark:bg-ink-900/60 px-6 py-10 text-center">
-                  <p className="text-[15px] font-bold text-ink-900 dark:text-ink-50">Loading creators…</p>
-                </div>
+                <GridCardsSkeleton count={6} className="grid grid-cols-2 gap-4 sm:gap-5 xl:grid-cols-3" />
               ) : paged.length === 0 ? (
                 <div className="flex flex-col items-center rounded-2xl border border-dashed border-ink-200 dark:border-ink-700 bg-ink-50/60 dark:bg-ink-900/60 px-6 py-10 text-center">
                   <p className="text-[15px] font-bold text-ink-900 dark:text-ink-50">No creators found</p>

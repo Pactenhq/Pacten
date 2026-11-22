@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { TableSkeleton } from "@/components/ui/Skeleton";
 import { WelcomeHeader } from "@/components/dashboard/widgets";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -77,7 +78,7 @@ export default function AdminUsersPage() {
           </Button>
         </div>
         {loading ? (
-          <p className="text-[14px] text-ink-500 dark:text-ink-300">Loading…</p>
+          <TableSkeleton rows={4} />
         ) : users.length === 0 ? (
           <p className="text-[14px] text-ink-500 dark:text-ink-300">No users found.</p>
         ) : (

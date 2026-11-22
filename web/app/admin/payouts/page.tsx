@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { RowsSkeleton } from "@/components/ui/Skeleton";
 import { WelcomeHeader } from "@/components/dashboard/widgets";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -61,7 +62,7 @@ export default function AdminPayoutsPage() {
       </div>
       <Card className="mt-6 p-6">
         {loading ? (
-          <p className="text-[14px] text-ink-500 dark:text-ink-300">Loading…</p>
+          <RowsSkeleton rows={3} withAvatar />
         ) : payouts.length === 0 ? (
           <p className="text-[14px] text-ink-500 dark:text-ink-300">No payouts in this state.</p>
         ) : (

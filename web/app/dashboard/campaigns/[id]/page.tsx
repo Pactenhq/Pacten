@@ -3,6 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { useEffect, useState } from "react";
+import { DetailSkeleton } from "@/components/ui/Skeleton";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
@@ -75,7 +76,7 @@ export default function CampaignDetailsPage() {
             </Link>
           </div>
         ) : (
-          <p className="text-ink-500 dark:text-ink-300">Loading campaign...</p>
+          <DetailSkeleton />
         )}
       </DashboardShell>
     );

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { PlanCardsSkeleton } from "@/components/ui/Skeleton";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -246,7 +247,9 @@ function HomePricingCards({
   const { plans, loading } = usePlans(role);
 
   if (loading) {
-    return <p className="text-center text-[15px] text-ink-500 dark:text-ink-300">Loading plans...</p>;
+    return (
+      <PlanCardsSkeleton className="mx-auto mt-10 grid max-w-[1100px] gap-5 text-left md:grid-cols-3" />
+    );
   }
 
   if (plans.length === 0) {

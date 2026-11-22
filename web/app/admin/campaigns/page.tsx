@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { TableSkeleton } from "@/components/ui/Skeleton";
 import { WelcomeHeader } from "@/components/dashboard/widgets";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -104,7 +105,7 @@ export default function AdminCampaignsPage() {
           <p className="mb-4 text-[14px] font-medium text-red-700">{error}</p>
         )}
         {loading ? (
-          <p className="text-[14px] text-ink-500 dark:text-ink-300">Loading…</p>
+          <TableSkeleton rows={4} />
         ) : campaigns.length === 0 ? (
           <p className="text-[14px] text-ink-500 dark:text-ink-300">No campaigns found.</p>
         ) : (

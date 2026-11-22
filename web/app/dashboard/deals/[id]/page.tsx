@@ -3,6 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { useEffect, useState } from "react";
+import { DealDetailSkeleton } from "@/components/ui/Skeleton";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
@@ -302,7 +303,7 @@ export default function DealDetailPage() {
         userName={dashboardUser.name}
         userInitials={dashboardUser.initials}
       >
-        <p className="text-gray-500 dark:text-ink-300">Loading deal...</p>
+        <DealDetailSkeleton />
       </DashboardShell>
     );
   }
