@@ -48,9 +48,25 @@ export class ProfilesController {
     return this.profilesService.searchCreators({ niche, skill, language, industry, platform, country, city, query, limit, offset, sort, excludeTest });
   }
 
+  // Standardized filter datasets (public, same auth as the
+  // filter-options endpoints — i.e. none). Cities are per-country:
+  // GET /profiles/datasets/cities?country=GB (ISO code) or
+  // ?country=United%20Kingdom (name, case-insensitive).
+  // Declared before the ':id' routes below so 'datasets' is never
+  // captured as a profile id.
+  @Get('datasets')
+  getDatasets() {
+    return this.profilesService.getDatasets();
+  }
+
+  @Get('datasets/cities')
+  getDatasetCities(@Query('country') country?: string) {
+    return this.profilesService.getDatasetCities(country);
+  }
+
   @Get('creators/filter-options')
-  getCreatorFilterOptions() {
-    return this.profilesService.getCreatorFilterOptions();
+  getCreatorFilterOptions(@Query('country') country?: string) {
+    return this.profilesService.getCreatorFilterOptions(country);
   }
 
   @Get('creators/for-deal')
@@ -81,8 +97,8 @@ export class ProfilesController {
   }
 
   @Get('professionals/filter-options')
-  getProfessionalFilterOptions() {
-    return this.profilesService.getProfessionalFilterOptions();
+  getProfessionalFilterOptions(@Query('country') country?: string) {
+    return this.profilesService.getProfessionalFilterOptions(country);
   }
 
   // Declared BEFORE the ':id' routes below: 'by-user' would otherwise

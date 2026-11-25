@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { GridCardsSkeleton } from "@/components/ui/Skeleton";
 import { Navbar } from "@/components/ui/Navbar";
 import { Footer } from "@/components/ui/Footer";
@@ -105,55 +105,15 @@ export default function CreatorsPage() {
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 9;
 
-  // Distinct real languages/industries across the loaded creators, for
-  // the Language / Industry Experience dropdowns (same source the
-  // cards render from: API `languages` / `industries`).
-  const loadedLanguageOptions = useMemo(
-    () =>
-      [...new Set(allCreators.flatMap((c) => c.languagesList ?? []))].sort(
-        (a, b) => a.localeCompare(b)
-      ),
-    [allCreators]
-  );
-  const loadedIndustryOptions = useMemo(
-    () =>
-      [...new Set(allCreators.flatMap((c) => c.industriesList ?? []))].sort(
-        (a, b) => a.localeCompare(b)
-      ),
-    [allCreators]
-  );
-
-  const loadedCountryOptions = useMemo(
-    () =>
-      [...new Set(allCreators.map((c) => (c.country ?? "").trim()).filter(Boolean))].sort(
-        (a, b) => a.localeCompare(b)
-      ),
-    [allCreators]
-  );
-  const loadedCityOptions = useMemo(
-    () =>
-      [...new Set(allCreators.map((c) => (c.city ?? "").trim()).filter(Boolean))].sort(
-        (a, b) => a.localeCompare(b)
-      ),
-    [allCreators]
-  );
-  const countryOptions = serverFilterOptions?.countries ?? loadedCountryOptions;
-  const cityOptions = serverFilterOptions?.cities ?? loadedCityOptions;
-  const languageOptions =
-    serverFilterOptions?.languages ?? loadedLanguageOptions;
-  const industryOptions =
-    serverFilterOptions?.industries ?? loadedIndustryOptions;
-
-  // Distinct real skills across the loaded creators, for the Skills
-  // dropdown (same source the profile pages render from: API `skills`).
-  const loadedSkillOptions = useMemo(
-    () =>
-      [...new Set(allCreators.flatMap((c) => c.skillsList ?? []))].sort(
-        (a, b) => a.localeCompare(b)
-      ),
-    [allCreators]
-  );
-  const skillOptions = serverFilterOptions?.skills ?? loadedSkillOptions;
+  // Filter options come from the standardized dataset endpoint
+  // (GET /profiles/creators/filter-options) — never from the loaded
+  // rows, whose free-text values included fictional entries. Cities
+  // are fetched per-country inside the filter panel, so this page
+  // passes an empty city list.
+  const countryOptions = serverFilterOptions?.countries ?? [];
+  const languageOptions = serverFilterOptions?.languages ?? [];
+  const industryOptions = serverFilterOptions?.industries ?? [];
+  const skillOptions = serverFilterOptions?.skills ?? [];
 
   // Arriving from the home-page hero search (?q=...) — start filtered.
   useEffect(() => {
@@ -262,7 +222,7 @@ export default function CreatorsPage() {
           <div className="flex gap-8">
             <aside className="hidden w-[300px] shrink-0 lg:block">
               <div className="sticky top-24 rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 p-5 shadow-card">
-                <FilterPanel kind="creators" countryOptions={countryOptions} cityOptions={cityOptions} languageOptions={languageOptions} industryOptions={industryOptions} skillOptions={skillOptions} onCreatorFilterChange={handleFilter} onClearSearch={handleClearSearch} />
+                <FilterPanel kind="creators" countryOptions={countryOptions} cityOptions={[]} languageOptions={languageOptions} industryOptions={industryOptions} skillOptions={skillOptions} onCreatorFilterChange={handleFilter} onClearSearch={handleClearSearch} />
               </div>
             </aside>
             <div className="min-w-0 flex-1">
@@ -294,7 +254,7 @@ export default function CreatorsPage() {
         onClose={() => setDrawerOpen(false)}
         title="Filters"
       >
-        <FilterPanel kind="creators" countryOptions={countryOptions} cityOptions={cityOptions} languageOptions={languageOptions} industryOptions={industryOptions} skillOptions={skillOptions} onCreatorFilterChange={handleFilter} onClearSearch={handleClearSearch} />
+        <FilterPanel kind="creators" countryOptions={countryOptions} cityOptions={[]} languageOptions={languageOptions} industryOptions={industryOptions} skillOptions={skillOptions} onCreatorFilterChange={handleFilter} onClearSearch={handleClearSearch} />
       </Drawer>
     </>
   );

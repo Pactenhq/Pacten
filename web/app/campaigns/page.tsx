@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Skeleton, GridCardsSkeleton } from "@/components/ui/Skeleton";
 import { Navbar } from "@/components/ui/Navbar";
 import { Footer } from "@/components/ui/Footer";
@@ -14,11 +14,6 @@ import {
 import { CampaignCard } from "@/components/marketplace/Cards";
 import { FilterPanel, type CampaignFilters } from "@/components/marketplace/Filters";
 import { api } from "@/lib/api";
-
-// Distinct sorted values across rows, for the requirement dropdowns
-// (same pattern as /creators: options come from the rows themselves).
-const distinctValues = (rows: any[], get: (c: any) => string[]) =>
-  [...new Set(rows.flatMap(get))].sort((a, b) => a.localeCompare(b));
 
 // 
 // Filter drawer content matches "Filter campagns" (411:58388).
@@ -46,6 +41,19 @@ export default function CampaignsPage() {
   });
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 6;
+  // Filter options come from the standardized dataset endpoint —
+  // never from the loaded rows, whose free-text values included
+  // fictional entries. Cities are fetched per-country inside the
+  // filter panel.
+  const [datasetOptions, setDatasetOptions] = useState<{
+    countries: { code: string; name: string }[];
+    languages: string[];
+    skills: string[];
+    industries: string[];
+  } | null>(null);
+  useEffect(() => {
+    api.datasets().then(setDatasetOptions).catch(() => {});
+  }, []);
 
   // Arriving from the home-page hero search (?q=...) — start filtered.
   useEffect(() => {
@@ -90,43 +98,11 @@ export default function CampaignsPage() {
     setPage(1);
   };
 
-  const countryOptions = useMemo(
-    () =>
-      distinctValues(allCampaigns, (c) =>
-        String(c.country ?? "").trim() ? [String(c.country).trim()] : []
-      ),
-    [allCampaigns]
-  );
-  const cityOptions = useMemo(
-    () =>
-      distinctValues(allCampaigns, (c) =>
-        String(c.city ?? "").trim() ? [String(c.city).trim()] : []
-      ),
-    [allCampaigns]
-  );
-  const languageOptions = useMemo(
-    () =>
-      distinctValues(allCampaigns, (c) =>
-        String(c.language ?? "").trim() ? [String(c.language).trim()] : []
-      ),
-    [allCampaigns]
-  );
-  const industryOptions = useMemo(
-    () =>
-      distinctValues(allCampaigns, (c) =>
-        String(c.industry ?? "").trim() ? [String(c.industry).trim()] : []
-      ),
-    [allCampaigns]
-  );
-  const skillOptions = useMemo(
-    () =>
-      distinctValues(allCampaigns, (c) =>
-        Array.isArray(c.skills)
-          ? c.skills.map((s: string) => String(s).trim()).filter(Boolean)
-          : []
-      ),
-    [allCampaigns]
-  );
+  const countryOptions = (datasetOptions?.countries ?? []).map((c) => c.name);
+  const cityOptions: string[] = [];
+  const languageOptions = datasetOptions?.languages ?? [];
+  const industryOptions = datasetOptions?.industries ?? [];
+  const skillOptions = datasetOptions?.skills ?? [];
 
   const handleFilterChange = (filters: CampaignFilters) => {
     setActiveFilters(filters);

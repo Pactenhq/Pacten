@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/cn";
+import { Combobox } from "@/components/ui/Combobox";
+import { api } from "@/lib/api";
 
 // Filter panels rebuilt from the design marketplace frames
 // ("Marketplace Creator" 278:4057, "Marketplace professional" 401:55119,
@@ -429,7 +431,9 @@ export function FilterPanel({
   kind: FilterKind;
   /** Distinct real countries across the loaded rows; feeds the Country dropdown. */
   countryOptions?: string[];
-  /** Distinct real cities across the loaded rows; feeds the City dropdown. */
+  /** Legacy prop, kept for call-site compatibility: cities are now
+      fetched per-country inside this panel (GET /profiles/datasets/
+      cities?country=...) and this value is ignored. */
   cityOptions?: string[];
   /** Distinct real skills across the loaded rows; feeds the Skills dropdown. */
   skillOptions?: string[];
@@ -470,6 +474,32 @@ export function FilterPanel({
     onProfessionalFilterChange?.(professionalRef.current);
   };
 
+  // Country/City are searchable dataset dropdowns (not native selects):
+  // the City list narrows to the chosen country's cities, fetched from
+  // GET /profiles/datasets/cities?country=... . Picking a country
+  // clears the city (it cannot belong to the new country). With no
+  // country picked the City list is empty by design.
+  const [countryValue, setCountryValue] = useState("");
+  const [cityValue, setCityValue] = useState("");
+  const [cityOptionsState, setCityOptionsState] = useState<string[]>([]);
+  const onCountry = (country: string) => {
+    setCountryValue(country);
+    setCityValue("");
+    setCityOptionsState([]);
+    if (kind === "creators") emitCreator({ country, city: "" });
+    else if (kind === "professionals") emitProfessional({ country, city: "" });
+    else emit({ country, city: "" });
+    if (country) {
+      api.datasetCities(country).then((d) => setCityOptionsState(d.cities)).catch(() => {});
+    }
+  };
+  const onCity = (city: string) => {
+    setCityValue(city);
+    if (kind === "creators") emitCreator({ city });
+    else if (kind === "professionals") emitProfessional({ city });
+    else emit({ city });
+  };
+
   const clearAll = () => {
     filtersRef.current = {
       type: "All",
@@ -482,6 +512,9 @@ export function FilterPanel({
     };
     creatorRef.current = { ...DEFAULT_CREATOR_FILTERS };
     professionalRef.current = { ...DEFAULT_PROFESSIONAL_FILTERS };
+    setCountryValue("");
+    setCityValue("");
+    setCityOptionsState([]);
     onFilterChange?.(filtersRef.current);
     onCreatorFilterChange?.(creatorRef.current);
     onProfessionalFilterChange?.(professionalRef.current);
@@ -506,7 +539,7 @@ export function FilterPanel({
       {kind === "creators" && (
         <div className="space-y-6" key={resetKey}>
           <CategoryPills
-            options={["All", "Fashion", "Beauty", "Fitness", "Gaming", "Travel", "Food", "Business", "Lifestyle"]}
+            options={["All", ...(industryOptions ?? ["Fashion", "Beauty", "Fitness", "Gaming", "Travel", "Food", "Business", "Lifestyle"])]}
             onChange={(category) => emitCreator({ category })}
           />
           <RangeSlider
@@ -525,15 +558,20 @@ export function FilterPanel({
             label="Available Now"
             onChange={(availableNow) => emitCreator({ availableNow })}
           />
-          <SelectRow
+          <Combobox
             label="Country"
-            options={countryOptions}
-            onChange={(country) => emitCreator({ country })}
+            placeholder="Search countries…"
+            value={countryValue}
+            options={countryOptions ?? []}
+            onChange={onCountry}
           />
-          <SelectRow
+          <Combobox
             label="City"
-            options={cityOptions}
-            onChange={(city) => emitCreator({ city })}
+            placeholder={countryValue ? "Search cities…" : "Select a country first"}
+            value={cityValue}
+            options={cityOptionsState}
+            onChange={onCity}
+            disabled={!countryValue}
           />
           <SelectRow
             label="Language"
@@ -579,15 +617,20 @@ export function FilterPanel({
             options={["Entry", "Mid", "Expert"]}
             onChange={(experience) => emitProfessional({ experience })}
           />
-          <SelectRow
+          <Combobox
             label="Country"
-            options={countryOptions}
-            onChange={(country) => emitProfessional({ country })}
+            placeholder="Search countries…"
+            value={countryValue}
+            options={countryOptions ?? []}
+            onChange={onCountry}
           />
-          <SelectRow
+          <Combobox
             label="City"
-            options={cityOptions}
-            onChange={(city) => emitProfessional({ city })}
+            placeholder={countryValue ? "Search cities…" : "Select a country first"}
+            value={cityValue}
+            options={cityOptionsState}
+            onChange={onCity}
+            disabled={!countryValue}
           />
           <SelectRow
             label="Language"
@@ -620,15 +663,20 @@ export function FilterPanel({
             max="100K"
             onChange={(budget) => emit({ budget })}
           />
-          <SelectRow
+          <Combobox
             label="Country"
-            options={countryOptions}
-            onChange={(country) => emit({ country })}
+            placeholder="Search countries…"
+            value={countryValue}
+            options={countryOptions ?? []}
+            onChange={onCountry}
           />
-          <SelectRow
+          <Combobox
             label="City"
-            options={cityOptions}
-            onChange={(city) => emit({ city })}
+            placeholder={countryValue ? "Search cities…" : "Select a country first"}
+            value={cityValue}
+            options={cityOptionsState}
+            onChange={onCity}
+            disabled={!countryValue}
           />
           <SelectRow
             label="Language"

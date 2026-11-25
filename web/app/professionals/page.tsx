@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { GridCardsSkeleton } from "@/components/ui/Skeleton";
 import { Navbar } from "@/components/ui/Navbar";
 import { Footer } from "@/components/ui/Footer";
@@ -97,54 +97,14 @@ export default function ProfessionalsPage() {
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 9;
 
-  // Distinct real skills across the loaded professionals, for the
-  // Skills dropdown (same source the cards render from: API `skills`).
-  const loadedSkillOptions = useMemo(
-    () =>
-      [...new Set(allProfessionals.flatMap((p) => p.skillsList ?? []))].sort(
-        (a, b) => a.localeCompare(b)
-      ),
-    [allProfessionals]
-  );
-
-  // Distinct real languages/industries across the loaded professionals,
-  // for the Language / Industry Experience dropdowns (API `languages` /
-  // `industries`).
-  const loadedLanguageOptions = useMemo(
-    () =>
-      [...new Set(allProfessionals.flatMap((p) => p.languagesList ?? []))].sort(
-        (a, b) => a.localeCompare(b)
-      ),
-    [allProfessionals]
-  );
-  const loadedIndustryOptions = useMemo(
-    () =>
-      [...new Set(allProfessionals.flatMap((p) => p.industriesList ?? []))].sort(
-        (a, b) => a.localeCompare(b)
-      ),
-    [allProfessionals]
-  );
-  const loadedCountryOptions = useMemo(
-    () =>
-      [...new Set(allProfessionals.map((p) => (p.country ?? "").trim()).filter(Boolean))].sort(
-        (a, b) => a.localeCompare(b)
-      ),
-    [allProfessionals]
-  );
-  const loadedCityOptions = useMemo(
-    () =>
-      [...new Set(allProfessionals.map((p) => (p.city ?? "").trim()).filter(Boolean))].sort(
-        (a, b) => a.localeCompare(b)
-      ),
-    [allProfessionals]
-  );
-  const countryOptions = serverFilterOptions?.countries ?? loadedCountryOptions;
-  const cityOptions = serverFilterOptions?.cities ?? loadedCityOptions;
-  const languageOptions =
-    serverFilterOptions?.languages ?? loadedLanguageOptions;
-  const industryOptions =
-    serverFilterOptions?.industries ?? loadedIndustryOptions;
-  const skillOptions = serverFilterOptions?.skills ?? loadedSkillOptions;
+  // Filter options come from the standardized dataset endpoint
+  // (GET /profiles/professionals/filter-options) — never from the
+  // loaded rows, whose free-text values included fictional entries.
+  // Cities are fetched per-country inside the filter panel.
+  const countryOptions = serverFilterOptions?.countries ?? [];
+  const languageOptions = serverFilterOptions?.languages ?? [];
+  const industryOptions = serverFilterOptions?.industries ?? [];
+  const skillOptions = serverFilterOptions?.skills ?? [];
 
   // Arriving from the home-page hero search (?q=...) — start filtered.
   useEffect(() => {
@@ -246,7 +206,7 @@ export default function ProfessionalsPage() {
           <div className="flex gap-8">
             <aside className="hidden w-[300px] shrink-0 lg:block">
               <div className="sticky top-24 rounded-2xl border border-ink-100 dark:border-ink-800 bg-white dark:bg-ink-900 p-5 shadow-card">
-                <FilterPanel kind="professionals" countryOptions={countryOptions} cityOptions={cityOptions} skillOptions={skillOptions} languageOptions={languageOptions} industryOptions={industryOptions} onProfessionalFilterChange={handleFilter} onClearSearch={handleClearSearch} />
+                <FilterPanel kind="professionals" countryOptions={countryOptions} cityOptions={[]} skillOptions={skillOptions} languageOptions={languageOptions} industryOptions={industryOptions} onProfessionalFilterChange={handleFilter} onClearSearch={handleClearSearch} />
               </div>
             </aside>
             <div className="min-w-0 flex-1">
@@ -296,7 +256,7 @@ export default function ProfessionalsPage() {
         onClose={() => setDrawerOpen(false)}
         title="Filters"
       >
-        <FilterPanel kind="professionals" countryOptions={countryOptions} cityOptions={cityOptions} skillOptions={skillOptions} languageOptions={languageOptions} industryOptions={industryOptions} onProfessionalFilterChange={handleFilter} onClearSearch={handleClearSearch} />
+        <FilterPanel kind="professionals" countryOptions={countryOptions} cityOptions={[]} skillOptions={skillOptions} languageOptions={languageOptions} industryOptions={industryOptions} onProfessionalFilterChange={handleFilter} onClearSearch={handleClearSearch} />
       </Drawer>
     </>
   );

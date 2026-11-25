@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { TextField } from "@/components/ui/TextField";
+import { Combobox, MultiCombobox } from "@/components/ui/Combobox";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { api } from "@/lib/api";
 import { AuthError } from "@/components/auth/auth-forms";
@@ -19,15 +20,11 @@ export function SettingsProfileForm() {
   const [values, setValues] = useState({
     fullName: "",
     location: "",
-    country: "",
-    city: "",
     website: "",
     bio: "",
-    // Comma-separated in the form; sent as arrays. Only shown for
-    // creator/professional roles (brand profiles have no such fields).
-    languages: "",
-    industries: "",
-    skills: "",
+    // Platforms and Niches stay comma-separated free text (out of the
+    // dataset scope, unchanged). Languages/Industries/Skills moved to
+    // dataset multi-selects below; Country/City to dataset dropdowns.
     platforms: "",
     // Creator-only: niches feed the Category pills; rate is the
     // "Typical rate" the public profile shows. For professionals the
@@ -38,6 +35,64 @@ export function SettingsProfileForm() {
     niches: "",
     rate: "",
   });
+  // Dataset-backed fields. Stored shape is UNCHANGED (country/city
+  // strings, languages/industries/skills text[] arrays) — no migration.
+  const [country, setCountry] = useState("");
+  const [city, setCity] = useState("");
+  const [languages, setLanguages] = useState<string[]>([]);
+  const [industries, setIndustries] = useState<string[]>([]);
+  const [skills, setSkills] = useState<string[]>([]);
+  const [datasets, setDatasets] = useState<{
+    countries: { code: string; name: string }[];
+    languages: string[];
+    skills: string[];
+    industries: string[];
+  } | null>(null);
+  const [cityOptions, setCityOptions] = useState<string[]>([]);
+
+  // Load the standardized dataset once (countries/languages/skills/
+  // industries); cities load per selected country, below.
+  useEffect(() => {
+    api.datasets().then(setDatasets).catch(() => {});
+  }, []);
+
+  // Cities narrow to the chosen country. On first load this just
+  // populates the list (a stored city outside the dataset still shows
+  // as a legacy value in the dropdown); when the USER changes the
+  // country, handleCountryChange clears a city that is not in the new
+  // country's list.
+  useEffect(() => {
+    if (!country) {
+      setCityOptions([]);
+      return;
+    }
+    let cancelled = false;
+    api
+      .datasetCities(country)
+      .then((d) => {
+        if (!cancelled) setCityOptions(d.cities);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [country]);
+
+  const handleCountryChange = (next: string) => {
+    setCountry(next);
+    if (!next) {
+      setCity("");
+      return;
+    }
+    // Clear the city if it is not in the new country's list.
+    api
+      .datasetCities(next)
+      .then((d) => {
+        setCityOptions(d.cities);
+        setCity((cur) => (cur && !d.cities.includes(cur) ? "" : cur));
+      })
+      .catch(() => {});
+  };
   const [initials, setInitials] = useState("");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -53,13 +108,8 @@ export function SettingsProfileForm() {
       setValues({
         fullName: name,
         location: p.location || "",
-        country: p.country || "",
-        city: p.city || "",
         website: p.website || "",
         bio: user.role === "brand" ? p.description || "" : p.bio || "",
-        languages: Array.isArray(p.languages) ? p.languages.join(", ") : "",
-        industries: Array.isArray(p.industries) ? p.industries.join(", ") : "",
-        skills: Array.isArray(p.skills) ? p.skills.join(", ") : "",
         platforms: Array.isArray(p.platforms) ? p.platforms.join(", ") : "",
         niches: Array.isArray(p.niches) ? p.niches.join(", ") : "",
         // Creators store `rate`; professionals store `hourlyRate`.
@@ -70,6 +120,11 @@ export function SettingsProfileForm() {
               ? String(p.hourlyRate)
               : "",
       });
+      setCountry(p.country || "");
+      setCity(p.city || "");
+      setLanguages(Array.isArray(p.languages) ? p.languages : []);
+      setIndustries(Array.isArray(p.industries) ? p.industries : []);
+      setSkills(Array.isArray(p.skills) ? p.skills : []);
       setInitials(
         name
           .split(" ")
@@ -111,8 +166,8 @@ export function SettingsProfileForm() {
         location: values.location,
       };
       if (user.role !== "brand") {
-        payload.country = values.country.trim();
-        payload.city = values.city.trim();
+        payload.country = country.trim();
+        payload.city = city.trim();
       }
       if (user.role === "brand") {
         payload.companyName = values.fullName;
@@ -121,9 +176,9 @@ export function SettingsProfileForm() {
       } else {
         payload.displayName = values.fullName;
         payload.bio = values.bio;
-        payload.languages = parseList(values.languages);
-        payload.industries = parseList(values.industries);
-        payload.skills = parseList(values.skills);
+        payload.languages = languages;
+        payload.industries = industries;
+        payload.skills = skills;
         payload.platforms = parseList(values.platforms);
         if (user.role === "creator") {
           payload.niches = parseList(values.niches);
@@ -175,17 +230,22 @@ export function SettingsProfileForm() {
           <TextField label="Location" {...field("location")} />
           {user?.role !== "brand" && (
             <>
-              <TextField
+              <Combobox
                 label="Country"
                 placeholder="e.g. United Kingdom"
                 hint="Feeds the marketplace Country filter."
-                {...field("country")}
+                value={country}
+                options={(datasets?.countries ?? []).map((c) => c.name)}
+                onChange={handleCountryChange}
               />
-              <TextField
+              <Combobox
                 label="City"
-                placeholder="e.g. London"
+                placeholder={country ? "e.g. London" : "Select a country first"}
                 hint="Feeds the marketplace City filter."
-                {...field("city")}
+                value={city}
+                options={cityOptions}
+                onChange={setCity}
+                disabled={!country}
               />
             </>
           )}
@@ -198,23 +258,29 @@ export function SettingsProfileForm() {
           )}
           {user?.role !== "brand" && (
             <>
-              <TextField
+              <MultiCombobox
                 label="Languages"
                 placeholder="English, Urdu, Spanish"
-                hint="Separate with commas — these feed the marketplace Language filter."
-                {...field("languages")}
+                hint="Pick from the list — these feed the marketplace Language filter."
+                values={languages}
+                options={datasets?.languages ?? []}
+                onChange={setLanguages}
               />
-              <TextField
+              <MultiCombobox
                 label="Industries"
                 placeholder="Fashion, Beauty, Fitness"
-                hint="Separate with commas — these feed the marketplace Industry Experience filter."
-                {...field("industries")}
+                hint="Pick from the list — these feed the marketplace Industry Experience filter."
+                values={industries}
+                options={datasets?.industries ?? []}
+                onChange={setIndustries}
               />
-              <TextField
+              <MultiCombobox
                 label="Skills"
                 placeholder="Video Editing, Photography"
-                hint="Separate with commas — these feed the marketplace Skills filter."
-                {...field("skills")}
+                hint="Pick from the list — these feed the marketplace Skills filter."
+                values={skills}
+                options={datasets?.skills ?? []}
+                onChange={setSkills}
               />
               <TextField
                 label="Platforms"

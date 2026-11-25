@@ -22,6 +22,7 @@ import {
   Subscription,
   SubscriptionStatus,
 } from '../subscriptions/subscription.entity';
+import { applyStripeSubscriptionToRow } from '../subscriptions/subscription-sync.util';
 import { SubscriptionPlan } from '../subscriptions/subscription-plan.entity';
 import { StripeService } from './stripe.service';
 import { parseBudgetNumber } from './budget.util';
@@ -579,6 +580,10 @@ export class PaymentsService implements OnModuleInit {
               periodEnd.setMonth(periodEnd.getMonth() + 1);
               sub.currentPeriodEnd = periodEnd;
             }
+            // Same for the period start: only when it was never set.
+            if (!sub.currentPeriodStart) {
+              sub.currentPeriodStart = new Date();
+            }
             sub.cancelAtPeriodEnd = false;
             await this.subsRepo.save(sub);
             // Referral earning: 20% of this subscription payment (first
@@ -723,19 +728,35 @@ export class PaymentsService implements OnModuleInit {
       }
       case 'customer.subscription.updated':
       case 'customer.subscription.deleted': {
+        // Sync-gap fix (Nov 25 2026): this used to update ONLY the
+        // status inline — the period end and cancel flag were never
+        // applied, so a renewal whose invoice event was missed left the
+        // row stale. Now it applies the full Stripe state through the
+        // shared helper (same code as syncFromStripeEvent; the helper
+        // avoids injecting SubscriptionsService here, which would be a
+        // circular dependency).
         const stripeSubId = event.data.id;
         const sub = await this.subsRepo.findOne({
           where: { stripeSubscriptionId: stripeSubId },
         });
         if (sub) {
-          if (event.type === 'customer.subscription.deleted') {
+          const changes = applyStripeSubscriptionToRow(sub, {
+            status: event.data.status,
+            current_period_start: event.data.current_period_start,
+            current_period_end: event.data.current_period_end,
+            cancel_at_period_end: event.data.cancel_at_period_end,
+          });
+          if (
+            event.type === 'customer.subscription.deleted' &&
+            sub.status !== SubscriptionStatus.CANCELED
+          ) {
             sub.status = SubscriptionStatus.CANCELED;
-          } else if (event.data.status === 'past_due') {
-            sub.status = SubscriptionStatus.PAST_DUE;
-          } else if (event.data.status === 'active') {
-            sub.status = SubscriptionStatus.ACTIVE;
+            changes.status = SubscriptionStatus.CANCELED;
           }
           await this.subsRepo.save(sub);
+          this.logger.log(
+            `Subscription ${sub.id} synced from Stripe webhook ${event.type} (${stripeSubId}): ${JSON.stringify(changes)}`,
+          );
         }
         await this.recordEvent(event.id, event.type, null, event.data);
         break;
@@ -746,6 +767,29 @@ export class PaymentsService implements OnModuleInit {
     }
 
     return { received: true };
+  }
+
+  /**
+   * Find a Payment row by Stripe invoice id (used by the admin
+   * subscription re-sync backfill to skip invoices already recorded).
+   */
+  async findPaymentByInvoiceId(
+    stripeInvoiceId: string,
+  ): Promise<Payment | null> {
+    return this.paymentsRepo.findOne({ where: { stripeInvoiceId } });
+  }
+
+  /**
+   * Find a Payment row by Stripe checkout session id (used by the
+   * admin subscription re-sync backfill to skip initial payments
+   * already recorded by a checkout path).
+   */
+  async findPaymentBySessionId(
+    stripeCheckoutSessionId: string,
+  ): Promise<Payment | null> {
+    return this.paymentsRepo.findOne({
+      where: { stripeCheckoutSessionId },
+    });
   }
 
   /**

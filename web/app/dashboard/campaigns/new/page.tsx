@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Navbar } from "@/components/ui/Navbar";
 import { Footer } from "@/components/ui/Footer";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { TextField } from "@/components/ui/TextField";
+import { Combobox, MultiCombobox } from "@/components/ui/Combobox";
 import { api } from "@/lib/api";
 
 // desktop + "mob Campaign Request"
@@ -21,6 +22,54 @@ export default function CampaignRequestPage() {
     description?: string;
   }>({});
   const [loading, setLoading] = useState(false);
+  // Campaign requirements come from the standardized dataset, not
+  // free text (free text is how fictional filter values got in).
+  // Country -> City narrows to that country's cities.
+  const [country, setCountry] = useState("");
+  const [city, setCity] = useState("");
+  const [language, setLanguage] = useState("");
+  const [industry, setIndustry] = useState("");
+  const [skills, setSkills] = useState<string[]>([]);
+  const [datasets, setDatasets] = useState<{
+    countries: { code: string; name: string }[];
+    languages: string[];
+    skills: string[];
+    industries: string[];
+  } | null>(null);
+  const [cityOptions, setCityOptions] = useState<string[]>([]);
+  useEffect(() => {
+    api.datasets().then(setDatasets).catch(() => {});
+  }, []);
+  useEffect(() => {
+    if (!country) {
+      setCityOptions([]);
+      return;
+    }
+    let cancelled = false;
+    api
+      .datasetCities(country)
+      .then((d) => {
+        if (!cancelled) setCityOptions(d.cities);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [country]);
+  const handleCountryChange = (next: string) => {
+    setCountry(next);
+    if (!next) {
+      setCity("");
+      return;
+    }
+    api
+      .datasetCities(next)
+      .then((d) => {
+        setCityOptions(d.cities);
+        setCity((cur) => (cur && !d.cities.includes(cur) ? "" : cur));
+      })
+      .catch(() => {});
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -44,10 +93,7 @@ export default function CampaignRequestPage() {
     }
     setFieldErrors({});
     setLoading(true);
-    const skillList = ((form.get("skills") as string) ?? "")
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
+    const skillList = [...new Set(skills)];
     try {
       await api.createCampaign({
         title: form.get("title") as string,
@@ -57,13 +103,11 @@ export default function CampaignRequestPage() {
         type: form.get("type") as string,
         deadline: form.get("deadline") as string,
         notes: form.get("notes") as string,
-        country: ((form.get("country") as string) ?? "").trim() || undefined,
-        city: ((form.get("city") as string) ?? "").trim() || undefined,
-        language:
-          ((form.get("language") as string) ?? "").trim() || undefined,
-        industry:
-          ((form.get("industry") as string) ?? "").trim() || undefined,
-        skills: skillList.length > 0 ? [...new Set(skillList)] : undefined,
+        country: country.trim() || undefined,
+        city: city.trim() || undefined,
+        language: language.trim() || undefined,
+        industry: industry.trim() || undefined,
+        skills: skillList.length > 0 ? skillList : undefined,
       });
       setSent(true);
     } catch (err: any) {
@@ -223,31 +267,42 @@ export default function CampaignRequestPage() {
                   campaigns page. Leave blank anything that does not apply.
                 </p>
                 <div className="grid gap-5 sm:grid-cols-2">
-                  <TextField
+                  <Combobox
                     label="Country"
-                    name="country"
                     placeholder="e.g. United Kingdom"
+                    value={country}
+                    options={(datasets?.countries ?? []).map((c) => c.name)}
+                    onChange={handleCountryChange}
                   />
-                  <TextField
+                  <Combobox
                     label="City"
-                    name="city"
-                    placeholder="e.g. London"
+                    placeholder={country ? "e.g. London" : "Select a country first"}
+                    value={city}
+                    options={cityOptions}
+                    onChange={setCity}
+                    disabled={!country}
                   />
-                  <TextField
+                  <Combobox
                     label="Language"
-                    name="language"
                     placeholder="e.g. English"
+                    value={language}
+                    options={datasets?.languages ?? []}
+                    onChange={setLanguage}
                   />
-                  <TextField
+                  <Combobox
                     label="Industry"
-                    name="industry"
                     placeholder="e.g. Fashion"
+                    value={industry}
+                    options={datasets?.industries ?? []}
+                    onChange={setIndustry}
                   />
-                  <TextField
+                  <MultiCombobox
                     label="Required skills"
-                    name="skills"
                     placeholder="e.g. Video Editing, Photography"
-                    hint="Separate multiple skills with commas."
+                    hint="Pick from the list."
+                    values={skills}
+                    options={datasets?.skills ?? []}
+                    onChange={setSkills}
                   />
                 </div>
               </div>

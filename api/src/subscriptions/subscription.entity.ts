@@ -35,6 +35,9 @@ export class Subscription {
   stripeSubscriptionId: string;
 
   @Column({ nullable: true })
+  currentPeriodStart: Date;
+
+  @Column({ nullable: true })
   currentPeriodEnd: Date;
 
   @Column({ default: false })

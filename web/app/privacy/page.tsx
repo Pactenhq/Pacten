@@ -5,7 +5,7 @@ export default function PrivacyPage() {
     <InfoPage
       tag="Legal"
       title="Privacy Policy"
-      intro="This page summarises, in plain language, what data Pacten collects and how it is used. The full Privacy Policy text has not been supplied yet — it will be published here in full once provided."
+      intro="This page summarises, in plain language, what data Pacten collects and how it is used."
     >
       <InfoSection heading="Data we collect">
         <p>

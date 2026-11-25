@@ -4,10 +4,7 @@ import { Navbar } from "@/components/ui/Navbar";
 // Full Platform Terms and Conditions, verbatim from the supplied
 // document (PACTEN_-_TOS.docx, v1.0). Do not paraphrase, summarise or
 // drop clauses: this page is the binding text.
-// EFFECTIVE DATE — WORKING VALUE: the source document leaves the date
-// blank ("[EFFECTIVE DATE]") and no final date has been provided yet.
-// 22 November 2026 is shown until the final approved date is supplied;
-// replace it then.
+// Effective date intentionally omitted until Leonid provides the final approved Terms date.
 export default function TermsPage() {
   return (
     <div className="min-h-screen bg-white dark:bg-ink-900">
@@ -32,7 +29,6 @@ export default function TermsPage() {
             </a>
           </p>
           <p>Version 1.0</p>
-          <p>Effective date: 22 November 2026</p>
         </div>
         <div className="mt-8 space-y-6 text-[15px] leading-relaxed text-ink-700 dark:text-ink-200">
       <section>

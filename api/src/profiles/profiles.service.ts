@@ -5,6 +5,13 @@ import { BrandProfile } from './brand-profile.entity';
 import { CreatorProfile } from './creator-profile.entity';
 import { ProfessionalProfile } from './professional-profile.entity';
 import { UserRole } from '../users/user.entity';
+import {
+  citiesForCountry,
+  getDatasets,
+  getFilterOptions,
+  resolveCountryCode,
+  resolveCountryName,
+} from '../datasets';
 
 @Injectable()
 export class ProfilesService {
@@ -217,69 +224,35 @@ export class ProfilesService {
     return qb.getMany();
   }
 
-  // Distinct countries/cities/languages/skills/industries across the
-  // whole table, not just the capped list the pages load — a value
-  // carried only by a profile ranked past the list cap would otherwise
-  // never appear as an option. Only profiles the list itself shows
-  // (available now).
-  async getCreatorFilterOptions() {
-    return this.profileFilterOptions(this.creatorRepo, 'c');
+  // Filter options now come from the STANDARDIZED dataset, not from
+  // SQL DISTINCT over free-text profile columns — DISTINCT surfaced
+  // whatever test users had typed (Elvish, Zorkian, ZorkianSkill,
+  // ZorkianCraft, Astrophysics, Marine Biology). Cities are per-country:
+  // pass ?country=<ISO code or name> (e.g. GB or "United Kingdom");
+  // with no country the list is [] and the frontend fetches cities
+  // once a country is picked. Shape is unchanged ({countries, cities,
+  // languages, skills, industries}) so existing callers keep working.
+  async getCreatorFilterOptions(country?: string) {
+    return getFilterOptions(country);
   }
 
-  async getProfessionalFilterOptions() {
-    return this.profileFilterOptions(this.professionalRepo, 'p');
+  async getProfessionalFilterOptions(country?: string) {
+    return getFilterOptions(country);
   }
 
-  private async profileFilterOptions(repo: Repository<any>, alias: string) {
+  /** GET /profiles/datasets — the form dataset (no cities; see below). */
+  getDatasets() {
+    return getDatasets();
+  }
+
+  /** GET /profiles/datasets/cities?country=GB — cities for one country. */
+  getDatasetCities(country?: string) {
+    const code = resolveCountryCode(country);
     return {
-      countries: await this.distinctValues(repo, alias, 'country'),
-      cities: await this.distinctValues(repo, alias, 'city'),
-      languages: await this.distinctArrayValues(repo, alias, 'languages'),
-      skills: await this.distinctArrayValues(repo, alias, 'skills'),
-      industries: await this.distinctArrayValues(repo, alias, 'industries'),
+      country: code ? resolveCountryName(code) : null,
+      code,
+      cities: citiesForCountry(country),
     };
-  }
-
-  // Same distinct/sort rules as distinctValues, for text[] columns:
-  // unnest the array, then trim and dedupe in JS (an empty array
-  // yields no rows; a NULL element yields a NULL row, skipped here).
-  private async distinctArrayValues(repo: Repository<any>, alias: string, column: string): Promise<string[]> {
-    const rows = await repo
-      .createQueryBuilder(alias)
-      .select(`DISTINCT TRIM(unnest(${alias}.${column}))`, 'value')
-      .where(`${alias}.availableNow = :available`, { available: true })
-      .andWhere(`${alias}.${column} IS NOT NULL`)
-      .getRawMany();
-    const seen = new Set<string>();
-    const values: string[] = [];
-    for (const row of rows) {
-      if (row.value == null) continue;
-      const value = String(row.value).trim();
-      if (!value || seen.has(value.toLowerCase())) continue;
-      seen.add(value.toLowerCase());
-      values.push(value);
-    }
-    return values.sort((a, b) => a.localeCompare(b));
-  }
-
-  private async distinctValues(repo: Repository<any>, alias: string, column: string): Promise<string[]> {
-    const rows = await repo
-      .createQueryBuilder(alias)
-      .select(`DISTINCT TRIM(${alias}.${column})`, 'value')
-      .where(`${alias}.availableNow = :available`, { available: true })
-      .andWhere(`${alias}.${column} IS NOT NULL`)
-      .andWhere(`TRIM(${alias}.${column}) <> ''`)
-      .getRawMany();
-    const seen = new Set<string>();
-    const values: string[] = [];
-    for (const row of rows) {
-      const value = String(row.value).trim();
-      if (!seen.has(value.toLowerCase())) {
-        seen.add(value.toLowerCase());
-        values.push(value);
-      }
-    }
-    return values.sort((a, b) => a.localeCompare(b));
   }
 
   async searchCreatorsForDeal(limit?: number, query?: string) {

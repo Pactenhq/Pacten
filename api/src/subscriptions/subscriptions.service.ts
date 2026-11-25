@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  BadRequestException,
   OnModuleInit,
   Logger,
 } from '@nestjs/common';
@@ -12,6 +13,10 @@ import {
   Subscription,
   SubscriptionStatus,
 } from './subscription.entity';
+import {
+  applyStripeSubscriptionToRow,
+  SubscriptionSyncChanges,
+} from './subscription-sync.util';
 import { SubscriptionPlan } from './subscription-plan.entity';
 import { StripeService } from '../payments/stripe.service';
 import { PaymentsService } from '../payments/payments.service';
@@ -330,6 +335,7 @@ export class SubscriptionsService implements OnModuleInit {
     sub.status = SubscriptionStatus.ACTIVE;
     sub.stripeSubscriptionId = stripeSubscriptionId;
     sub.cancelAtPeriodEnd = false;
+    sub.currentPeriodStart = new Date();
     const periodEnd = new Date();
     periodEnd.setMonth(periodEnd.getMonth() + 1);
     sub.currentPeriodEnd = periodEnd;
@@ -357,6 +363,36 @@ export class SubscriptionsService implements OnModuleInit {
       where: { userId, status: SubscriptionStatus.ACTIVE },
     });
     if (!sub) throw new NotFoundException('No active subscription');
+    // Cancel at Stripe FIRST (live mode only). Before this fix cancel()
+    // set only the local flag — Stripe kept charging the user at the
+    // next renewal, because no code path anywhere cancelled the Stripe
+    // subscription. On a Stripe error the user is NOT cancelled locally
+    // and no cancellation email is sent: never tell them they are
+    // cancelled while Stripe keeps charging. The only exceptions are
+    // "already gone" (not found / already canceled) — then the local
+    // flag is the correct state and we proceed.
+    if (sub.stripeSubscriptionId && !this.stripe.isDemo()) {
+      try {
+        await this.stripe.setCancelAtPeriodEnd(sub.stripeSubscriptionId, true);
+      } catch (err: any) {
+        const message = String(err?.message ?? '');
+        const alreadyGone =
+          err?.code === 'resource_missing' ||
+          err?.statusCode === 404 ||
+          /no such subscription/i.test(message) ||
+          /canceled|cancelled/i.test(message);
+        if (alreadyGone) {
+          this.logger.warn(
+            `Stripe cancel skipped for ${sub.stripeSubscriptionId} (already gone): ${message} — proceeding locally`,
+          );
+        } else {
+          this.logger.error(
+            `Stripe cancel failed for ${sub.stripeSubscriptionId}: ${message} — local flag NOT set`,
+          );
+          throw err;
+        }
+      }
+    }
     sub.cancelAtPeriodEnd = true;
     const saved = await this.subsRepo.save(sub);
     // Notify the subscriber (transactional email). Webhook-driven
@@ -398,7 +434,17 @@ export class SubscriptionsService implements OnModuleInit {
     return saved;
   }
 
-  /** Called from the Stripe webhook for subscription events. */
+  /**
+   * Called from the Stripe webhook for subscription events.
+   *
+   * Sync-gap fix (Nov 25 2026): this used to update ONLY the status and
+   * had zero callers (dead code) — the live webhook path duplicated the
+   * status-only logic inline. It now applies the full Stripe state
+   * (status, period start/end with a monotonic guard, cancel flag) via
+   * the shared helper, and the webhook handler calls this method.
+   * A customer.subscription.deleted event always means canceled, even
+   * if the payload carries no usable status.
+   */
   async syncFromStripeEvent(eventType: string, data: any): Promise<void> {
     const stripeSubId =
       data.id || data.subscription || data?.object?.id;
@@ -407,19 +453,251 @@ export class SubscriptionsService implements OnModuleInit {
       where: { stripeSubscriptionId: stripeSubId },
     });
     if (!sub) return;
+    const changes = applyStripeSubscriptionToRow(sub, {
+      status: data.status,
+      current_period_start: data.current_period_start,
+      current_period_end: data.current_period_end,
+      cancel_at_period_end: data.cancel_at_period_end,
+    });
     if (
-      eventType === 'customer.subscription.deleted' ||
-      data.status === 'canceled'
+      eventType === 'customer.subscription.deleted' &&
+      sub.status !== SubscriptionStatus.CANCELED
     ) {
       sub.status = SubscriptionStatus.CANCELED;
-    } else if (data.status === 'past_due') {
-      sub.status = SubscriptionStatus.PAST_DUE;
-    } else if (data.status === 'active' || data.status === 'trialing') {
-      sub.status =
-        data.status === 'trialing'
-          ? SubscriptionStatus.TRIALING
-          : SubscriptionStatus.ACTIVE;
+      changes.status = SubscriptionStatus.CANCELED;
     }
     await this.subsRepo.save(sub);
+    this.logger.log(
+      `Subscription ${sub.id} synced from Stripe ${eventType} (${stripeSubId}): ${JSON.stringify(changes)}`,
+    );
   }
+
+  /**
+   * Admin re-sync of one subscription from Stripe (POST
+   * /subscriptions/admin/resync). Repairs rows left stale when webhook
+   * events never landed — e.g. e2e-brand sub_1UTlEXAF2tt2PwITgykpeUxH:
+   * Stripe renewed Nov 23 (invoice WTUKRTEP-0023, $29, paid; current
+   * period ends Dec 23, 2026) but the local row still said period end
+   * Nov 23 with no $29 Payment rows, because both the Oct 23 and Nov
+   * 23 invoice.payment_succeeded events were missed.
+   *
+   * Refuses demo mode (there is no real Stripe state to sync from).
+   * Idempotent: the period guard is monotonic and the Payment backfill
+   * dedupes by invoice id / session id, so re-running is a no-op.
+   */
+  async resyncFromStripe(params: {
+    subscriptionId?: string;
+    stripeSubscriptionId?: string;
+  }): Promise<SubscriptionResyncReport> {
+    if (this.stripe.isDemo()) {
+      throw new BadRequestException(
+        'Subscription re-sync is not available in demo mode',
+      );
+    }
+    if (!params.subscriptionId && !params.stripeSubscriptionId) {
+      throw new BadRequestException(
+        'Provide subscriptionId or stripeSubscriptionId',
+      );
+    }
+    let sub: Subscription | null = null;
+    if (params.subscriptionId) {
+      sub = await this.subsRepo.findOne({
+        where: { id: params.subscriptionId },
+      });
+    } else if (params.stripeSubscriptionId) {
+      sub = await this.subsRepo.findOne({
+        where: { stripeSubscriptionId: params.stripeSubscriptionId },
+      });
+    }
+    if (!sub) throw new NotFoundException('Subscription not found');
+    if (!sub.stripeSubscriptionId) {
+      throw new BadRequestException(
+        'Subscription has no Stripe subscription id',
+      );
+    }
+
+    const before: SubscriptionResyncState = {
+      status: sub.status,
+      currentPeriodStart: sub.currentPeriodStart
+        ? sub.currentPeriodStart.toISOString()
+        : null,
+      currentPeriodEnd: sub.currentPeriodEnd
+        ? sub.currentPeriodEnd.toISOString()
+        : null,
+      cancelAtPeriodEnd: sub.cancelAtPeriodEnd,
+    };
+
+    const stripeSub = await this.stripe.retrieveSubscription(
+      sub.stripeSubscriptionId,
+    );
+    const changes = applyStripeSubscriptionToRow(sub, {
+      status: stripeSub.status,
+      current_period_start: stripeSub.currentPeriodStart,
+      current_period_end: stripeSub.currentPeriodEnd,
+      cancel_at_period_end: stripeSub.cancelAtPeriodEnd,
+    });
+    const saved = await this.subsRepo.save(sub);
+
+    // Backfill missing Payment rows from the paid invoices on Stripe
+    // (oldest first). The invoice.payment_succeeded webhook is the
+    // normal path; this only repairs invoices whose events never
+    // landed. Referral credit uses the same mechanism as the live
+    // paths (20% of the payment, first three payments only, deduped
+    // by sourceId inside ReferralsService).
+    const plan = await this.plansRepo.findOne({
+      where: { id: sub.planId },
+    });
+    const paymentsCreated: SubscriptionResyncPayment[] = [];
+    const paymentsSkipped: SubscriptionResyncSkipped[] = [];
+    let referralCreditsAttempted = 0;
+    if (!plan) {
+      paymentsSkipped.push({
+        invoiceId: null,
+        reason: 'plan not found for subscription — backfill skipped',
+      });
+    } else {
+      const invoices = await this.stripe.listSubscriptionInvoices(
+        sub.stripeSubscriptionId,
+      );
+      for (const invoice of invoices) {
+        const skip = (reason: string) =>
+          paymentsSkipped.push({
+            invoiceId: invoice.id,
+            invoiceNumber: invoice.number,
+            reason,
+          });
+        if (!invoice.amountPaid || invoice.amountPaid <= 0) {
+          skip('zero amount');
+          continue;
+        }
+        if (
+          await this.payments.findPaymentByInvoiceId(invoice.id)
+        ) {
+          skip('Payment row already exists for this invoice');
+          continue;
+        }
+        if (invoice.billingReason === 'subscription_cycle') {
+          await this.payments.recordRenewalPayment({
+            userId: sub.userId,
+            plan,
+            stripeInvoiceId: invoice.id,
+            amountCents: invoice.amountPaid,
+            currency: invoice.currency,
+            stripePaymentIntentId: invoice.paymentIntentId,
+          });
+          await this.referrals.handleSubscriptionPayment(
+            sub.userId,
+            invoice.amountPaid,
+            invoice.id,
+          );
+          referralCreditsAttempted++;
+          paymentsCreated.push({
+            invoiceId: invoice.id,
+            invoiceNumber: invoice.number,
+            amountCents: invoice.amountPaid,
+            kind: 'renewal',
+          });
+        } else if (invoice.billingReason === 'subscription_create') {
+          // The initial payment is keyed by CHECKOUT SESSION id, never
+          // by the invoice id (using the invoice id as the sourceId
+          // would double-count it against the three-payment referral
+          // cap). If no session is found, skip and flag for manual
+          // review — never invent a session id or an amount.
+          const sessionId =
+            await this.stripe.findCheckoutSessionBySubscription(
+              sub.stripeSubscriptionId,
+            );
+          if (!sessionId) {
+            skip(
+              'needs manual review: no checkout session found for the initial invoice',
+            );
+            continue;
+          }
+          if (await this.payments.findPaymentBySessionId(sessionId)) {
+            skip('Payment row already exists for the checkout session');
+            continue;
+          }
+          await this.payments.recordSubscriptionPayment({
+            userId: sub.userId,
+            plan,
+            stripeCheckoutSessionId: sessionId,
+            amountCents: invoice.amountPaid,
+            currency: invoice.currency,
+            stripePaymentIntentId: invoice.paymentIntentId,
+          });
+          await this.referrals.handleSubscriptionPayment(
+            sub.userId,
+            invoice.amountPaid,
+            sessionId,
+          );
+          referralCreditsAttempted++;
+          paymentsCreated.push({
+            invoiceId: invoice.id,
+            invoiceNumber: invoice.number,
+            amountCents: invoice.amountPaid,
+            kind: 'initial',
+          });
+        } else {
+          skip(
+            `unsupported billing_reason: ${invoice.billingReason ?? 'unknown'}`,
+          );
+        }
+      }
+    }
+
+    const report: SubscriptionResyncReport = {
+      subscriptionId: saved.id,
+      stripeSubscriptionId: saved.stripeSubscriptionId,
+      before,
+      after: {
+        status: saved.status,
+        currentPeriodStart: saved.currentPeriodStart
+          ? saved.currentPeriodStart.toISOString()
+          : null,
+        currentPeriodEnd: saved.currentPeriodEnd
+          ? saved.currentPeriodEnd.toISOString()
+          : null,
+        cancelAtPeriodEnd: saved.cancelAtPeriodEnd,
+      },
+      stripeValuesApplied: changes,
+      paymentsCreated,
+      paymentsSkipped,
+      referralCreditsAttempted,
+    };
+    this.logger.log(
+      `Admin re-sync ${saved.id} (${saved.stripeSubscriptionId}): ${JSON.stringify(report)}`,
+    );
+    return report;
+  }
+}
+
+export interface SubscriptionResyncState {
+  status: SubscriptionStatus;
+  currentPeriodStart: string | null;
+  currentPeriodEnd: string | null;
+  cancelAtPeriodEnd: boolean;
+}
+
+export interface SubscriptionResyncPayment {
+  invoiceId: string;
+  invoiceNumber: string | null;
+  amountCents: number;
+  kind: 'initial' | 'renewal';
+}
+
+export interface SubscriptionResyncSkipped {
+  invoiceId: string | null;
+  invoiceNumber?: string | null;
+  reason: string;
+}
+
+export interface SubscriptionResyncReport {
+  subscriptionId: string;
+  stripeSubscriptionId: string | null;
+  before: SubscriptionResyncState;
+  after: SubscriptionResyncState;
+  stripeValuesApplied: SubscriptionSyncChanges;
+  paymentsCreated: SubscriptionResyncPayment[];
+  paymentsSkipped: SubscriptionResyncSkipped[];
+  referralCreditsAttempted: number;
 }

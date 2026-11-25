@@ -131,14 +131,36 @@ export const api = {
 
   creators: (params = "") => apiFetch<any[]>(`/profiles/creators${params}`),
 
-  creatorFilterOptions: () =>
+  // Standardized filter datasets (GET /profiles/datasets):
+  // countries are {code, name}; cities are per-country via
+  // datasetCities(country) — country may be an ISO code ("GB") or a
+  // name ("United Kingdom"). Filter-options endpoints return the same
+  // dataset values; ?country= narrows cities, no country -> cities [].
+  datasets: () =>
+    apiFetch<{
+      countries: { code: string; name: string }[];
+      languages: string[];
+      skills: string[];
+      industries: string[];
+    }>(`/profiles/datasets`),
+
+  datasetCities: (country: string) =>
+    apiFetch<{ country: string | null; code: string | null; cities: string[] }>(
+      `/profiles/datasets/cities?country=${encodeURIComponent(country)}`
+    ),
+
+  creatorFilterOptions: (country?: string) =>
     apiFetch<{
       countries: string[];
       cities: string[];
       languages: string[];
       skills: string[];
       industries: string[];
-    }>(`/profiles/creators/filter-options`),
+    }>(
+      country
+        ? `/profiles/creators/filter-options?country=${encodeURIComponent(country)}`
+        : `/profiles/creators/filter-options`
+    ),
 
   // Brand-only creator directory WITH emails, for the New Deal form's
   // creator dropdown (D2 disambiguation: two same-named creators must
@@ -159,14 +181,18 @@ export const api = {
   professionals: (params = "") =>
     apiFetch<any[]>(`/profiles/professionals${params}`),
 
-  professionalFilterOptions: () =>
+  professionalFilterOptions: (country?: string) =>
     apiFetch<{
       countries: string[];
       cities: string[];
       languages: string[];
       skills: string[];
       industries: string[];
-    }>(`/profiles/professionals/filter-options`),
+    }>(
+      country
+        ? `/profiles/professionals/filter-options?country=${encodeURIComponent(country)}`
+        : `/profiles/professionals/filter-options`
+    ),
 
   professionalProfile: (id: string) =>
     apiFetch<any>(`/profiles/professionals/${id}`),

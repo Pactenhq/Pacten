@@ -269,6 +269,123 @@ export class StripeService {
   }
 
   /**
+   * Fetch a subscription's live state from Stripe (used by the admin
+   * re-sync and the cancel path). Throws in demo mode — there is no
+   * real subscription behind a demo id.
+   */
+  async retrieveSubscription(id: string): Promise<{
+    id: string;
+    status: string | null;
+    currentPeriodStart: number | null;
+    currentPeriodEnd: number | null;
+    cancelAtPeriodEnd: boolean;
+  }> {
+    if (this.demoMode) {
+      throw new BadRequestException(
+        'Stripe subscriptions are not available in demo mode',
+      );
+    }
+    const sub = await this.stripe.subscriptions.retrieve(id);
+    // Stripe API 2025-06-30: the billing period lives on the
+    // subscription ITEM, not on the subscription itself.
+    const item = sub.items?.data?.[0];
+    return {
+      id: sub.id,
+      status: sub.status,
+      currentPeriodStart: item?.current_period_start ?? null,
+      currentPeriodEnd: item?.current_period_end ?? null,
+      cancelAtPeriodEnd: sub.cancel_at_period_end ?? false,
+    };
+  }
+
+  /**
+   * Set cancel_at_period_end on a Stripe subscription. In demo mode
+   * this is a logged no-op returning the requested value (there is no
+   * real subscription to cancel); live mode calls Stripe.
+   */
+  async setCancelAtPeriodEnd(
+    id: string,
+    value: boolean,
+  ): Promise<{ id: string; cancelAtPeriodEnd: boolean }> {
+    if (this.demoMode) {
+      this.logger.log(
+        `Demo mode: subscription ${id} cancel_at_period_end=${value} (no-op)`,
+      );
+      return { id, cancelAtPeriodEnd: value };
+    }
+    const sub = await this.stripe.subscriptions.update(id, {
+      cancel_at_period_end: value,
+    });
+    return { id: sub.id, cancelAtPeriodEnd: sub.cancel_at_period_end ?? value };
+  }
+
+  /**
+   * Paid invoices for a subscription, oldest first (used by the admin
+   * re-sync backfill). Throws in demo mode.
+   */
+  async listSubscriptionInvoices(subscriptionId: string): Promise<
+    Array<{
+      id: string;
+      number: string | null;
+      billingReason: string | null;
+      amountPaid: number;
+      currency: string;
+      paymentIntentId: string | null;
+      status: string | null;
+      created: number;
+    }>
+  > {
+    if (this.demoMode) {
+      throw new BadRequestException(
+        'Stripe invoices are not available in demo mode',
+      );
+    }
+    const invoices = await this.stripe.invoices.list({
+      subscription: subscriptionId,
+      limit: 100,
+    });
+    return invoices.data
+      .filter((inv) => inv.status === 'paid')
+      .map((inv) => ({
+        id: inv.id,
+        number: inv.number ?? null,
+        billingReason: inv.billing_reason ?? null,
+        amountPaid: inv.amount_paid ?? 0,
+        currency: inv.currency ?? 'usd',
+        // Stripe API 2025-06-30 has no top-level payment_intent on an
+        // invoice; the Payment row's payment-intent column is nullable
+        // metadata, so the re-sync leaves it null rather than guessing.
+        paymentIntentId: null as string | null,
+        status: inv.status,
+        created: inv.created ?? 0,
+      }))
+      .sort((a, b) => a.created - b.created);
+  }
+
+  /**
+   * The Checkout Session that created a subscription (used by the
+   * admin re-sync to backfill the INITIAL payment row, which is keyed
+   * by session id — never by the invoice id). Returns null when no
+   * session is found; the caller reports that invoice as needing
+   * manual review instead of inventing a session id. Throws in demo
+   * mode.
+   */
+  async findCheckoutSessionBySubscription(
+    subscriptionId: string,
+  ): Promise<string | null> {
+    if (this.demoMode) {
+      throw new BadRequestException(
+        'Stripe checkout sessions are not available in demo mode',
+      );
+    }
+    const sessions = await this.stripe.checkout.sessions.list({
+      subscription: subscriptionId,
+      limit: 1,
+    });
+    return sessions.data[0]?.id ?? null;
+  }
+
+  /**
    * Verify + parse a webhook payload. In demo mode the signature is not
    * verified (there is no webhook secret yet) — the JSON is parsed directly.
    */
