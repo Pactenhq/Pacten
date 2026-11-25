@@ -18,11 +18,9 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 function CategoryPills({
   options,
-  cols = 3,
   onChange,
 }: {
   options: string[];
-  cols?: 2 | 3;
   onChange?: (value: string) => void;
 }) {
   const [active, setActive] = useState(options[0]);
@@ -33,14 +31,14 @@ function CategoryPills({
   return (
     <div>
       <SectionLabel>Category:</SectionLabel>
-      <div className={cn("mt-2.5 grid gap-2", cols === 2 ? "grid-cols-2" : "grid-cols-3")}>
+      <div className="mt-2.5 flex flex-wrap gap-2">
         {options.map((o) => (
           <button
             key={o}
             type="button"
             onClick={() => select(o)}
             className={cn(
-              "cursor-pointer inline-flex h-10 items-center justify-center rounded-full border px-2 text-[13px] font-medium transition-colors",
+              "cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-full border px-3.5 py-2 text-[13px] font-medium transition-colors",
               active === o
                 ? "border-brand bg-brand text-white"
                 : "border-brand/60 bg-white dark:bg-ink-900 text-brand dark:text-brand-200 hover:bg-brand-50 dark:hover:bg-white/10"
@@ -595,7 +593,6 @@ export function FilterPanel({
         <div className="space-y-6" key={resetKey}>
           <CategoryPills
             options={["All", "Editors", "Copywriters", "Designers"]}
-            cols={2}
             onChange={(category) => emitProfessional({ category })}
           />
           <RangeSlider
@@ -654,7 +651,6 @@ export function FilterPanel({
         <div className="space-y-6" key={resetKey}>
           <CategoryPills
             options={["All", "One-time project", "Long-term", "Retainer"]}
-            cols={2}
             onChange={(type) => emit({ type })}
           />
           <RangeSlider
